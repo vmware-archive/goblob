@@ -3,35 +3,34 @@ package blobstore
 import (
 	"os"
 
-	log "code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 )
 
 type localblobstore struct {
-	fs        boshsys.FileSystem
-	logger    log.Logger
+	fs     boshsys.FileSystem
+	logger boshlog.Logger
+	logTag string
 }
 
-func NewLocalBlobstore(fs boshsys.FileSystem, logger log.Logger) Blobstore {
+func NewLocalBlobstore(fs boshsys.FileSystem, logger boshlog.Logger) Blobstore {
 	return &localblobstore{
-		fs:        fs,
-		logger:    logger,
+		fs:     fs,
+		logger: logger,
+		logTag: "localBlobstore",
 	}
 }
 
 func (b *localblobstore) Get(destinationPath, blobID string) (LocalBlob, error) {
-
 	return NewLocalBlob(destinationPath, b.fs, b.logger), nil
 }
 
-func (b *localblobstore) GetAll(destinationPath string) ([]LocalBlob, error) {
+func (b *localblobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 
-	b.logger.Info("Downloading blobs")
-
-	b.logger.Debug("Walking files in %s\n" + destinationPath)
+	b.logger.Debug(b.logTag, "Getting all blobs from %s\n"+blobPath)
 
 	blobs := []LocalBlob{}
-	b.fs.Walk(destinationPath, func(path string, info os.FileInfo, err error) error {
+	b.fs.Walk(blobPath, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			blobs = append(blobs, NewLocalBlob(path, b.fs, b.logger))
 		}

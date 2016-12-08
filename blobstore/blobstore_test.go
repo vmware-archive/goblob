@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -26,7 +26,7 @@ var _ = Describe("Blobstore", func() {
 	BeforeEach(func() {
 		fakeNfsClient = fakeboshnfs.NewFakeClient()
 		fs = fakesys.NewFakeFileSystem()
-		logger := lager.NewLogger("logger")
+		logger := boshlog.NewLogger("logger")
 		logBuffer = gbytes.NewBuffer()
 
 		blobstore = NewBlobstore(fakeNfsClient, fs, nil, logger)

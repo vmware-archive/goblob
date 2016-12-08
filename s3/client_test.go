@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/minio/minio-go"
 	"github.com/c0-ops/goblob/s3"
 
@@ -23,7 +23,7 @@ var _ = Describe("Client", func() {
 		region                       string
 		accessKeyID, secretAccessKey string
 		logBuffer                    *gbytes.Buffer
-		logger                       lager.Logger
+		logger                       boshlog.Logger
 	)
 
 	BeforeEach(func() {
@@ -32,9 +32,9 @@ var _ = Describe("Client", func() {
 		accessKeyID = "JP0NF5645O4O6A67VGA8"
 		secretAccessKey = "EeaNuDd5zcNLN7WV4+x50TzYyKckHg/R1FwwPbbo"
 
-		logger = lager.NewLogger("logger")
+		logger = boshlog.NewLogger("logger")
 		logBuffer = gbytes.NewBuffer()
-		logger.RegisterSink(lager.NewWriterSink(logBuffer, lager.INFO))
+		logger.RegisterSink(boshlog.NewWriterSink(logBuffer, boshlog.INFO))
 
 		mc, mcErr = minio.New(fakeS3EndpointURL, accessKeyID, secretAccessKey, false)
 		Expect(mcErr).NotTo(HaveOccurred())

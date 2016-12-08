@@ -1,7 +1,7 @@
 package blobstore_test
 
 import (
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -14,16 +14,16 @@ import (
 var _ = Describe("BlobstoreFactory", func() {
 	var (
 		fs               *fakesys.FakeFileSystem
-		logger           lager.Logger
+		logger           boshlog.Logger
 		logBuffer        *gbytes.Buffer
 		blobstoreFactory Factory
 	)
 
 	BeforeEach(func() {
 		fs = fakesys.NewFakeFileSystem()
-		logger = lager.NewLogger("logger")
+		logger = boshlog.NewLogger("logger")
 		logBuffer = gbytes.NewBuffer()
-		logger.RegisterSink(lager.NewWriterSink(logBuffer, lager.INFO))
+		logger.RegisterSink(boshlog.NewWriterSink(logBuffer, boshlog.INFO))
 
 		blobstoreFactory = NewRemoteBlobstoreFactory(fs, logger)
 	})

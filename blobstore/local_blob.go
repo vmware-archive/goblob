@@ -3,7 +3,7 @@ package blobstore
 import (
 	"fmt"
 
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 )
@@ -21,14 +21,16 @@ type LocalBlob interface {
 type localBlob struct {
 	path   string
 	fs     boshsys.FileSystem
-	logger lager.Logger
+	logger boshlog.Logger
+	logTag        string
 }
 
-func NewLocalBlob(path string, fs boshsys.FileSystem, logger lager.Logger) LocalBlob {
+func NewLocalBlob(path string, fs boshsys.FileSystem, logger boshlog.Logger) LocalBlob {
 	return &localBlob{
 		path:   path,
 		fs:     fs,
 		logger: logger,
+		logTag: "localBlob",
 	}
 }
 
@@ -47,8 +49,7 @@ func (b *localBlob) Delete() error {
 func (b *localBlob) DeleteSilently() {
 	err := b.Delete()
 	if err != nil {
-		data := lager.Data{"event": "Failed to delete local blob"}
-		b.logger.Error("delete-silently",err, data)
+		b.logger.Error(b.logTag, "Failed to delete local blob: %s", err.Error())
 	}
 }
 

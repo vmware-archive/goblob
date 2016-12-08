@@ -3,7 +3,7 @@ package s3
 import (
 	"io"
 
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/minio/minio-go"
 )
 
@@ -15,10 +15,11 @@ type Client interface {
 
 type s3Client struct {
 	client *minio.Client
-	logger lager.Logger
+	logger boshlog.Logger
+	logTag    string
 }
 
-func NewClient(endpoint, accessKey, secretKey string, secure bool, logger lager.Logger) (Client, error) {
+func NewClient(endpoint, accessKey, secretKey string, secure bool, logger boshlog.Logger) (Client, error) {
 	mc, err := minio.New(endpoint, accessKey, secretKey, secure)
 	if err != nil {
 		return nil, err
@@ -26,64 +27,40 @@ func NewClient(endpoint, accessKey, secretKey string, secure bool, logger lager.
 	return &s3Client{
 		client: mc,
 		logger: logger,
+		logTag: "s3Client",
 	}, nil
 }
 
-//func (c *s3Client) CreateFolder(folder string) error {
-//
-//}
-
 func (c *s3Client) CreateBucket(bucketName string, region string) error {
-	logData := lager.Data{
-		"bucket_name": bucketName,
-		"region":      region,
-	}
 
-	c.logInfo("s3client.create-bucket", "starting", logData)
+	c.logger.Info(c.logTag, "Start creating bucket")
 
 	err := c.client.MakeBucket(bucketName, region)
 	if err != nil {
 		exists, existsErr := c.client.BucketExists(bucketName)
 		if existsErr == nil && exists {
-			c.logInfo("s3client.create-bucket", "already-exists", logData)
+			c.logger.Info(c.logTag, "Bucket already exists")
 		} else {
-			c.logError("s3client.create-bucket", err, logData)
+			c.logger.Error(c.logTag, "Failed to create bucket %s", err.Error())
 			return err
 		}
 	}
-	c.logInfo("s3client.create-bucket", "done", logData)
+	c.logger.Info(c.logTag, "Done creating bucket")
 
 	return nil
 }
 
 func (c *s3Client) UploadObject(bucketName string, objectName string, object io.Reader, contentType string) (int64, error) {
-	logData := lager.Data{
-		"bucket_name":  bucketName,
-		"object_name":  objectName,
-		"content_type": contentType,
-		"size":         0,
-	}
 
-	c.logInfo("s3client.upload-object", "uploading", logData)
+	c.logger.Info(c.logTag, "Start uploading object")
 
 	n, err := c.client.PutObject(bucketName, objectName, object, contentType)
 	if err != nil {
-		c.logError("s3client.upload-object", err, logData)
+		c.logger.Error(c.logTag, "Failed to upload object %s", err.Error())
 		return 0, err
 	}
-	logData["size"] = n
 
-	c.logInfo("s3client.upload-object", "done", logData)
+	c.logger.Info(c.logTag, "Done uploading object; size: %d", n)
 
 	return n, nil
-}
-
-func (c *s3Client) logInfo(action, event string, data lager.Data) {
-	data["event"] = event
-	c.logger.Info(action, data)
-}
-
-func (c *s3Client) logError(action string, err error, data lager.Data) {
-	data["event"] = "failed"
-	c.logger.Error(action, err, data)
 }

@@ -3,7 +3,7 @@ package blobstore_test
 import (
 	. "github.com/c0-ops/goblob/blobstore"
 
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +18,7 @@ var _ = Describe("LocalBlobstore", func() {
 	var (
 		outBuffer *gbytes.Buffer
 		errBuffer *gbytes.Buffer
-		logger    lager.Logger
+		logger    boshlog.Logger
 		fs        *fakeboshsys.FakeFileSystem
 
 		localBlobPath string
@@ -29,9 +29,9 @@ var _ = Describe("LocalBlobstore", func() {
 	BeforeEach(func() {
 		outBuffer = gbytes.NewBuffer()
 		errBuffer = gbytes.NewBuffer()
-		logger = lager.NewLogger("logger")
-		logger.RegisterSink(lager.NewWriterSink(outBuffer, lager.INFO))
-		logger.RegisterSink(lager.NewWriterSink(errBuffer, lager.ERROR))
+		logger = boshlog.NewLogger("logger")
+		logger.RegisterSink(boshlog.NewWriterSink(outBuffer, boshlog.INFO))
+		logger.RegisterSink(boshlog.NewWriterSink(errBuffer, boshlog.ERROR))
 
 		fs = fakeboshsys.NewFakeFileSystem()
 

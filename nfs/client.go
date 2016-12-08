@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"path"
 
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	"code.cloudfoundry.org/lager"
 	"github.com/c0-ops/goblob/cmd"
 	"github.com/c0-ops/goblob/tar"
-	"path"
 )
 
 type Client interface {
@@ -22,15 +22,16 @@ type Client interface {
 
 type nfsClient struct {
 	NfsDirectory string
-	fs        boshsys.FileSystem
+	fs           boshsys.FileSystem
 	extractor    tar.CmdExtractor
 	Caller       cmd.Executor
-	logger       lager.Logger
+	logger       boshlog.Logger
+	logTag       string
 }
 
 var SshCmdExecutor = cmd.NewRemoteExecutor
 
-func NewNFSClient(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger lager.Logger) (*nfsClient, error) {
+func NewNFSClient(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
 	config := cmd.SshConfig{
 		Username: username,
 		Password: password,
@@ -43,10 +44,11 @@ func NewNFSClient(username string, password string, ip string, remoteArchivePath
 	}
 	return &nfsClient{
 		NfsDirectory: remoteArchivePath,
-		fs: fs,
+		fs:           fs,
 		Caller:       remoteExecuter,
 		extractor:    extractor,
 		logger:       logger,
+		logTag:       "nfsClient",
 	}, nil
 }
 
@@ -59,7 +61,7 @@ func (c *nfsClient) Get(blobID string) (io.Reader, error) {
 func (c *nfsClient) GetAll(blobPath string) (string, error) {
 	src := path.Join("/tmp", blobPath) + ".tgz"
 	cmd := fmt.Sprintf("cd %s && tar czf %s %s", "/var/vcap/store/shared", src, blobPath)
-	log.Printf("compressing blobs with command: %s\n", cmd)
+	c.logger.Debug(c.logTag, "Compressing blobs with command: %s\n", cmd)
 	_, err := c.Caller.ExecuteForRead(cmd)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Compressing blobs with command %s", cmd)
@@ -72,7 +74,7 @@ func (c *nfsClient) GetAll(blobPath string) (string, error) {
 	defer tmpFile.Close()
 	tmpDir := tmpFile.Name()
 
-	log.Printf("Downloading tarball of blobs to %s\n", tmpDir)
+	c.logger.Debug(c.logTag, "Downloading tarball of blobs to %s\n", tmpDir)
 	err = c.Caller.SecureCopy(src, tmpFile)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Failed to download blobs")
@@ -89,9 +91,9 @@ func (c *nfsClient) Put(path string, content io.ReadCloser, contentLength int64)
 	return bosherr.WrapErrorf(err, "Put function not yet implemented")
 }
 
-func (c *nfsClient) cleanup(path string)  {
+func (c *nfsClient) cleanup(path string) {
 	err := c.extractor.CleanUp(path)
 	if err != nil {
-		c.logger.Debug("Failed to remove blobstore tarball %s" + err.Error())
+		c.logger.Debug(c.logTag, "Failed to remove blobstore tarball %s", err.Error())
 	}
 }

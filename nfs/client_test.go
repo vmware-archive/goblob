@@ -7,22 +7,22 @@ import (
 	. "github.com/c0-ops/goblob/nfs"
 	"github.com/c0-ops/goblob/nfs/fakes"
 	"github.com/c0-ops/goblob/cmd"
-	"code.cloudfoundry.org/lager"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var _ = Describe("nfs client", func() {
 	Describe("NewNFSClient", func() {
-		var logger lager.Logger
+		var logger boshlog.Logger
 		BeforeEach(func() {
-			logger = lager.NewLogger("logger")
+			logger = boshlog.NewLogger("logger")
 		})
 
 		Context("when executer is created successfully", func() {
 			var origExecuterFunction func(cmd.SshConfig) (cmd.Executor, error)
-			var logger lager.Logger
+			var logger boshlog.Logger
 
 			BeforeEach(func() {
-				logger = lager.NewLogger("logger")
+				logger = boshlog.NewLogger("logger")
 				origExecuterFunction = SshCmdExecutor
 				SshCmdExecutor = func(cmd.SshConfig) (cmd.Executor, error) {
 					return &fakes.SuccessMockNFSExecuter{}, nil

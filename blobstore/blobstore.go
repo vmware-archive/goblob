@@ -5,11 +5,11 @@ import (
 	"io"
 	"os"
 
-	log "code.cloudfoundry.org/lager"
-	nfsclient "github.com/c0-ops/goblob/nfs"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
+	nfsclient "github.com/c0-ops/goblob/nfs"
 	"github.com/c0-ops/goblob/tar"
 )
 
@@ -23,26 +23,23 @@ type blobstore struct {
 	bsClient  nfsclient.Client
 	fs        boshsys.FileSystem
 	extractor tar.CmdExtractor
-	logger    log.Logger
+	logger    boshlog.Logger
+	logTag    string
 }
 
-func NewBlobstore(bsClient nfsclient.Client, fs boshsys.FileSystem, extractor tar.CmdExtractor, logger log.Logger) Blobstore {
+func NewBlobstore(bsClient nfsclient.Client, fs boshsys.FileSystem, extractor tar.CmdExtractor, logger boshlog.Logger) Blobstore {
 	return &blobstore{
 		bsClient:  bsClient,
 		fs:        fs,
 		extractor: extractor,
 		logger:    logger,
+		logTag:    "blobstore",
 	}
 }
 
 func (b *blobstore) Get(blobPath, blobID string) (LocalBlob, error) {
 
-	logData := log.Data{
-		"blob_id":          blobID,
-		"destination_path": blobPath,
-	}
-
-	b.logger.Debug("Downloading blob %s to %s", logData)
+	b.logger.Debug(b.logTag, "Downloading blob %s to %s", blobID, blobPath)
 
 	reader, err := b.bsClient.Get(blobID)
 	if err != nil {
@@ -64,7 +61,7 @@ func (b *blobstore) Get(blobPath, blobID string) (LocalBlob, error) {
 
 func (b *blobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 
-	b.logger.Debug("Downloading blobs")
+	b.logger.Debug(b.logTag, "Downloading blobs")
 
 	extractPath, err := b.bsClient.GetAll(blobPath)
 	if err != nil {
@@ -101,12 +98,7 @@ func (b *blobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 
 func (b *blobstore) Add(sourcePath string, blobID string) error {
 
-	logData := log.Data{
-		"blob_id":     blobID,
-		"source_path": sourcePath,
-	}
-
-	b.logger.Debug("Uploading blob %s to %s", logData)
+	b.logger.Debug(b.logTag, "Uploading blob %s to %s", blobID, sourcePath)
 
 	file, err := b.fs.OpenFile(sourcePath, os.O_RDONLY, 0)
 	if err != nil {
@@ -114,7 +106,7 @@ func (b *blobstore) Add(sourcePath string, blobID string) error {
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
-			b.logger.Error("Couldn't close source file", err, logData)
+			b.logger.Error(b.logTag, "Couldn't close source file", err)
 		}
 	}()
 
