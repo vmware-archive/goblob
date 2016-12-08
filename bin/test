@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+function test() {
+     ginkgo -r -v -race --keepGoing -randomizeAllSpecs -skipMeasurements -failOnPending -cover $@ -skipPackage /vendor
+}
+
+if [[ $# -eq 0 ]]; then
+    test
+else
+  while [[ $# -gt 0 ]]
+    do
+        key="$1"
+        case $key in
+            -c|--showcoverage)
+                rm gover.coverprofile || true
+                test && gover && go tool cover -html=gover.coverprofile
+                shift
+            ;;
+            -vet|--govet)
+                go tool vet -composites=false . 2>&1 | grep -v vendor/
+                shift
+            ;;
+            -w|--watch)
+                ginkgo watch -cover -r -race -skipPackage /vendor/
+                shift
+            ;;
+            *)
+                echo "Invalid Arguments"
+                exit 1
+            ;;
+        esac
+        shift # past argument or value
+    done
+fi
