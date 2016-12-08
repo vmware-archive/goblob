@@ -1,17 +1,16 @@
 package s3_test
 
 import (
-	"fmt"
+	"bytes"
 	"io"
 	"os"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	"github.com/minio/minio-go"
-	"github.com/c0-ops/goblob/s3"
 
+	"github.com/c0-ops/goblob/s3"
+	"github.com/minio/minio-go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Client", func() {
@@ -22,19 +21,20 @@ var _ = Describe("Client", func() {
 		bucketName                   string
 		region                       string
 		accessKeyID, secretAccessKey string
-		logBuffer                    *gbytes.Buffer
+		outBuffer                    *bytes.Buffer
+		errBuffer                    *bytes.Buffer
 		logger                       boshlog.Logger
 	)
 
 	BeforeEach(func() {
 		bucketName = "mybucket"
 		region = "us-east-1"
-		accessKeyID = "JP0NF5645O4O6A67VGA8"
-		secretAccessKey = "EeaNuDd5zcNLN7WV4+x50TzYyKckHg/R1FwwPbbo"
+		accessKeyID = "D2Z5WU2UI35D05WXSJGW"
+		secretAccessKey = "Y+4XHK07GQbDqQbkVFIgz2VVi3fapWIGfsdpIL0q"
 
-		logger = boshlog.NewLogger("logger")
-		logBuffer = gbytes.NewBuffer()
-		logger.RegisterSink(boshlog.NewWriterSink(logBuffer, boshlog.INFO))
+		outBuffer = bytes.NewBufferString("")
+		errBuffer = bytes.NewBufferString("")
+		logger = boshlog.NewWriterLogger(boshlog.LevelDebug, outBuffer, errBuffer)
 
 		mc, mcErr = minio.New(fakeS3EndpointURL, accessKeyID, secretAccessKey, false)
 		Expect(mcErr).NotTo(HaveOccurred())
@@ -66,15 +66,10 @@ var _ = Describe("Client", func() {
 			})
 
 			It("provides logging", func() {
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"starting","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"already-exists","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"done","region":"%s"}`, bucketName, region),
-				))
+				outString := outBuffer.String()
+				Expect(outString).To(ContainSubstring("Start creating bucket"))
+				Expect(outString).To(ContainSubstring("Bucket already exists"))
+				Expect(outString).To(ContainSubstring("Done creating bucket"))
 			})
 		})
 
@@ -101,12 +96,9 @@ var _ = Describe("Client", func() {
 			})
 
 			It("provides logging", func() {
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"starting","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"done","region":"%s"}`, bucketName, region),
-				))
+				outString := outBuffer.String()
+				Expect(outString).To(ContainSubstring("Start creating bucket"))
+				Expect(outString).To(ContainSubstring("Done creating bucket"))
 			})
 
 			It("creates the bucket", func() {
@@ -132,12 +124,11 @@ var _ = Describe("Client", func() {
 			})
 
 			It("provides logging", func() {
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"starting","region":"%s"}`, bucketName, bogusRegion),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","error":"%s","event":"failed","region":"%s"}`, bucketName, createErr, bogusRegion),
-				))
+				outString := outBuffer.String()
+				Expect(outString).To(ContainSubstring("Start creating bucket"))
+
+				errorLogString := errBuffer.String()
+				Expect(errorLogString).To(ContainSubstring("Failed to create bucket"))
 			})
 		})
 
@@ -203,22 +194,12 @@ var _ = Describe("Client", func() {
 			})
 
 			It("provides logging", func() {
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"starting","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"already-exists","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"done","region":"%s"}`, bucketName, region),
-				))
-
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","content_type":"%s","event":"uploading","object_name":"%s","size":%d}`, bucketName, contentType, objectName, 0),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","content_type":"%s","event":"done","object_name":"%s","size":%d}`, bucketName, contentType, objectName, size),
-				))
+				outString := outBuffer.String()
+				Expect(outString).To(ContainSubstring("Start creating bucket"))
+				Expect(outString).To(ContainSubstring("Bucket already exists"))
+				Expect(outString).To(ContainSubstring("Done creating bucket"))
+				Expect(outString).To(ContainSubstring("Start uploading object"))
+				Expect(outString).To(ContainSubstring("Done uploading object"))
 			})
 		})
 
@@ -252,22 +233,14 @@ var _ = Describe("Client", func() {
 			})
 
 			It("provides logging", func() {
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"starting","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"already-exists","region":"%s"}`, bucketName, region),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","event":"done","region":"%s"}`, bucketName, region),
-				))
+				outString := outBuffer.String()
+				Expect(outString).To(ContainSubstring("Start creating bucket"))
+				Expect(outString).To(ContainSubstring("Bucket already exists"))
+				Expect(outString).To(ContainSubstring("Done creating bucket"))
+				Expect(outString).To(ContainSubstring("Start uploading object"))
 
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","content_type":"%s","event":"uploading","object_name":"%s","size":%d}`, bucketName, contentType, objectName, 0),
-				))
-				Expect(logBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"bucket_name":"%s","content_type":"%s","error":"%s","event":"failed","object_name":"%s","size":%d}`, bucketName, contentType, uploadErr.Error(), objectName, 0),
-				))
+				errorLogString := errBuffer.String()
+				Expect(errorLogString).To(ContainSubstring("Failed to upload object Object name cannot be empty"))
 			})
 		})
 	})

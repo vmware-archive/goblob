@@ -9,7 +9,6 @@ import (
 
 type Client interface {
 	CreateBucket(string, string) error
-	//CreateFolder(string) error
 	UploadObject(string, string, io.Reader, string) (int64, error)
 }
 
