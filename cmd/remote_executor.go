@@ -119,11 +119,11 @@ func (executor *DefaultRemoteExecutor) SecureCopy(src string, w io.Writer) (err 
 
 		const size int64 = 1e9
 
-		log.Printf("reading %v bytes", size)
+		//log.Printf("reading %v bytes", size)
 		t1 := time.Now()
 		n, err := io.Copy(w, io.LimitReader(r, size))
 		if err != nil {
-			log.Fatal(err)
+			err = fmt.Errorf("error copying bytes to file %s", src)
 		}
 		if n != size {
 			log.Printf("copy: expected %v bytes, got %d", size, n)

@@ -26,7 +26,7 @@ func NewRemoteBlobstoreFactory(fs boshsys.FileSystem, logger lager.Logger) Blobs
 
 func (f blobstoreFactory) NewBlobstore(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, logger lager.Logger) (Blobstore, error) {
 
-	nfsClient, err := nfs.NewNFSClient(username, password, ip, remoteArchivePath, extractor, logger)
+	nfsClient, err := nfs.NewNFSClient(username, password, ip, remoteArchivePath, extractor, f.fs, logger)
 	if err != nil {
 		return nil, err
 	}

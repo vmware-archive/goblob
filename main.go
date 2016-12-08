@@ -24,10 +24,10 @@ const (
 var (
 	nfsIpAddress = flag.String("host", "localhost", "nfs server ip address")
 	vcapPass = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
-	bpBucket = flag.String("buildpacks-bucket", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
-	drpBucket = flag.String("droplets-bucket", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
-	pkgBucket = flag.String("packages-bucket", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
-	resBucket = flag.String("resources-bucket", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
+	bpBucket = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
+	drpBucket = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
+	pkgBucket = flag.String("packages", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
+	resBucket = flag.String("resources", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
 )
 
 func init() {
@@ -41,8 +41,8 @@ func main() {
 
 	// s3 connection info needs to be moved into a config file
 	endpoint := "127.0.0.1:9000"
-	accessKeyID := "O1DIN1QXYAN0TBNHHFP7"
-	secretAccessKey := "42hF6PdMdDt6IY1sYr91SeGIXJyTCISfFZynmXlZ"
+	accessKeyID := "D2Z5WU2UI35D05WXSJGW"
+	secretAccessKey := "Y+4XHK07GQbDqQbkVFIgz2VVi3fapWIGfsdpIL0q"
 	region := "us-east-1"
 
 	buckets := []string{*bpBucket, *drpBucket, *pkgBucket, *resBucket}
@@ -76,7 +76,7 @@ func main() {
 		fmt.Println("You must specify the nfs ip address")
 	}
 	for _, bucketName := range buckets {
-		if bucketName != "" {
+		if strings.Trim(bucketName, "ignore") != "" {
 			runner := boshsys.NewExecCmdRunner(logger)
 			nfsDirectory := path.Join(NfsBlobstorePath, NfsBuildpacksDir)
 			extractor := tar.NewCmdExtractor(runner, fs, logger)
@@ -84,14 +84,7 @@ func main() {
 
 			nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, nfsDirectory, extractor, log)
 
-			file, err := fs.TempFile("bosh-init-local-blob")
-			destinationPath := file.Name()
-			err = file.Close()
-			if err != nil {
-				log.Fatal("failed closing file", err)
-			}
-			fmt.Printf("get all blobs from %s\n", destinationPath)
-			blobs, err := nfsBlobstore.GetAll(destinationPath)
+			blobs, err := nfsBlobstore.GetAll(bucketName)
 			if err != nil {
 				log.Fatal("failed to get all blobs", err)
 			}

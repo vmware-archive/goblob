@@ -13,9 +13,9 @@ import (
 )
 
 type Blobstore interface {
-	Get(destinationPath string, blobID string) (LocalBlob, error)
+	Get(blobPath string, blobID string) (LocalBlob, error)
 	Add(blobID string, sourcePath string) (err error)
-	GetAll(destinationPath string) ([]LocalBlob, error)
+	GetAll(blobPath string) ([]LocalBlob, error)
 }
 
 type blobstore struct {
@@ -34,11 +34,11 @@ func NewBlobstore(bsClient nfsclient.Client, fs boshsys.FileSystem, extractor ta
 	}
 }
 
-func (b *blobstore) Get(destinationPath, blobID string) (LocalBlob, error) {
+func (b *blobstore) Get(blobPath, blobID string) (LocalBlob, error) {
 
 	logData := log.Data{
 		"blob_id":          blobID,
-		"destination_path": destinationPath,
+		"destination_path": blobPath,
 	}
 
 	b.logger.Debug("Downloading blob %s to %s", logData)
@@ -48,28 +48,28 @@ func (b *blobstore) Get(destinationPath, blobID string) (LocalBlob, error) {
 		return nil, bosherr.WrapErrorf(err, "Getting blob %s from blobstore", blobID)
 	}
 
-	targetFile, err := b.fs.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	targetFile, err := b.fs.OpenFile(blobPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Opening file for blob at %s", destinationPath)
+		return nil, bosherr.WrapErrorf(err, "Opening file for blob at %s", blobPath)
 	}
 
 	_, err = io.Copy(targetFile, reader)
 	if err != nil {
-		return nil, bosherr.WrapErrorf(err, "Saving blob to %s", destinationPath)
+		return nil, bosherr.WrapErrorf(err, "Saving blob to %s", blobPath)
 	}
 
-	return NewLocalBlob(destinationPath, b.fs, b.logger), nil
+	return NewLocalBlob(blobPath, b.fs, b.logger), nil
 }
 
-func (b *blobstore) GetAll(destinationPath string) ([]LocalBlob, error) {
+func (b *blobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 
 	b.logger.Debug("Downloading blobs")
 
-	extractPath, err := b.bsClient.GetAll(destinationPath)
+	extractPath, err := b.bsClient.GetAll(blobPath)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Getting all blobs from blobstore")
 	}
-	//
+
 	//fmt.Printf("Opening file for blobs at %s\n", destinationPath)
 	//
 	//targetFile, err := b.fs.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)

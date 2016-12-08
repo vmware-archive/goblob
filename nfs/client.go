@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/pivotal-customer0/cfblobmigrator/cmd"
 	"github.com/pivotal-customer0/cfblobmigrator/tar"
+	"path"
 )
 
 type Client interface {
@@ -21,6 +22,7 @@ type Client interface {
 
 type nfsClient struct {
 	NfsDirectory string
+	fs        boshsys.FileSystem
 	extractor    tar.CmdExtractor
 	Caller       cmd.Executor
 	logger       lager.Logger
@@ -28,7 +30,7 @@ type nfsClient struct {
 
 var SshCmdExecutor = cmd.NewRemoteExecutor
 
-func NewNFSClient(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, logger lager.Logger) (*nfsClient, error) {
+func NewNFSClient(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger lager.Logger) (*nfsClient, error) {
 	config := cmd.SshConfig{
 		Username: username,
 		Password: password,
@@ -40,9 +42,10 @@ func NewNFSClient(username string, password string, ip string, remoteArchivePath
 		return nil, err
 	}
 	return &nfsClient{
+		NfsDirectory: remoteArchivePath,
+		fs: fs,
 		Caller:       remoteExecuter,
 		extractor:    extractor,
-		NfsDirectory: remoteArchivePath,
 		logger:       logger,
 	}, nil
 }
@@ -53,40 +56,42 @@ func (c *nfsClient) Get(blobID string) (io.Reader, error) {
 	return c.Caller.ExecuteForRead(cmd)
 }
 
-func (c *nfsClient) GetAll(destinationPath string) (string, error) {
-	src := "/tmp/cc-packages.tgz"
-	cmd := fmt.Sprintf("cd %s && tar czf %s %s", "/var/vcap/store/shared", src, "cc-packages")
+func (c *nfsClient) GetAll(blobPath string) (string, error) {
+	src := path.Join("/tmp", blobPath) + ".tgz"
+	cmd := fmt.Sprintf("cd %s && tar czf %s %s", "/var/vcap/store/shared", src, blobPath)
 	log.Printf("compressing blobs with command: %s\n", cmd)
 	_, err := c.Caller.ExecuteForRead(cmd)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Compressing blobs with command %s", cmd)
 	}
 
-	targetFile, err := os.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	//targetFile, err := b.fs.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	tmpFile, err := c.fs.TempFile("bosh-local-blob")
 	if err != nil {
-		return "", bosherr.WrapErrorf(err, "Opening file for blobs at %s", destinationPath)
+		return "", bosherr.WrapErrorf(err, "Opening file for blobs")
 	}
-	defer targetFile.Close()
+	defer tmpFile.Close()
+	tmpDir := tmpFile.Name()
 
-	log.Printf("Saving tarball of blobs to %s\n", destinationPath)
-	err = c.Caller.SecureCopy(src, targetFile)
+	log.Printf("Downloading tarball of blobs to %s\n", tmpDir)
+	err = c.Caller.SecureCopy(src, tmpFile)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Failed to download blobs")
 	}
-	extractPath, exErr := c.extractor.Extract(destinationPath)
-	if exErr != nil {
-		//cleanUpErr := c.downloader.CleanUp(src)
-		//if cleanUpErr != nil {
-		//	c.logger.Debug("nfsClientGetAll",
-		//		"Failed to clean up downloaded blobs %v", cleanUpErr)
-		//}
-
-		return extractPath, bosherr.WrapError(exErr, "Extracting blobs")
+	extractPath, err := c.extractor.Extract(tmpDir)
+	defer c.cleanup(tmpDir)
+	if err != nil {
+		return extractPath, bosherr.WrapError(err, "Extracting blobs")
 	}
 	return extractPath, err
 }
 
 func (c *nfsClient) Put(path string, content io.ReadCloser, contentLength int64) (err error) {
 	return bosherr.WrapErrorf(err, "Put function not yet implemented")
+}
+
+func (c *nfsClient) cleanup(path string)  {
+	err := c.extractor.CleanUp(path)
+	if err != nil {
+		c.logger.Debug("Failed to remove blobstore tarball %s" + err.Error())
+	}
 }
