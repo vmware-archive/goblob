@@ -4,9 +4,9 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotal-customer0/cfblobmigrator/nfs"
-	"github.com/pivotal-customer0/cfblobmigrator/nfs/fakes"
-	"github.com/pivotal-customer0/cfblobmigrator/cmd"
+	. "github.com/c0-ops/goblob/nfs"
+	"github.com/c0-ops/goblob/nfs/fakes"
+	"github.com/c0-ops/goblob/cmd"
 	"code.cloudfoundry.org/lager"
 )
 

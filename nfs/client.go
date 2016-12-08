@@ -9,8 +9,8 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/pivotal-customer0/cfblobmigrator/cmd"
-	"github.com/pivotal-customer0/cfblobmigrator/tar"
+	"github.com/c0-ops/goblob/cmd"
+	"github.com/c0-ops/goblob/tar"
 	"path"
 )
 

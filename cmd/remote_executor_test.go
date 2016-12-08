@@ -10,7 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotal-customer0/cfblobmigrator/cmd"
+	. "github.com/c0-ops/goblob/cmd"
 )
 
 type mockClient struct {

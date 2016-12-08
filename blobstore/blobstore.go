@@ -1,15 +1,16 @@
 package blobstore
 
 import (
+	"fmt"
 	"io"
 	"os"
 
 	log "code.cloudfoundry.org/lager"
+	nfsclient "github.com/c0-ops/goblob/nfs"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	nfsclient "github.com/pivotal-customer0/cfblobmigrator/nfs"
-	"github.com/pivotal-customer0/cfblobmigrator/tar"
-	"fmt"
+
+	"github.com/c0-ops/goblob/tar"
 )
 
 type Blobstore interface {

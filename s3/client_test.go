@@ -7,7 +7,7 @@ import (
 
 	"code.cloudfoundry.org/lager"
 	"github.com/minio/minio-go"
-	"github.com/pivotal-customer0/cfblobmigrator/s3"
+	"github.com/c0-ops/goblob/s3"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

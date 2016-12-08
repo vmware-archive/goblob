@@ -11,9 +11,9 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/pivotal-customer0/cfblobmigrator/blobstore"
-	"github.com/pivotal-customer0/cfblobmigrator/s3"
-	"github.com/pivotal-customer0/cfblobmigrator/tar"
+	"github.com/c0-ops/goblob/blobstore"
+	"github.com/c0-ops/goblob/s3"
+	"github.com/c0-ops/goblob/tar"
 )
 
 const (

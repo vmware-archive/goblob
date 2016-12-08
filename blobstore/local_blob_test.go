@@ -1,7 +1,7 @@
 package blobstore_test
 
 import (
-	. "github.com/pivotal-customer0/cfblobmigrator/blobstore"
+	. "github.com/c0-ops/goblob/blobstore"
 
 	"code.cloudfoundry.org/lager"
 

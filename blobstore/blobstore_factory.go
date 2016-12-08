@@ -4,8 +4,8 @@ import (
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/pivotal-customer0/cfblobmigrator/nfs"
-	"github.com/pivotal-customer0/cfblobmigrator/tar"
+	"github.com/c0-ops/goblob/nfs"
+	"github.com/c0-ops/goblob/tar"
 )
 
 type BlobstoreFactory interface {

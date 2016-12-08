@@ -5,10 +5,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
-	. "github.com/pivotal-customer0/cfblobmigrator/blobstore"
+	. "github.com/c0-ops/goblob/blobstore"
 
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	"github.com/pivotal-customer0/cfblobmigrator/nfs"
+	"github.com/c0-ops/goblob/nfs"
 )
 
 var _ = Describe("BlobstoreFactory", func() {
