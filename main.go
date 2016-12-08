@@ -4,23 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
-	"strings"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
+	"github.com/c0-ops/goblob/xfer"
 	"github.com/c0-ops/goblob/blobstore"
-	"github.com/c0-ops/goblob/s3"
 	"github.com/c0-ops/goblob/tar"
 )
 
-const (
-	NfsBlobstorePath string = "/var/vcap/store/shared"
-	NfsBuildpacksDir string = "cc-buildpacks/ea/07"
-)
-
-const goblobMainLogTag = "CmdExtractor"
+const mainLogTag = "main"
 
 var (
 	nfsIpAddress = flag.String("host", "localhost", "nfs server ip address")
@@ -48,63 +41,43 @@ func main() {
 	logger := boshlog.NewWriterLogger(boshlog.LevelDebug, os.Stderr, os.Stderr)
 	fs := boshsys.NewOsFileSystem(logger)
 
+	localBlobstoreFactory := blobstore.NewLocalBlobstoreFactory(fs, logger)
+	localBlobstore, err := localBlobstoreFactory.NewBlobstore(logger)
+	svc := xfer.NewTransferService(endpoint, accessKeyID, secretAccessKey, region, localBlobstore, logger)
+
 	if isLocal() {
-		blobstoreFactory := blobstore.NewLocalBlobstoreFactory(fs, logger)
-		localBlobstore, err := blobstoreFactory.NewBlobstore(logger)
 		if err != nil {
-			logger.Error(goblobMainLogTag, "Failed to create local blobstore %v", err)
+			logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
 			os.Exit(1)
 		}
-
-		for _, bucketName := range buckets {
-			if strings.Trim(bucketName, "ignore") != "" {
-				destinationPath := "./blobstore/fixtures/"+bucketName
-				fmt.Printf("get all blobs from %s\n", destinationPath)
-				blobs, err := localBlobstore.GetAll(destinationPath)
-				if err != nil {
-					logger.Error(goblobMainLogTag, "Failed to get all blobs %v", err)
-					os.Exit(1)
-				}
-				populateS3blobstore(endpoint, accessKeyID, secretAccessKey, bucketName, region, blobs, logger)
-			}
+		err := svc.Transfer(buckets, "./blobstore/fixtures")
+		if err != nil {
+			os.Exit(1)
 		}
 		os.Exit(0)
 	}
 
 	if *nfsIpAddress == "" {
 		fmt.Println("You must specify the nfs ip address")
+		os.Exit(1)
 	}
-	for _, bucketName := range buckets {
-		if strings.Trim(bucketName, "ignore") != "" {
-			runner := boshsys.NewExecCmdRunner(logger)
-			nfsDirectory := path.Join(NfsBlobstorePath, NfsBuildpacksDir)
-			extractor := tar.NewCmdExtractor(runner, fs, logger)
-			blobstoreFactory := blobstore.NewRemoteBlobstoreFactory(fs, logger)
 
-			nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, nfsDirectory, extractor, logger)
+	runner := boshsys.NewExecCmdRunner(logger)
+	extractor := tar.NewCmdExtractor(runner, fs, logger)
+	blobstoreFactory := blobstore.NewRemoteBlobstoreFactory(fs, logger)
 
-			blobs, err := nfsBlobstore.GetAll(bucketName)
-			if err != nil {
-				logger.Error(goblobMainLogTag, "Failed to get all blobs %v", err)
-				os.Exit(1)
-			}
-			populateS3blobstore(endpoint, accessKeyID, secretAccessKey, bucketName, region, blobs, logger)
-		}
-	}
-}
-
-func populateS3blobstore(endpoint, accessKeyID, secretAccessKey, bucketName, region string, blobs []blobstore.LocalBlob, logger boshlog.Logger) {
-	err := createBucket(endpoint, accessKeyID, secretAccessKey, bucketName, region, logger)
+	nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, extractor, logger)
 	if err != nil {
-		logger.Error(goblobMainLogTag, "Failed to create bucket %v", err)
+		logger.Error(mainLogTag, "Failed to create nfs blobstore %v", err)
+		os.Exit(1)
 	}
-	for _, blob := range blobs {
-		fmt.Printf("uploading blob %s\n", blob.Path())
-		err = uploadObject(endpoint, accessKeyID, secretAccessKey, bucketName, blob, logger)
-		if err != nil {
-			logger.Error(goblobMainLogTag, "Failed to upload blobs %s %v", blob.Path())
-		}
+
+	rxfer := xfer.NewRemoteTransferService(svc, endpoint, accessKeyID, secretAccessKey, region, nfsBlobstore, logger)
+	err = rxfer.Transfer(buckets, "")
+	if err != nil {
+		os.Exit(1)
 	}
+	os.Exit(0)
 }
 
 func isLocal() bool {
@@ -114,35 +87,3 @@ func isLocal() bool {
 	return false
 }
 
-func createBucket(endpoint, accessKeyID, secretAccessKey, bucketName, region string, logger boshlog.Logger) error {
-	client, err := s3.NewClient(endpoint, accessKeyID, secretAccessKey, false, logger)
-	if err != nil {
-		return err
-	}
-	err = client.CreateBucket(bucketName, region)
-	return err
-}
-
-func uploadObject(endpoint, accessKeyID, secretAccessKey, bucketName string, blob blobstore.LocalBlob, logger boshlog.Logger) error {
-	client, err := s3.NewClient(endpoint, accessKeyID, secretAccessKey, false, logger)
-	if err != nil {
-		return err
-	}
-	//object, _ := fs.OpenFile(blob.Path(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	object, err := os.Open(blob.Path())
-	if err != nil {
-		return err
-	}
-
-	dir, file := split(blob.Path())
-	fmt.Printf("dir is %s\n", dir)
-	fmt.Printf("file is %s\n", file)
-
-	_, err = client.UploadObject(bucketName, file, object, "")
-	return err
-}
-
-func split(path string) (dir, file string) {
-	i := strings.LastIndex(path, "/")
-	return path[:i+1], path[i+1:]
-}

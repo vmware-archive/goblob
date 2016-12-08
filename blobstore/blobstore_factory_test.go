@@ -32,7 +32,7 @@ var _ = Describe("BlobstoreFactory", func() {
 		It("returns the blobstore", func() {
 			blobstore, err := blobstoreFactory.NewRemoteBlobstore("fake-user", "fake-password", "fake-ip", "fake-archive-dir", nil, logger)
 			Expect(err).ToNot(HaveOccurred())
-			nfsClient, err2 := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", "fake-archive-dir", nil, logger)
+			nfsClient, err2 := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", nil, logger)
 			Expect(err2).ToNot(HaveOccurred())
 			expectedBlobstore := NewBlobstore(nfsClient, fs, nil, logger)
 			Expect(blobstore).To(Equal(expectedBlobstore))

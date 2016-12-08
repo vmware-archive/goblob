@@ -27,7 +27,7 @@ func (b *localblobstore) Get(destinationPath, blobID string) (LocalBlob, error) 
 
 func (b *localblobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 
-	b.logger.Debug(b.logTag, "Getting all blobs from %s\n"+blobPath)
+	b.logger.Debug(b.logTag, "Getting all blobs from %s", blobPath)
 
 	blobs := []LocalBlob{}
 	b.fs.Walk(blobPath, func(path string, info os.FileInfo, err error) error {

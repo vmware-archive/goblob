@@ -13,7 +13,6 @@ type BlobstoreFactory interface {
 		username string,
 		password string,
 		ip string,
-		remoteArchivePath string,
 		extractor tar.CmdExtractor,
 		logger boshlog.Logger,
 	) (Blobstore, error)
@@ -35,11 +34,10 @@ func (f blobstoreFactory) NewBlobstore(
 	username string,
 	password string,
 	ip string,
-	remoteArchivePath string,
 	extractor tar.CmdExtractor,
 	logger boshlog.Logger,
 ) (Blobstore, error) {
-	nfsClient, err := nfs.NewNFSClient(username, password, ip, remoteArchivePath, extractor, f.fs, logger)
+	nfsClient, err := nfs.NewNFSClient(username, password, ip, extractor, f.fs, logger)
 	if err != nil {
 		return nil, err
 	}

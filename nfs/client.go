@@ -3,7 +3,6 @@ package nfs
 import (
 	"fmt"
 	"io"
-	"log"
 	"path"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
@@ -15,9 +14,9 @@ import (
 )
 
 type Client interface {
-	Get(path string) (content io.Reader, err error)
-	Put(path string, content io.ReadCloser, contentLength int64) (err error)
-	GetAll(path string) (extractPath string, err error)
+	Get(blobPath string, blobID string) (content io.Reader, err error)
+	Put(blobPath string, content io.ReadCloser, contentLength int64) (err error)
+	GetAll(blobPath string) (extractPath string, err error)
 }
 
 type nfsClient struct {
@@ -31,7 +30,7 @@ type nfsClient struct {
 
 var SshCmdExecutor = cmd.NewRemoteExecutor
 
-func NewNFSClient(username string, password string, ip string, remoteArchivePath string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
+func NewNFSClient(username string, password string, ip string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
 	config := cmd.SshConfig{
 		Username: username,
 		Password: password,
@@ -43,7 +42,6 @@ func NewNFSClient(username string, password string, ip string, remoteArchivePath
 		return nil, err
 	}
 	return &nfsClient{
-		NfsDirectory: remoteArchivePath,
 		fs:           fs,
 		Caller:       remoteExecuter,
 		extractor:    extractor,
@@ -52,9 +50,9 @@ func NewNFSClient(username string, password string, ip string, remoteArchivePath
 	}, nil
 }
 
-func (c *nfsClient) Get(blobID string) (io.Reader, error) {
-	cmd := fmt.Sprintf("cd %s && cat %s", c.NfsDirectory, blobID)
-	log.Printf("fetching blob %s with command: %s\n", blobID, cmd)
+func (c *nfsClient) Get(blobPath string, blobID string) (io.Reader, error) {
+	cmd := fmt.Sprintf("cd %s && cat %s", blobPath, blobID)
+	c.logger.Debug(c.logTag, "Fetching blob %s with command: %s", blobID, cmd)
 	return c.Caller.ExecuteForRead(cmd)
 }
 

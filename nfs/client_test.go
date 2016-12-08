@@ -34,7 +34,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and a valid nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", "/var/somepath", nil, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", nil, nil, logger)
 				Expect(err).Should(BeNil())
 				Expect(n).ShouldNot(BeNil())
 			})
@@ -57,7 +57,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", "/var/somepath", nil, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", nil, nil, logger)
 				Expect(err).ShouldNot(BeNil())
 				Expect(n).Should(BeNil())
 			})

@@ -1,7 +1,6 @@
 package blobstore
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -41,7 +40,7 @@ func (b *blobstore) Get(blobPath, blobID string) (LocalBlob, error) {
 
 	b.logger.Debug(b.logTag, "Downloading blob %s to %s", blobID, blobPath)
 
-	reader, err := b.bsClient.Get(blobID)
+	reader, err := b.bsClient.Get(blobPath, blobID)
 	if err != nil {
 		return nil, bosherr.WrapErrorf(err, "Getting blob %s from blobstore", blobID)
 	}
@@ -68,22 +67,7 @@ func (b *blobstore) GetAll(blobPath string) ([]LocalBlob, error) {
 		return nil, bosherr.WrapErrorf(err, "Getting all blobs from blobstore")
 	}
 
-	//fmt.Printf("Opening file for blobs at %s\n", destinationPath)
-	//
-	//targetFile, err := b.fs.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	//if err != nil {
-	//	return nil, bosherr.WrapErrorf(err, "Opening file for blobs at %s", destinationPath)
-	//}
-	//
-	//fmt.Printf("Saving blobs to %s\n", destinationPath)
-	//
-	//_, err = io.Copy(targetFile, reader)
-	//if err != nil {
-	//	return nil, bosherr.WrapErrorf(err, "Saving blobs to %s", destinationPath)
-	//}
-
-	//extractPath, err := b.extractor.Extract(destinationPath)
-	fmt.Printf("Walking files in %s\n", extractPath)
+	b.logger.Debug(b.logTag, "Walking files in %s", extractPath)
 
 	blobs := []LocalBlob{}
 	b.fs.Walk(extractPath, func(path string, info os.FileInfo, err error) error {
