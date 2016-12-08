@@ -27,7 +27,7 @@ func NewRemoteTransferService(svc xferSvc, endpoint, accessKeyID, secretAccessKe
 		region:          region,
 		blobstore:       bs,
 		logger:          logger,
-		logTag:          "transferService",
+		logTag:          "rXferSvc",
 	}
 }
 

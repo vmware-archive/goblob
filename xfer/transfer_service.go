@@ -27,7 +27,7 @@ func NewTransferService(endpoint, accessKeyID, secretAccessKey, region string, b
 		region:          region,
 		blobstore:       bs,
 		logger:          logger,
-		logTag:          "transferService",
+		logTag:          "xferSvc",
 	}
 }
 
