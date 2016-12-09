@@ -1,0 +1,177 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": boshlog "github.com/cloudfoundry/bosh-utils/logger",
+			"repository": "https://github.com/cloudfoundry/boshlog",
+			"vcs": "git",
+			"revision": "6cfe365fb6bb84343f0034b4a53cd250d173b61f",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cheggaaa/pb",
+			"repository": "https://github.com/cheggaaa/pb",
+			"vcs": "git",
+			"revision": "d7e6ca3010b6f084d8056847f55d7f572f180678",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/blobstore",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "/blobstore",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/crypto",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "crypto",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/errors",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "errors",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/logger",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "logger",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/system",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "system",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/uuid",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "uuid",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/vendor/github.com/bmatcuk/doublestar",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "vendor/github.com/bmatcuk/doublestar",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/vendor/github.com/charlievieth/fs",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "vendor/github.com/charlievieth/fs",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/cloudfoundry/bosh-utils/vendor/github.com/nu7hatch/gouuid",
+			"repository": "https://github.com/cloudfoundry/bosh-utils",
+			"vcs": "git",
+			"revision": "cf9c03783f4c332b547d98fab54846eb6c099d80",
+			"branch": "master",
+			"path": "vendor/github.com/nu7hatch/gouuid",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto",
+			"repository": "https://github.com/golang/protobuf",
+			"vcs": "git",
+			"revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
+			"branch": "master",
+			"path": "/proto",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/golang/protobuf/ptypes/any",
+			"repository": "https://github.com/golang/protobuf",
+			"vcs": "git",
+			"revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
+			"branch": "master",
+			"path": "ptypes/any",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/mattn/go-runewidth",
+			"repository": "https://github.com/mattn/go-runewidth",
+			"vcs": "git",
+			"revision": "737072b4e32b7a5018b4a7125da8d12de90e8045",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/minio/minio",
+			"repository": "https://github.com/minio/minio",
+			"vcs": "git",
+			"revision": "3b455d6137997a2fa9c0279f1aada08af051b559",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/minio/minio-go",
+			"repository": "https://github.com/minio/minio-go",
+			"vcs": "git",
+			"revision": "95231ceb23b6b961f00ff14f68a155a76afe49a9",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/onsi/ginkgo",
+			"repository": "https://github.com/onsi/ginkgo",
+			"vcs": "git",
+			"revision": "00054c0bb96fc880d4e0be1b90937fad438c5290",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/onsi/gomega",
+			"repository": "https://github.com/onsi/gomega",
+			"vcs": "git",
+			"revision": "f1f0f388b31eca4e2cbe7a6dd8a3a1dfddda5b1c",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "golang.org/x/sys/unix",
+			"repository": "https://go.googlesource.com/sys",
+			"vcs": "git",
+			"revision": "478fcf54317e52ab69f40bb4c7a1520288d7f7ea",
+			"branch": "master",
+			"path": "/unix",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/yaml.v2",
+			"repository": "https://gopkg.in/yaml.v2",
+			"vcs": "git",
+			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
+			"branch": "v2",
+			"notests": true
+		}
+	]
+}
