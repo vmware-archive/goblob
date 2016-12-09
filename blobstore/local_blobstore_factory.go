@@ -7,7 +7,7 @@ import (
 )
 
 type LocalBlobstoreFactory interface {
-	NewBlobstore(logger boshlog.Logger) (Blobstore, error)
+	NewBlobstore() (Blobstore, error)
 }
 
 type localBlobstoreFactory struct {
@@ -22,6 +22,6 @@ func NewLocalBlobstoreFactory(fs boshsys.FileSystem, logger boshlog.Logger) Loca
 	}
 }
 
-func (f localBlobstoreFactory) NewBlobstore(logger boshlog.Logger) (Blobstore, error) {
+func (f localBlobstoreFactory) NewBlobstore() (Blobstore, error) {
 	return NewLocalBlobstore(f.fs, f.logger), nil
 }

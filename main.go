@@ -42,7 +42,7 @@ func main() {
 	fs := boshsys.NewOsFileSystem(logger)
 
 	localBlobstoreFactory := blobstore.NewLocalBlobstoreFactory(fs, logger)
-	localBlobstore, err := localBlobstoreFactory.NewBlobstore(logger)
+	localBlobstore, err := localBlobstoreFactory.NewBlobstore()
 	if err != nil {
 		logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
 		os.Exit(1)
@@ -67,7 +67,7 @@ func main() {
 	extractor := tar.NewCmdExtractor(runner, fs, logger)
 	blobstoreFactory := blobstore.NewRemoteBlobstoreFactory(fs, logger)
 
-	nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, extractor, logger)
+	nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, extractor)
 	if err != nil {
 		logger.Error(mainLogTag, "Failed to create nfs blobstore %v", err)
 		os.Exit(1)
