@@ -12,3 +12,7 @@ func TestBosh(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Bosh Suite")
 }
+
+var _ = AfterEach(func() {
+	bosh.ResetBodyReader()
+})

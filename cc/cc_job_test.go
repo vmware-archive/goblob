@@ -16,7 +16,18 @@ var _ = Describe("CloudController Job", func() {
 	)
 	BeforeEach(func() {
 		boshClient = fakes.NewFakeBoshClient()
-		cc = NewCloudController(boshClient)
+		cc = NewCloudController(boshClient, []CCJob{
+			CCJob{
+				Name: "cloud_controller",
+				Deployment: "cf-deployment",
+				Index: 0,
+			},
+			CCJob{
+				Name: "cloud_controller",
+				Deployment: "cf-deployment",
+				Index: 1,
+			},
+		},)
 	})
 
 	Describe("Stop", func() {

@@ -18,21 +18,10 @@ type CloudController struct {
 	client BOSHClient
 }
 
-func NewCloudController(client BOSHClient) *CloudController {
+func NewCloudController(client BOSHClient, jobs []CCJob) *CloudController {
 	return &CloudController{
 		client: client,
-		jobs: []CCJob{
-			CCJob{
-				Name: "cc",
-				Deployment: "cf-deployment",
-				Index: 0,
-			},
-			CCJob{
-				Name: "cc",
-				Deployment: "cf-deployment",
-				Index: 1,
-			},
-		},
+		jobs: jobs,
 	}
 }
 

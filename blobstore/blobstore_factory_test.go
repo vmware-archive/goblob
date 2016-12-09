@@ -30,7 +30,7 @@ var _ = Describe("BlobstoreFactory", func() {
 	})
 
 	Describe("NewNFSBlobstore", func() {
-		It("returns the blobstore", func() {
+		PIt("returns the blobstore", func() {
 			blobstore, err := blobstoreFactory.NewBlobstore("fake-user", "fake-password", "fake-ip", extractor)
 			Expect(err).ToNot(HaveOccurred())
 			nfsClient, err := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", extractor, fs, logger)
