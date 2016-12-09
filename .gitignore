@@ -6,8 +6,6 @@
 # Folders
 _obj
 _test
-!vendor/manifest
-vendor
 
 # Architecture specific extensions/prefixes
 *.[568vq]
