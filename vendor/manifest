@@ -2,7 +2,7 @@
 	"version": 0,
 	"dependencies": [
 		{
-			"importpath": boshlog "github.com/cloudfoundry/bosh-utils/logger",
+			"importpath": "github.com/cloudfoundry/bosh-utils/logger",
 			"repository": "https://github.com/cloudfoundry/boshlog",
 			"vcs": "git",
 			"revision": "6cfe365fb6bb84343f0034b4a53cd250d173b61f",
