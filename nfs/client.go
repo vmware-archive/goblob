@@ -23,11 +23,12 @@ type nfsClient struct {
 	NfsDirectory string
 	fs           boshsys.FileSystem
 	extractor    tar.Extractor
-	Caller       cmd.Executor
+	Executor     cmd.Executor
 	logger       boshlog.Logger
 	logTag       string
 }
 
+//pass this into New so it doesn't need to be exported
 var SshCmdExecutor = cmd.NewRemoteExecutor
 
 func NewNFSClient(username string, password string, ip string, extractor tar.Extractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
@@ -37,30 +38,30 @@ func NewNFSClient(username string, password string, ip string, extractor tar.Ext
 		Host:     ip,
 		Port:     22,
 	}
-	remoteExecuter, err := SshCmdExecutor(config)
+	executor, err := SshCmdExecutor(config)
 	if err != nil {
 		return nil, err
 	}
 	return &nfsClient{
-		fs:           fs,
-		Caller:       remoteExecuter,
-		extractor:    extractor,
-		logger:       logger,
-		logTag:       "nfsClient",
+		fs:        fs,
+		Executor:  executor,
+		extractor: extractor,
+		logger:    logger,
+		logTag:    "nfsClient",
 	}, nil
 }
 
 func (c *nfsClient) Get(blobPath string, blobID string) (io.Reader, error) {
 	cmd := fmt.Sprintf("cd %s && cat %s", blobPath, blobID)
 	c.logger.Debug(c.logTag, "Fetching blob %s with command: %s", blobID, cmd)
-	return c.Caller.ExecuteForRead(cmd)
+	return c.Executor.ExecuteForRead(cmd)
 }
 
 func (c *nfsClient) GetAll(blobPath string) (string, error) {
 	src := path.Join("/tmp", blobPath) + ".tgz"
 	cmd := fmt.Sprintf("cd %s && tar czf %s %s", "/var/vcap/store/shared", src, blobPath)
 	c.logger.Debug(c.logTag, "Compressing blobs with command: %s\n", cmd)
-	_, err := c.Caller.ExecuteForRead(cmd)
+	_, err := c.Executor.ExecuteForRead(cmd)
 	if err != nil {
 		return "", bosherr.WrapErrorf(err, "Compressing blobs with command %s", cmd)
 	}
@@ -73,7 +74,7 @@ func (c *nfsClient) GetAll(blobPath string) (string, error) {
 	tmpDir := tmpFile.Name()
 
 	c.logger.Debug(c.logTag, "Downloading tarball of blobs to %s\n", tmpDir)
-	err = c.Caller.SecureCopy(src, tmpFile)
+	err = c.Executor.SecureCopy(src, tmpFile)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Failed to download blobs")
 	}
