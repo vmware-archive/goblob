@@ -2,27 +2,33 @@ package nfs_test
 
 import (
 	"fmt"
+	"github.com/c0-ops/goblob/cmd"
+	"github.com/c0-ops/goblob/cmd/fakes"
+	. "github.com/c0-ops/goblob/nfs"
+	faketar "github.com/c0-ops/goblob/tar/fakes"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/c0-ops/goblob/nfs"
-	"github.com/c0-ops/goblob/nfs/fakes"
-	"github.com/c0-ops/goblob/cmd"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var _ = Describe("nfs client", func() {
 	Describe("NewNFSClient", func() {
-		var logger boshlog.Logger
+		var (
+			logger    boshlog.Logger
+			fs        *fakesys.FakeFileSystem
+			extractor faketar.FakeCmdExtractor
+		)
 		BeforeEach(func() {
-			logger = boshlog.NewLogger("logger")
+			fs = fakesys.NewFakeFileSystem()
+			logger = boshlog.NewLogger(boshlog.LevelNone)
+			extractor = faketar.NewFakeCmdExtractor()
 		})
 
 		Context("when executer is created successfully", func() {
 			var origExecuterFunction func(cmd.SshConfig) (cmd.Executor, error)
-			var logger boshlog.Logger
 
 			BeforeEach(func() {
-				logger = boshlog.NewLogger("logger")
 				origExecuterFunction = SshCmdExecutor
 				SshCmdExecutor = func(cmd.SshConfig) (cmd.Executor, error) {
 					return &fakes.SuccessMockNFSExecuter{}, nil
@@ -34,7 +40,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and a valid nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", nil, nil, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", extractor, fs, logger)
 				Expect(err).Should(BeNil())
 				Expect(n).ShouldNot(BeNil())
 			})
@@ -57,7 +63,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", nil, nil, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", extractor, fs, logger)
 				Expect(err).ShouldNot(BeNil())
 				Expect(n).Should(BeNil())
 			})

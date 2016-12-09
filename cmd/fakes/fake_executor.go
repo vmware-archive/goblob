@@ -29,6 +29,11 @@ func (s *SuccessMockNFSExecuter) ExecuteForRead(cmd string) (io.Reader, error) {
 	return strings.NewReader(NfsSuccessString), nil
 }
 
+func (s *SuccessMockNFSExecuter) SecureCopy(src string, w io.Writer) (err error) {
+	io.Copy(w, strings.NewReader(NfsSuccessString))
+	return
+}
+
 type FailureMockNFSExecuter struct{}
 
 func (s *FailureMockNFSExecuter) ExecuteForWrite(dest io.Writer, cmd string) (err error) {
@@ -39,4 +44,9 @@ func (s *FailureMockNFSExecuter) ExecuteForWrite(dest io.Writer, cmd string) (er
 
 func (s *FailureMockNFSExecuter) ExecuteForRead(cmd string) (io.Reader, error) {
 	return nil, ErrMockNfsCommand
+}
+
+func (s *FailureMockNFSExecuter) SecureCopy(src string, w io.Writer) (err error) {
+	io.Copy(w, strings.NewReader(NfsFailureString))
+	return
 }
