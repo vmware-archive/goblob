@@ -13,6 +13,8 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
+//Taken from cfops
+
 var DefaultPacketSize int = 1<<15
 
 //SshConfig - for the SSH connection
