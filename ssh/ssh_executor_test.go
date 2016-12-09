@@ -1,4 +1,4 @@
-package cmd_test
+package ssh_test
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/c0-ops/goblob/cmd"
+	. "github.com/c0-ops/goblob/ssh"
 )
 
 type mockClient struct {

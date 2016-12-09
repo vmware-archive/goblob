@@ -9,7 +9,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	"github.com/c0-ops/goblob/cmd"
+	"github.com/c0-ops/goblob/ssh"
 	"github.com/c0-ops/goblob/tar"
 )
 
@@ -23,16 +23,16 @@ type nfsClient struct {
 	NfsDirectory string
 	fs           boshsys.FileSystem
 	extractor    tar.Extractor
-	Executor     cmd.Executor
+	Executor     ssh.Executor
 	logger       boshlog.Logger
 	logTag       string
 }
 
 //pass this into New so it doesn't need to be exported
-var SshCmdExecutor = cmd.NewRemoteExecutor
+var SshCmdExecutor = ssh.NewRemoteExecutor
 
 func NewNFSClient(username string, password string, ip string, extractor tar.Extractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
-	config := cmd.SshConfig{
+	config := ssh.SshConfig{
 		Username: username,
 		Password: password,
 		Host:     ip,

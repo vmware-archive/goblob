@@ -2,8 +2,8 @@ package nfs_test
 
 import (
 	"fmt"
-	"github.com/c0-ops/goblob/cmd"
-	"github.com/c0-ops/goblob/cmd/fakes"
+	"github.com/c0-ops/goblob/ssh"
+	"github.com/c0-ops/goblob/ssh/fakes"
 	. "github.com/c0-ops/goblob/nfs"
 	faketar "github.com/c0-ops/goblob/tar/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -26,11 +26,11 @@ var _ = Describe("nfs client", func() {
 		})
 
 		Context("when executer is created successfully", func() {
-			var origExecuterFunction func(cmd.SshConfig) (cmd.Executor, error)
+			var origExecuterFunction func(ssh.SshConfig) (ssh.Executor, error)
 
 			BeforeEach(func() {
 				origExecuterFunction = SshCmdExecutor
-				SshCmdExecutor = func(cmd.SshConfig) (cmd.Executor, error) {
+				SshCmdExecutor = func(ssh.SshConfig) (ssh.Executor, error) {
 					return &fakes.SuccessMockNFSExecuter{}, nil
 				}
 			})
@@ -47,11 +47,11 @@ var _ = Describe("nfs client", func() {
 		})
 
 		Context("when executer fails to be created properly", func() {
-			var origExecuterFunction func(cmd.SshConfig) (cmd.Executor, error)
+			var origExecuterFunction func(ssh.SshConfig) (ssh.Executor, error)
 
 			BeforeEach(func() {
 				origExecuterFunction = SshCmdExecutor
-				SshCmdExecutor = func(cmd.SshConfig) (ce cmd.Executor, err error) {
+				SshCmdExecutor = func(ssh.SshConfig) (ce ssh.Executor, err error) {
 					ce = &fakes.FailureMockNFSExecuter{}
 					err = fmt.Errorf("we have an error")
 					return
