@@ -43,13 +43,14 @@ func main() {
 
 	localBlobstoreFactory := blobstore.NewLocalBlobstoreFactory(fs, logger)
 	localBlobstore, err := localBlobstoreFactory.NewBlobstore(logger)
+	if err != nil {
+		logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
+		os.Exit(1)
+	}
+
 	svc := xfer.NewTransferService(endpoint, accessKeyID, secretAccessKey, region, localBlobstore, logger)
 
 	if isLocal() {
-		if err != nil {
-			logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
-			os.Exit(1)
-		}
 		err := svc.Transfer(buckets, "./blobstore/fixtures")
 		if err != nil {
 			os.Exit(1)
