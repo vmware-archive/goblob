@@ -3,31 +3,30 @@ package cc_test
 import (
 	. "github.com/c0-ops/goblob/cc"
 
+	"github.com/c0-ops/goblob/bosh"
+	"github.com/c0-ops/goblob/bosh/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/c0-ops/goblob/bosh/fakes"
 )
 
 var _ = Describe("CloudController Job", func() {
 
-	var(
-		cc *CloudController
+	var (
+		cc         *CloudController
 		boshClient fakes.FakeBoshClient
 	)
 	BeforeEach(func() {
 		boshClient = fakes.NewFakeBoshClient()
-		cc = NewCloudController(boshClient, []CCJob{
-			CCJob{
-				Name: "cloud_controller",
-				Deployment: "cf-deployment",
-				Index: 0,
+		cc = NewCloudController(boshClient, "cf-deployment", []bosh.VM{
+			{
+				JobName: "cloud_controller",
+				Index:   0,
 			},
-			CCJob{
-				Name: "cloud_controller",
-				Deployment: "cf-deployment",
-				Index: 1,
+			{
+				JobName: "cloud_controller",
+				Index:   1,
 			},
-		},)
+		})
 	})
 
 	Describe("Stop", func() {
