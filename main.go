@@ -4,13 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 
-	"github.com/c0-ops/goblob/xfer"
 	"github.com/c0-ops/goblob/blobstore"
+	"github.com/c0-ops/goblob/bosh"
+	"github.com/c0-ops/goblob/cc"
 	"github.com/c0-ops/goblob/tar"
+	"github.com/c0-ops/goblob/xfer"
 )
 
 const mainLogTag = "main"
@@ -47,6 +50,20 @@ func main() {
 		logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
 		os.Exit(1)
 	}
+	taskPingFreq := 1000 * time.Millisecond
+	bc := bosh.NewClient(bosh.Config{
+		URL:                 "some-url",
+		Username:            "some-username",
+		Password:            "some-password",
+		TaskPollingInterval: taskPingFreq,
+		AllowInsecureSSL:    true,
+	})
+
+	vms, err := bc.GetVMs("some-deployment")
+
+	cloudController := cc.NewCloudController(bc, "some-deployment", vms)
+	cloudController.Stop()
+	defer cloudController.Start()
 
 	svc := xfer.NewTransferService(endpoint, accessKeyID, secretAccessKey, region, localBlobstore, logger)
 
