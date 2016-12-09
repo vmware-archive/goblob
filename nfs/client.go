@@ -22,7 +22,7 @@ type Client interface {
 type nfsClient struct {
 	NfsDirectory string
 	fs           boshsys.FileSystem
-	extractor    tar.CmdExtractor
+	extractor    tar.Extractor
 	Caller       cmd.Executor
 	logger       boshlog.Logger
 	logTag       string
@@ -30,7 +30,7 @@ type nfsClient struct {
 
 var SshCmdExecutor = cmd.NewRemoteExecutor
 
-func NewNFSClient(username string, password string, ip string, extractor tar.CmdExtractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
+func NewNFSClient(username string, password string, ip string, extractor tar.Extractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
 	config := cmd.SshConfig{
 		Username: username,
 		Password: password,

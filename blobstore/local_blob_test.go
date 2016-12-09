@@ -3,21 +3,20 @@ package blobstore_test
 import (
 	. "github.com/c0-ops/goblob/blobstore"
 
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"bytes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakeboshsys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	"github.com/onsi/gomega/gbytes"
-	"fmt"
 )
 
 var _ = Describe("LocalBlobstore", func() {
 	var (
-		outBuffer *gbytes.Buffer
-		errBuffer *gbytes.Buffer
+		outBuffer *bytes.Buffer
+		errBuffer *bytes.Buffer
 		logger    boshlog.Logger
 		fs        *fakeboshsys.FakeFileSystem
 
@@ -27,11 +26,9 @@ var _ = Describe("LocalBlobstore", func() {
 	)
 
 	BeforeEach(func() {
-		outBuffer = gbytes.NewBuffer()
-		errBuffer = gbytes.NewBuffer()
-		logger = boshlog.NewLogger("logger")
-		logger.RegisterSink(boshlog.NewWriterSink(outBuffer, boshlog.INFO))
-		logger.RegisterSink(boshlog.NewWriterSink(errBuffer, boshlog.ERROR))
+		outBuffer = bytes.NewBufferString("")
+		errBuffer = bytes.NewBufferString("")
+		logger = boshlog.NewWriterLogger(boshlog.LevelDebug, outBuffer, errBuffer)
 
 		fs = fakeboshsys.NewFakeFileSystem()
 
@@ -90,9 +87,9 @@ var _ = Describe("LocalBlobstore", func() {
 			It("logs the error", func() {
 				localBlob.DeleteSilently()
 
-				Expect(errBuffer).To(gbytes.Say(
-					fmt.Sprintf(`{"error":"Deleting local blob 'fake-local-blob-path': fake-delete-error","event":"Failed to delete local blob"}`),
-				))
+				errorLogString := errBuffer.String()
+				Expect(errorLogString).To(ContainSubstring("Failed to delete local blob"))
+				Expect(errorLogString).To(ContainSubstring("fake-delete-error"))
 			})
 		})
 	})

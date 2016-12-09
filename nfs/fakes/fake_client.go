@@ -19,10 +19,16 @@ func NewFakeClient() *FakeClient {
 	return &FakeClient{}
 }
 
-func (c *FakeClient) Get(path string) (io.Reader, error) {
+func (c *FakeClient) Get(path string, blobID string) (io.Reader, error) {
 	c.GetPath = path
 
 	return c.GetContents, c.GetErr
+}
+
+func (c *FakeClient) GetAll(path string) (string, error) {
+	c.GetPath = path
+
+	return c.GetPath, c.GetErr
 }
 
 func (c *FakeClient) Put(path string, content io.ReadCloser, contentLength int64) error {

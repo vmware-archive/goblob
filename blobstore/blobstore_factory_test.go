@@ -1,41 +1,42 @@
 package blobstore_test
 
 import (
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	. "github.com/c0-ops/goblob/blobstore"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
-	. "github.com/c0-ops/goblob/blobstore"
 
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 	"github.com/c0-ops/goblob/nfs"
+	faketar "github.com/c0-ops/goblob/tar/fakes"
+
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 )
 
 var _ = Describe("BlobstoreFactory", func() {
 	var (
 		fs               *fakesys.FakeFileSystem
+		//runner           *fakesys.FakeCmdRunner
+		extractor        faketar.FakeCmdExtractor
 		logger           boshlog.Logger
-		logBuffer        *gbytes.Buffer
-		blobstoreFactory Factory
+		blobstoreFactory BlobstoreFactory
 	)
 
 	BeforeEach(func() {
 		fs = fakesys.NewFakeFileSystem()
-		logger = boshlog.NewLogger("logger")
-		logBuffer = gbytes.NewBuffer()
-		logger.RegisterSink(boshlog.NewWriterSink(logBuffer, boshlog.INFO))
+		logger = boshlog.NewLogger(boshlog.LevelNone)
+		extractor = faketar.NewFakeCmdExtractor()
 
 		blobstoreFactory = NewRemoteBlobstoreFactory(fs, logger)
 	})
 
 	Describe("NewNFSBlobstore", func() {
 		It("returns the blobstore", func() {
-			blobstore, err := blobstoreFactory.NewRemoteBlobstore("fake-user", "fake-password", "fake-ip", "fake-archive-dir", nil, logger)
+			blobstore, err := blobstoreFactory.NewBlobstore("fake-user", "fake-password", "fake-ip", extractor)
 			Expect(err).ToNot(HaveOccurred())
-			nfsClient, err2 := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", nil, logger)
-			Expect(err2).ToNot(HaveOccurred())
-			expectedBlobstore := NewBlobstore(nfsClient, fs, nil, logger)
-			Expect(blobstore).To(Equal(expectedBlobstore))
+			nfsClient, err := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", extractor, fs, logger)
+			Expect(err).ToNot(HaveOccurred())
+			expectedBlobstore := NewBlobstore(nfsClient, fs, extractor, logger)
+			Expect(blobstore).To(BeEquivalentTo(expectedBlobstore))
 		})
 	})
 })

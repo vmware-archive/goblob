@@ -5,31 +5,33 @@ import (
 	"io/ioutil"
 	"strings"
 
+	. "github.com/c0-ops/goblob/blobstore"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
-	. "github.com/c0-ops/goblob/blobstore"
 
-	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
-	fakeboshnfs "github.com/c0-ops/goblob/nfs/fakes"
+	"github.com/c0-ops/goblob/nfs/fakes"
+	faketar "github.com/c0-ops/goblob/tar/fakes"
 )
 
 var _ = Describe("Blobstore", func() {
 	var (
-		logBuffer     *gbytes.Buffer
-		fakeNfsClient *fakeboshnfs.FakeClient
+		fakeNfsClient *fakes.FakeClient
 		fs            *fakesys.FakeFileSystem
+		fakeRunner    *fakesys.FakeCmdRunner
+		extractor     faketar.FakeCmdExtractor
 		blobstore     Blobstore
 	)
 
 	BeforeEach(func() {
-		fakeNfsClient = fakeboshnfs.NewFakeClient()
+		fakeNfsClient = fakes.NewFakeClient()
+		fakeRunner = fakesys.NewFakeCmdRunner()
 		fs = fakesys.NewFakeFileSystem()
-		logger := boshlog.NewLogger("logger")
-		logBuffer = gbytes.NewBuffer()
+		logger := boshlog.NewLogger(boshlog.LevelNone)
+		extractor = faketar.NewFakeCmdExtractor()
 
-		blobstore = NewBlobstore(fakeNfsClient, fs, nil, logger)
+		blobstore = NewBlobstore(fakeNfsClient, fs, extractor, logger)
 	})
 
 	Describe("Get", func() {
@@ -40,23 +42,18 @@ var _ = Describe("Blobstore", func() {
 
 		It("gets the blob from the blobstore", func() {
 			fakeNfsClient.GetContents = ioutil.NopCloser(strings.NewReader("fake-content"))
-			file, err := fs.TempFile("bosh-init-local-blob")
-			destinationPath := file.Name()
-			err = file.Close()
-			localBlob, err := blobstore.Get(destinationPath, "fake-blob-id")
+
+			localBlob, err := blobstore.Get("fake-destination-path", "fake-blob-id")
 			Expect(err).ToNot(HaveOccurred())
 			defer localBlob.DeleteSilently()
 
-			Expect(fakeNfsClient.GetPath).To(Equal("fake-blob-id"))
+			Expect(fakeNfsClient.GetPath).To(Equal("fake-destination-path"))
 		})
 
 		It("saves the blob to the destination path", func() {
 			fakeNfsClient.GetContents = ioutil.NopCloser(strings.NewReader("fake-content"))
 
-			file, err := fs.TempFile("bosh-init-local-blob")
-			destinationPath := file.Name()
-			err = file.Close()
-			localBlob, err := blobstore.Get(destinationPath, "fake-blob-id")
+			localBlob, err := blobstore.Get("fake-destination-path", "fake-blob-id")
 			Expect(err).ToNot(HaveOccurred())
 			defer func() {
 				err := localBlob.Delete()
@@ -74,7 +71,7 @@ var _ = Describe("Blobstore", func() {
 			It("returns an error", func() {
 				fakeNfsClient.GetErr = errors.New("fake-get-error")
 
-				_, err := blobstore.Get("", "fake-blob-id")
+				_, err := blobstore.Get("path/to/blobstore", "fake-blob-id")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fake-get-error"))
 			})
@@ -84,7 +81,7 @@ var _ = Describe("Blobstore", func() {
 	Describe("Add", func() {
 		BeforeEach(func() {
 			fs.RegisterOpenFile("fake-source-path", &fakesys.FakeFile{
-				Contents: []byte("fake-contents"),
+				Contents: []byte("fake-content"),
 			})
 		})
 
@@ -92,8 +89,8 @@ var _ = Describe("Blobstore", func() {
 
 			err := blobstore.Add("fake-source-path", "fake-blob-id")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(fakeNfsClient.PutPath).To(Equal("fake-blob-id"))
-			Expect(fakeNfsClient.PutContents).To(Equal("fake-contents"))
+			Expect(fakeNfsClient.PutPath).To(Equal("fake-source-path"))
+			Expect(fakeNfsClient.PutContents).To(Equal("fake-content"))
 		})
 	})
 })

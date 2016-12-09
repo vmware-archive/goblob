@@ -14,19 +14,19 @@ import (
 
 type Blobstore interface {
 	Get(blobPath string, blobID string) (LocalBlob, error)
-	Add(blobID string, sourcePath string) (err error)
+	Add(sourcePath string, blobID string) (err error)
 	GetAll(blobPath string) ([]LocalBlob, error)
 }
 
 type blobstore struct {
 	bsClient  nfsclient.Client
 	fs        boshsys.FileSystem
-	extractor tar.CmdExtractor
+	extractor tar.Extractor
 	logger    boshlog.Logger
 	logTag    string
 }
 
-func NewBlobstore(bsClient nfsclient.Client, fs boshsys.FileSystem, extractor tar.CmdExtractor, logger boshlog.Logger) Blobstore {
+func NewBlobstore(bsClient nfsclient.Client, fs boshsys.FileSystem, extractor tar.Extractor, logger boshlog.Logger) Blobstore {
 	return &blobstore{
 		bsClient:  bsClient,
 		fs:        fs,
@@ -99,7 +99,7 @@ func (b *blobstore) Add(sourcePath string, blobID string) error {
 		return bosherr.WrapErrorf(err, "Getting fileInfo from %s", sourcePath)
 	}
 
-	err = b.bsClient.Put(blobID, file, fileInfo.Size())
+	err = b.bsClient.Put(sourcePath, file, fileInfo.Size())
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Putting file '%s' into blobstore (via Client) as blobID '%s'", sourcePath, blobID)
 	}
