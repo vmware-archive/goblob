@@ -12,6 +12,7 @@ import (
 	"github.com/c0-ops/goblob/blobstore"
 	"github.com/c0-ops/goblob/bosh"
 	"github.com/c0-ops/goblob/cc"
+	"github.com/c0-ops/goblob/s3"
 	"github.com/c0-ops/goblob/tar"
 	"github.com/c0-ops/goblob/xfer"
 )
@@ -20,11 +21,11 @@ const mainLogTag = "main"
 
 var (
 	nfsIpAddress = flag.String("host", "localhost", "nfs server ip address")
-	vcapPass = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
-	bpBucket = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
-	drpBucket = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
-	pkgBucket = flag.String("packages", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
-	resBucket = flag.String("resources", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
+	vcapPass     = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
+	bpBucket     = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
+	drpBucket    = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
+	pkgBucket    = flag.String("packages", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
+	resBucket    = flag.String("resources", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
 )
 
 func init() {
@@ -38,6 +39,7 @@ func main() {
 	accessKeyID := "D2Z5WU2UI35D05WXSJGW"
 	secretAccessKey := "Y+4XHK07GQbDqQbkVFIgz2VVi3fapWIGfsdpIL0q"
 	region := "us-east-1"
+	secure := false
 
 	buckets := []string{*bpBucket, *drpBucket, *pkgBucket, *resBucket}
 
@@ -65,10 +67,23 @@ func main() {
 	cloudController.Stop()
 	defer cloudController.Start()
 
-	svc := xfer.NewTransferService(endpoint, accessKeyID, secretAccessKey, region, localBlobstore, logger)
+	s3Client, err := s3.NewClient(
+		s3.Config{
+			Endpoint:        endpoint,
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
+			Region:          region,
+			UseSSL:          secure,
+		}, logger)
+	if err != nil {
+		logger.Error(mainLogTag, "Failed to create s3 client %v", err)
+		os.Exit(1)
+	}
+
+	svc := xfer.NewTransferService(s3Client, localBlobstore, logger)
 
 	if isLocal() {
-		err := svc.Transfer(buckets, "./blobstore/fixtures")
+		err = svc.Transfer(buckets, "./blobstore/fixtures")
 		if err != nil {
 			os.Exit(1)
 		}
@@ -90,7 +105,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	rxfer := xfer.NewRemoteTransferService(svc, endpoint, accessKeyID, secretAccessKey, region, nfsBlobstore, logger)
+	rxfer := xfer.NewRemoteTransferService(svc, s3Client, nfsBlobstore, logger)
 	err = rxfer.Transfer(buckets, "")
 	if err != nil {
 		os.Exit(1)
@@ -104,4 +119,3 @@ func isLocal() bool {
 	}
 	return false
 }
-

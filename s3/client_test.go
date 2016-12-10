@@ -16,29 +16,41 @@ import (
 var _ = Describe("Client", func() {
 	var (
 		mc                           *minio.Client
-		mcErr                        error
 		client                       s3.Client
 		bucketName                   string
-		region                       string
 		accessKeyID, secretAccessKey string
+		region                       string
+		useSSL                       bool
+		config                       s3.Config
 		outBuffer                    *bytes.Buffer
 		errBuffer                    *bytes.Buffer
 		logger                       boshlog.Logger
 	)
 
 	BeforeEach(func() {
+		var err error
 		bucketName = "mybucket"
+		accessKeyID = "42C2AVWWMI1FMKVQ15UF"
+		secretAccessKey = "1SsAO5ScuHS5er/s30PJG9q3Ru8mRUv8b/L4Po7d"
 		region = "us-east-1"
-		accessKeyID = "D2Z5WU2UI35D05WXSJGW"
-		secretAccessKey = "Y+4XHK07GQbDqQbkVFIgz2VVi3fapWIGfsdpIL0q"
+		useSSL = false
 
 		outBuffer = bytes.NewBufferString("")
 		errBuffer = bytes.NewBufferString("")
 		logger = boshlog.NewWriterLogger(boshlog.LevelDebug, outBuffer, errBuffer)
 
-		mc, mcErr = minio.New(fakeS3EndpointURL, accessKeyID, secretAccessKey, false)
-		Expect(mcErr).NotTo(HaveOccurred())
-		client, _ = s3.NewClient(fakeS3EndpointURL, accessKeyID, secretAccessKey, false, logger)
+		mc, err = minio.New(fakeS3EndpointURL, accessKeyID, secretAccessKey, false)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	JustBeforeEach(func() {
+		config = s3.Config{
+			Endpoint:        fakeS3EndpointURL,
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
+			Region:          region,
+			UseSSL:          useSSL,
+		}
 	})
 
 	Describe("CreateBucket", func() {
@@ -47,13 +59,15 @@ var _ = Describe("Client", func() {
 				createErr error
 			)
 
-			BeforeEach(func() {
-				err := mc.MakeBucket(bucketName, region)
+			JustBeforeEach(func() {
+				client, err := s3.NewClient(config, logger)
+				Expect(err).NotTo(HaveOccurred())
+				err = mc.MakeBucket(bucketName, region)
 				if err != nil {
 					_, err := mc.BucketExists(bucketName)
 					Expect(err).NotTo(HaveOccurred())
 				}
-				createErr = client.CreateBucket(bucketName, region)
+				createErr = client.CreateBucket(bucketName)
 			})
 
 			AfterEach(func() {
@@ -78,12 +92,14 @@ var _ = Describe("Client", func() {
 				createErr error
 			)
 
-			BeforeEach(func() {
+			JustBeforeEach(func() {
+				client, err := s3.NewClient(config, logger)
+				Expect(err).NotTo(HaveOccurred())
 				bucketList, err := mc.ListBuckets()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(bucketList).To(HaveLen(0))
 
-				createErr = client.CreateBucket(bucketName, region)
+				createErr = client.CreateBucket(bucketName)
 			})
 
 			AfterEach(func() {
@@ -111,12 +127,17 @@ var _ = Describe("Client", func() {
 
 		Context("when the region does not exist", func() {
 			var (
-				createErr   error
-				bogusRegion = "fake-region"
+				createErr error
 			)
 
 			BeforeEach(func() {
-				createErr = client.CreateBucket(bucketName, bogusRegion)
+				region = "fake-region"
+			})
+
+			JustBeforeEach(func() {
+				client, err := s3.NewClient(config, logger)
+				Expect(err).NotTo(HaveOccurred())
+				createErr = client.CreateBucket(bucketName)
 			})
 
 			It("return an error", func() {
@@ -138,7 +159,19 @@ var _ = Describe("Client", func() {
 			)
 
 			BeforeEach(func() {
-				client, err = s3.NewClient("http://fake-endpoint", "fake-access-id", "fake-secret-key", false, logger)
+				fakeS3EndpointURL = "http://fake-endpoint"
+				accessKeyID = "fake-access-id"
+				secretAccessKey = "fake-secret-key"
+				region = "us-east-1"
+				useSSL = false
+			})
+
+			AfterEach(func() {
+				fakeS3EndpointURL = "127.0.0.1:9000"
+			})
+
+			JustBeforeEach(func() {
+				client, err = s3.NewClient(config, logger)
 			})
 
 			It("returns a nil client and an error", func() {
@@ -159,13 +192,15 @@ var _ = Describe("Client", func() {
 		)
 
 		Context("when the object exists on the file system", func() {
-			BeforeEach(func() {
-				err := mc.MakeBucket(bucketName, region)
+			JustBeforeEach(func() {
+				client, err := s3.NewClient(config, logger)
+				Expect(err).NotTo(HaveOccurred())
+				err = mc.MakeBucket(bucketName, region)
 				if err != nil {
 					_, err := mc.BucketExists(bucketName)
 					Expect(err).NotTo(HaveOccurred())
 				}
-				err = client.CreateBucket(bucketName, region)
+				err = client.CreateBucket(bucketName)
 				Expect(err).NotTo(HaveOccurred())
 
 				objectName = "test"
@@ -204,13 +239,15 @@ var _ = Describe("Client", func() {
 		})
 
 		Context("when the object does not exist on the file system", func() {
-			BeforeEach(func() {
-				err := mc.MakeBucket(bucketName, region)
+			JustBeforeEach(func() {
+				client, err := s3.NewClient(config, logger)
+				Expect(err).NotTo(HaveOccurred())
+				err = mc.MakeBucket(bucketName, region)
 				if err != nil {
 					_, err := mc.BucketExists(bucketName)
 					Expect(err).NotTo(HaveOccurred())
 				}
-				err = client.CreateBucket(bucketName, region)
+				err = client.CreateBucket(bucketName)
 				Expect(err).NotTo(HaveOccurred())
 
 				objectName = ""

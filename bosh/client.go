@@ -60,6 +60,10 @@ type VM struct {
 	IPs     []string `json:"ips"`
 }
 
+type Option struct {
+
+}
+
 func SetBodyReader(r func(io.Reader) ([]byte, error)) {
 	bodyReader = r
 }
@@ -182,7 +186,7 @@ func (c Client) Start(deployment, job string, index int) error {
 }
 
 func (c Client) Stop(deployment, job string, index int) error {
-	request, err := http.NewRequest("PUT", fmt.Sprintf("%s/deployments/%s/jobs/%s/%d?state=stop", c.config.URL, deployment, job, index), bytes.NewBuffer([]byte{}))
+	request, err := http.NewRequest("PUT", fmt.Sprintf("%s/deployments/%s/jobs/%s/%d?state=stop&soft=true", c.config.URL, deployment, job, index), bytes.NewBuffer([]byte{}))
 	if err != nil {
 		return err
 	}
