@@ -20,12 +20,13 @@ import (
 const mainLogTag = "main"
 
 var (
-	nfsIPAddress = flag.String("host", "localhost", "nfs server ip address")
-	vcapPass     = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
-	bpBucket     = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
-	drpBucket    = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
-	pkgBucket    = flag.String("packages", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
-	resBucket    = flag.String("resources", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
+	nfsIPAddress  = flag.String("host", "localhost", "nfs server ip address")
+	vcapPass      = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
+	bpBucket      = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
+	drpBucket     = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
+	pkgBucket     = flag.String("packages", "cc-packages", "S3 bucket for storing app packages. Defaults to cc-packages")
+	resBucket     = flag.String("resources", "cc-resources", "S3 bucket for storing app resources. Defaults to cc-resources")
+	localBlobPath = flag.String("path", "./blobstore/fixtures", "path to local blobstore")
 )
 
 func init() {
@@ -39,6 +40,13 @@ func main() {
 	secretAccessKey := "Y+4XHK07GQbDqQbkVFIgz2VVi3fapWIGfsdpIL0q"
 	region := "us-east-1"
 	secure := false
+
+	// bosh connection info needs to be moved into a config file or passed in as args
+	boshDirectorURL := "some-url"
+	boshDirectorUser := "some-username"
+	boshDirectorPass := "some-password"
+	boshDirectorSecure := false
+	boshDeployment := "some-deployment"
 
 	buckets := []string{*bpBucket, *drpBucket, *pkgBucket, *resBucket}
 
@@ -54,16 +62,16 @@ func main() {
 
 	taskPingFreq := 1000 * time.Millisecond
 	bc := bosh.NewClient(bosh.Config{
-		URL:                 "some-url",
-		Username:            "some-username",
-		Password:            "some-password",
+		URL:                 boshDirectorURL,
+		Username:            boshDirectorUser,
+		Password:            boshDirectorPass,
 		TaskPollingInterval: taskPingFreq,
-		AllowInsecureSSL:    true,
+		AllowInsecureSSL:    !boshDirectorSecure,
 	})
 
-	vms, err := bc.GetVMs("some-deployment")
+	vms, err := bc.GetVMs(boshDeployment)
 
-	cloudController := cc.NewCloudController(bc, "some-deployment", vms)
+	cloudController := cc.NewCloudController(bc, boshDeployment, vms)
 	cloudController.Stop()
 	defer cloudController.Start()
 
@@ -83,7 +91,7 @@ func main() {
 	svc := xfer.NewTransferService(s3Client, localBlobstore, logger)
 
 	if isLocal() {
-		err = svc.Transfer(buckets, "./blobstore/fixtures")
+		err = svc.Transfer(buckets, *localBlobPath)
 		if err != nil {
 			os.Exit(1)
 		}
