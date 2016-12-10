@@ -20,7 +20,7 @@ import (
 const mainLogTag = "main"
 
 var (
-	nfsIpAddress = flag.String("host", "localhost", "nfs server ip address")
+	nfsIPAddress = flag.String("host", "localhost", "nfs server ip address")
 	vcapPass     = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
 	bpBucket     = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")
 	drpBucket    = flag.String("droplets", "cc-droplets", "S3 bucket for storing app droplets. Defaults to cc-droplets")
@@ -33,7 +33,6 @@ func init() {
 }
 
 func main() {
-
 	// s3 connection info needs to be moved into a config file
 	endpoint := "127.0.0.1:9000"
 	accessKeyID := "D2Z5WU2UI35D05WXSJGW"
@@ -52,6 +51,7 @@ func main() {
 		logger.Error(mainLogTag, "Failed to create local blobstore %v", err)
 		os.Exit(1)
 	}
+
 	taskPingFreq := 1000 * time.Millisecond
 	bc := bosh.NewClient(bosh.Config{
 		URL:                 "some-url",
@@ -90,7 +90,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *nfsIpAddress == "" {
+	if *nfsIPAddress == "" {
 		fmt.Println("You must specify the nfs ip address")
 		os.Exit(1)
 	}
@@ -99,7 +99,7 @@ func main() {
 	extractor := tar.NewCmdExtractor(runner, fs, logger)
 	blobstoreFactory := blobstore.NewRemoteBlobstoreFactory(fs, logger)
 
-	nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIpAddress, extractor)
+	nfsBlobstore, err := blobstoreFactory.NewBlobstore("vcap", *vcapPass, *nfsIPAddress, extractor)
 	if err != nil {
 		logger.Error(mainLogTag, "Failed to create nfs blobstore %v", err)
 		os.Exit(1)
