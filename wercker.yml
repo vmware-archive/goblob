@@ -87,7 +87,7 @@ deploy:
           ls -la ${WERCKER_OUTPUT_DIR}
 
     - wercker/add-ssh-key@1.0.2:
-        keyname: PCF_GITHUB_KEY
+        keyname: GITHUB_KEY
 
     - wercker/add-to-known_hosts@1.4.0:
         hostname: github.com
