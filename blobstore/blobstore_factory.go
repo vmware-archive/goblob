@@ -13,6 +13,7 @@ type BlobstoreFactory interface {
 		username string,
 		password string,
 		ip string,
+		sshPort int,
 		extractor tar.Extractor,
 	) (Blobstore, error)
 }
@@ -30,12 +31,13 @@ func NewRemoteBlobstoreFactory(fs boshsys.FileSystem, logger boshlog.Logger) Blo
 }
 
 func (f blobstoreFactory) NewBlobstore(
-	username  string,
-	password  string,
-	ip        string,
+	username string,
+	password string,
+	ip string,
+	sshPort int,
 	extractor tar.Extractor,
 ) (Blobstore, error) {
-	nfsClient, err := nfs.NewNFSClient(username, password, ip, extractor, f.fs, f.logger)
+	nfsClient, err := nfs.NewNFSClient(username, password, ip, sshPort, extractor, f.fs, f.logger)
 	if err != nil {
 		return nil, err
 	}

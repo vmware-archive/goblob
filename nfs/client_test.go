@@ -2,9 +2,10 @@ package nfs_test
 
 import (
 	"fmt"
+
+	. "github.com/c0-ops/goblob/nfs"
 	"github.com/c0-ops/goblob/ssh"
 	"github.com/c0-ops/goblob/ssh/fakes"
-	. "github.com/c0-ops/goblob/nfs"
 	faketar "github.com/c0-ops/goblob/tar/fakes"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
@@ -40,7 +41,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and a valid nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", extractor, fs, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", 2222, extractor, fs, logger)
 				Expect(err).Should(BeNil())
 				Expect(n).ShouldNot(BeNil())
 			})
@@ -63,7 +64,7 @@ var _ = Describe("nfs client", func() {
 			})
 
 			It("should return a nil error and nfs client", func() {
-				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", extractor, fs, logger)
+				n, err := NewNFSClient("vcap", "pass", "0.0.0.0", 2222, extractor, fs, logger)
 				Expect(err).ShouldNot(BeNil())
 				Expect(n).Should(BeNil())
 			})

@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("BlobstoreFactory", func() {
 	var (
-		fs               *fakesys.FakeFileSystem
+		fs *fakesys.FakeFileSystem
 		//runner           *fakesys.FakeCmdRunner
 		extractor        faketar.FakeCmdExtractor
 		logger           boshlog.Logger
@@ -31,9 +31,9 @@ var _ = Describe("BlobstoreFactory", func() {
 
 	Describe("NewNFSBlobstore", func() {
 		PIt("returns the blobstore", func() {
-			blobstore, err := blobstoreFactory.NewBlobstore("fake-user", "fake-password", "fake-ip", extractor)
+			blobstore, err := blobstoreFactory.NewBlobstore("fake-user", "fake-password", "fake-ip", 2222, extractor)
 			Expect(err).ToNot(HaveOccurred())
-			nfsClient, err := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", extractor, fs, logger)
+			nfsClient, err := nfs.NewNFSClient("fake-user", "fake-password", "fake-ip", 2222, extractor, fs, logger)
 			Expect(err).ToNot(HaveOccurred())
 			expectedBlobstore := NewBlobstore(nfsClient, fs, extractor, logger)
 			Expect(blobstore).To(BeEquivalentTo(expectedBlobstore))

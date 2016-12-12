@@ -31,12 +31,12 @@ type nfsClient struct {
 //pass this into New so it doesn't need to be exported
 var SshCmdExecutor = ssh.NewRemoteExecutor
 
-func NewNFSClient(username string, password string, ip string, extractor tar.Extractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
+func NewNFSClient(username string, password string, ip string, sshPort int, extractor tar.Extractor, fs boshsys.FileSystem, logger boshlog.Logger) (*nfsClient, error) {
 	config := ssh.SshConfig{
 		Username: username,
 		Password: password,
 		Host:     ip,
-		Port:     22,
+		Port:     sshPort,
 	}
 	executor, err := SshCmdExecutor(config)
 	if err != nil {

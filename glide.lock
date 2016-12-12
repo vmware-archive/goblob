@@ -1,5 +1,5 @@
-hash: 65da6e54bbac9b7daf324a25921701615b49828472ebd8395ed5eac65451d655
-updated: 2016-12-12T08:42:55.632055532-07:00
+hash: b677a690b0e4d45e0812fcd715450a81a29dafbe40119eea853cc5b117c50f85
+updated: 2016-12-12T11:46:16.902557772-07:00
 imports:
 - name: github.com/bmatcuk/doublestar
   version: dd6a6f0a8cdfaaa88b08cf26cf1bc7d69003ee13
@@ -47,6 +47,8 @@ imports:
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
+- name: github.com/urfave/cli
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/xchapter7x/lo
   version: e33b245fc7a8186582208abc2458c2691bff681c
 - name: golang.org/x/crypto
