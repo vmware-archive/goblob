@@ -1,0 +1,33 @@
+package: github.com/c0-ops/goblob
+import:
+- package: github.com/cloudfoundry/bosh-utils
+  subpackages:
+  - logger
+  - blobstore
+  - crypto
+  - errors
+  - logger
+  - system
+  - uuid
+  - vendor/github.com/bmatcuk/doublestar
+  - vendor/github.com/charlievieth/fs
+  - vendor/github.com/nu7hatch/gouuid
+- package: github.com/cheggaaa/pb
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
+  - ptypes/any
+- package: github.com/mattn/go-runewidth
+- package: github.com/minio/minio
+- package: github.com/minio/minio-go
+- package: github.com/onsi/ginkgo
+- package: github.com/onsi/gomega
+- package: golang.org/x/sys
+  subpackages:
+  - unix
+- package: gopkg.in/yaml.v2
+- package: github.com/pkg/sftp
+- package: github.com/xchapter7x/lo
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh

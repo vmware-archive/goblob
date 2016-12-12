@@ -18,6 +18,8 @@ package cmd
 
 import (
 	"crypto/x509"
+	"os"
+	"strings"
 	"time"
 
 	humanize "github.com/dustin/go-humanize"
@@ -61,8 +63,14 @@ var (
 
 	globalIsDistXL = false // "Is Distributed?" flag.
 
-	// Maximum cache size.
-	globalMaxCacheSize = uint64(maxCacheSize)
+	// This flag is set to 'true' by default, it is set to `false`
+	// when MINIO_BROWSER env is set to 'off'.
+	globalIsBrowserEnabled = !strings.EqualFold(os.Getenv("MINIO_BROWSER"), "off")
+
+	// Maximum cache size. Defaults to disabled.
+	// Caching is enabled only for RAM size > 8GiB.
+	globalMaxCacheSize = uint64(0)
+
 	// Cache expiry.
 	globalCacheExpiry = objcache.DefaultExpiry
 	// Minio local server address (in `host:port` format)

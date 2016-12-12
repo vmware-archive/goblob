@@ -2,6 +2,7 @@ package s3_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 
@@ -15,37 +16,42 @@ import (
 
 var _ = Describe("Client", func() {
 	var (
-		mc                           *minio.Client
-		client                       s3.Client
-		bucketName                   string
-		accessKeyID, secretAccessKey string
-		region                       string
-		useSSL                       bool
-		config                       s3.Config
-		outBuffer                    *bytes.Buffer
-		errBuffer                    *bytes.Buffer
-		logger                       boshlog.Logger
+		mc                                       *minio.Client
+		bucketName                               string
+		accessKeyID, secretAccessKey, s3Endpoint string
+		region                                   string
+		useSSL                                   bool
+		config                                   s3.Config
+		outBuffer                                *bytes.Buffer
+		errBuffer                                *bytes.Buffer
+		logger                                   boshlog.Logger
 	)
 
 	BeforeEach(func() {
 		var err error
 		bucketName = "mybucket"
-		accessKeyID = "42C2AVWWMI1FMKVQ15UF"
-		secretAccessKey = "1SsAO5ScuHS5er/s30PJG9q3Ru8mRUv8b/L4Po7d"
+		accessKeyID = "AKIAIOSFODNN7EXAMPLE"
+		secretAccessKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 		region = "us-east-1"
 		useSSL = false
+
+		if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
+			s3Endpoint = "127.0.0.1:9000"
+		} else {
+			s3Endpoint = fmt.Sprintf("%s:9000", os.Getenv("MINIO_PORT_9000_TCP_ADDR"))
+		}
 
 		outBuffer = bytes.NewBufferString("")
 		errBuffer = bytes.NewBufferString("")
 		logger = boshlog.NewWriterLogger(boshlog.LevelDebug, outBuffer, errBuffer)
 
-		mc, err = minio.New(fakeS3EndpointURL, accessKeyID, secretAccessKey, false)
+		mc, err = minio.New(s3Endpoint, accessKeyID, secretAccessKey, false)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	JustBeforeEach(func() {
 		config = s3.Config{
-			Endpoint:        fakeS3EndpointURL,
+			Endpoint:        s3Endpoint,
 			AccessKeyID:     accessKeyID,
 			SecretAccessKey: secretAccessKey,
 			Region:          region,
@@ -97,7 +103,7 @@ var _ = Describe("Client", func() {
 				Expect(err).NotTo(HaveOccurred())
 				bucketList, err := mc.ListBuckets()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(bucketList).To(HaveLen(0))
+				Expect(bucketList).To(HaveLen(1))
 
 				createErr = client.CreateBucket(bucketName)
 			})
@@ -120,8 +126,8 @@ var _ = Describe("Client", func() {
 			It("creates the bucket", func() {
 				bucketList, err := mc.ListBuckets()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(bucketList).To(HaveLen(1))
-				Expect(bucketList[0].Name).To(Equal(bucketName))
+				Expect(bucketList).To(HaveLen(2))
+				Expect(bucketList[1].Name).To(Equal(bucketName))
 			})
 		})
 
@@ -150,33 +156,6 @@ var _ = Describe("Client", func() {
 
 				errorLogString := errBuffer.String()
 				Expect(errorLogString).To(ContainSubstring("Failed to create bucket"))
-			})
-		})
-
-		Context("when passed invalid parameters", func() {
-			var (
-				err error
-			)
-
-			BeforeEach(func() {
-				fakeS3EndpointURL = "http://fake-endpoint"
-				accessKeyID = "fake-access-id"
-				secretAccessKey = "fake-secret-key"
-				region = "us-east-1"
-				useSSL = false
-			})
-
-			AfterEach(func() {
-				fakeS3EndpointURL = "127.0.0.1:9000"
-			})
-
-			JustBeforeEach(func() {
-				client, err = s3.NewClient(config, logger)
-			})
-
-			It("returns a nil client and an error", func() {
-				Expect(client).To(BeNil())
-				Expect(err).To(HaveOccurred())
 			})
 		})
 	})

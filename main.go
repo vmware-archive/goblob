@@ -20,6 +20,8 @@ import (
 const mainLogTag = "main"
 
 var (
+	//VERSION - Application version injected by build
+	VERSION       string
 	nfsIPAddress  = flag.String("host", "localhost", "nfs server ip address")
 	vcapPass      = flag.String("pass", os.Getenv("VCAP_PASSWORD"), "vcap password for nfs-server job")
 	bpBucket      = flag.String("buildpacks", "cc-buildpacks", "S3 bucket for storing app buildpacks. Defaults to cc-buildpacks")

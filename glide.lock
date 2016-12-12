@@ -1,0 +1,65 @@
+hash: 65da6e54bbac9b7daf324a25921701615b49828472ebd8395ed5eac65451d655
+updated: 2016-12-12T08:42:55.632055532-07:00
+imports:
+- name: github.com/bmatcuk/doublestar
+  version: dd6a6f0a8cdfaaa88b08cf26cf1bc7d69003ee13
+- name: github.com/charlievieth/fs
+  version: 0551949e78554adf0c59760e2442c4ec2324ca56
+- name: github.com/cheggaaa/pb
+  version: d7e6ca3010b6f084d8056847f55d7f572f180678
+- name: github.com/cloudfoundry/bosh-utils
+  version: c4ba13859f0ddee3705aba7675b6338e3591dc76
+  subpackages:
+  - logger
+  - blobstore
+  - crypto
+  - errors
+  - logger
+  - system
+  - uuid
+  - vendor/github.com/bmatcuk/doublestar
+  - vendor/github.com/charlievieth/fs
+  - vendor/github.com/nu7hatch/gouuid
+- name: github.com/golang/protobuf
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  subpackages:
+  - proto
+  - ptypes/any
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/mattn/go-runewidth
+  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
+- name: github.com/minio/minio
+  version: 2d6f8153fabdb67c7823436593958ddd035dc08b
+- name: github.com/minio/minio-go
+  version: f69b61d54436a020de6da2d7ab093d3bc7fb064c
+  subpackages:
+  - pkg/policy
+  - pkg/s3signer
+  - pkg/set
+- name: github.com/onsi/ginkgo
+  version: 00054c0bb96fc880d4e0be1b90937fad438c5290
+- name: github.com/onsi/gomega
+  version: f1f0f388b31eca4e2cbe7a6dd8a3a1dfddda5b1c
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
+- name: github.com/pkg/errors
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+- name: github.com/pkg/sftp
+  version: 4d0e916071f68db74f8a73926335f809396d6b42
+- name: github.com/xchapter7x/lo
+  version: e33b245fc7a8186582208abc2458c2691bff681c
+- name: golang.org/x/crypto
+  version: b07d8c96772f426812d3fc5530710ec1f3b205e7
+  subpackages:
+  - ssh
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+- name: golang.org/x/sys
+  version: 478fcf54317e52ab69f40bb4c7a1520288d7f7ea
+  subpackages:
+  - unix
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+devImports: []
