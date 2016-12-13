@@ -23,5 +23,12 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return errors.New("the source store has no files")
 	}
 
+	for _, file := range files {
+		_, err := src.Read(file)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
