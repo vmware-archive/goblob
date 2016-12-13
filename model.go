@@ -3,18 +3,21 @@ package goblob
 import "io"
 
 // CloudFoundry is a Cloud Foundry deployment
+//go:generate counterfeiter -o ./mock/fakecloudfoundry.go . CloudFoundry
 type CloudFoundry interface {
 	Identifier() string
 	EnableBits() error
 	DisableBits() error
 	Reconfigure(dst Store) error
+	Store() (Store, error)
 }
 
 // Store lists, reads, and writes blobs
+//go:generate counterfeiter -o ./mock/fakestore.go . Store
 type Store interface {
 	List() ([]Blob, error)
 	Read(src Blob) (io.Reader, error)
-	Write(dst Blob, src io.Writer) error
+	Write(dst Blob, src io.Reader) error
 }
 
 // Blob is a file in a blob store

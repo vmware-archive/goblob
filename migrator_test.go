@@ -1,8 +1,8 @@
 package goblob_test
 
 import (
+	"bytes"
 	"errors"
-	"io"
 
 	. "github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/mock"
@@ -12,66 +12,122 @@ import (
 )
 
 var _ = Describe("Migrator", func() {
-	Describe("When the source store has no files", func() {
-		Describe("Migrate(dst, src)", func() {
-			var m *CloudFoundryMigrator
-			var src *mock.CloudFoundry
-			var dst *mock.S3
+	var m *CloudFoundryMigrator
+	var cf *mock.FakeCloudFoundry
+	var dstStore *mock.FakeStore
+	var srcStore *mock.FakeStore
 
-			BeforeEach(func() {
-				m = &CloudFoundryMigrator{}
-				src = &mock.CloudFoundry{}
-				dst = &mock.S3{}
+	BeforeEach(func() {
+		m = &CloudFoundryMigrator{}
+		cf = &mock.FakeCloudFoundry{}
+		dstStore = &mock.FakeStore{}
+		srcStore = &mock.FakeStore{}
+	})
+	Describe("When the source store has no files", func() {
+		Describe("Migrate(store, cf)", func() {
+			It("Should return an error if the cloud foundry is empty", func() {
+				var emptyStore = errors.New("cloud foundry is empty")
+				err := m.Migrate(dstStore, nil)
+				Ω(err).Should(Equal(emptyStore))
+			})
+
+			It("Should return an error if the cloud foundry store errors", func() {
+				var theErr = errors.New("error retrieving store")
+				cf.StoreReturns(nil, theErr)
+				err := m.Migrate(dstStore, cf)
+				Ω(err).Should(Equal(theErr))
 			})
 
 			It("Should return an error if the destination store is nil", func() {
 				var emptyStore = errors.New("src is an empty store")
-				err := m.Migrate(dst, nil)
+				err := m.Migrate(dstStore, cf)
 				Ω(err).Should(Equal(emptyStore))
 			})
 
 			It("Should return an error if the destination store is nil", func() {
 				var emptyStore = errors.New("dst is an empty store")
-				err := m.Migrate(nil, src)
+				cf.StoreReturns(srcStore, nil)
+				err := m.Migrate(nil, cf)
 				Ω(err).Should(Equal(emptyStore))
 			})
 
 			It("Should return an error if the source store has no files", func() {
 				var emptyStore = errors.New("the source store has no files")
-				src.ListFn = func() ([]Blob, error) {
-					return nil, nil
-				}
-				err := m.Migrate(dst, src)
+				cf.StoreReturns(srcStore, nil)
+				srcStore.ListReturns(nil, nil)
+				err := m.Migrate(dstStore, cf)
 				Ω(err).Should(Equal(emptyStore))
+				Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			})
 
 			It("Should error if the source store errors on List", func() {
 				var testErr = errors.New("test")
-				src.ListFn = func() ([]Blob, error) {
-					return nil, testErr
-				}
-				err := m.Migrate(dst, src)
+				cf.StoreReturns(srcStore, nil)
+				srcStore.ListReturns(nil, testErr)
+				err := m.Migrate(dstStore, cf)
 				Ω(err).Should(Equal(testErr))
+				Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			})
+		})
 
-			It("Should retrive a file if the source store has one", func() {
-				src.ListFn = func() ([]Blob, error) {
-					var files []Blob
-					files = append(files, Blob{
+		Describe("When the source store has files", func() {
+			Describe("Migrate(store, cf)", func() {
+				It("Should retrieve a file if the source store has one", func() {
+					cf.StoreReturns(srcStore, nil)
+					srcStore.ListReturns([]Blob{Blob{
 						Filename: "test",
 						Checksum: "123456789",
 						Path:     "root/src/file",
-					})
-					return files, nil
-				}
-				called := false
-				src.ReadFn = func(src Blob) (io.Reader, error) {
-					called = true
-					return nil, nil
-				}
-				err := m.Migrate(dst, src)
-				Ω(err).Should(BeNil())
-				Ω(called).Should(BeTrue())
+					}}, nil)
+					srcStore.ReadReturns(nil, nil)
+
+					err := m.Migrate(dstStore, cf)
+					Ω(err).Should(BeNil())
+					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
+				})
+
+				It("Should return an error reading file", func() {
+					cf.StoreReturns(srcStore, nil)
+					srcStore.ListReturns([]Blob{Blob{
+						Filename: "test",
+						Checksum: "123456789",
+						Path:     "root/src/file",
+					}}, nil)
+					readFileError := errors.New("error reading file")
+					srcStore.ReadReturns(nil, readFileError)
+					err := m.Migrate(dstStore, cf)
+					Ω(err).Should(BeEquivalentTo(readFileError))
+					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
+					Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(0))
+				})
+
+				It("Should call destination write", func() {
+					cf.StoreReturns(srcStore, nil)
+					srcStore.ListReturns([]Blob{Blob{
+						Filename: "aabbfile",
+						Checksum: "123456789",
+						Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+					}}, nil)
+					reader := bytes.NewReader([]byte("hello"))
+					srcStore.ReadReturns(reader, nil)
+					dstStore.WriteReturns(nil)
+
+					err := m.Migrate(dstStore, cf)
+					Ω(err).Should(BeNil())
+					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
+					Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
+					writeBlob, writeReader := dstStore.WriteArgsForCall(0)
+					Ω(writeBlob).ShouldNot(BeNil())
+					/*Ω(writeBlob).To(Equal(Blob{
+						Filename: "aabbfile",
+						Checksum: "12345689",
+						Path:     "/cc-bucket/aa/bb",
+					}))*/
+					Ω(writeReader).To(Equal(reader))
+				})
 			})
 		})
 	})
