@@ -1,4 +1,4 @@
-package cc_test
+package goblob_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCc(t *testing.T) {
+func TestGoblob(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cc Suite")
+	RunSpecs(t, "Goblob Suite")
 }
