@@ -15,7 +15,7 @@ import (
 
 //Taken from cfops
 
-var DefaultPacketSize int = 1<<15
+var DefaultPacketSize int = 1 << 15
 
 //SshConfig - for the SSH connection
 type SshConfig struct {
@@ -56,7 +56,7 @@ type DefaultRemoteExecutor struct {
 	Client         ClientInterface
 	LazyClientDial func()
 	once           sync.Once
-	sshclient *ssh.Client
+	sshclient      *ssh.Client
 }
 
 //SshClientWrapper - of ssh client to match client interface signature, since client.NewSession() does not use an interface

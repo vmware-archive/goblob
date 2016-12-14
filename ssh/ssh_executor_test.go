@@ -8,9 +8,9 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	. "github.com/c0-ops/goblob/ssh"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/c0-ops/goblob/ssh"
 )
 
 type mockClient struct {
