@@ -16,7 +16,7 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
-var _ = Describe("NFS", func() {
+var _ = Describe("NFSStore", func() {
 	var remoteNFS goblob.Store
 	var fakeExecutor *fakes.FakeExecutor
 	var pwd, _ = os.Getwd()
@@ -28,7 +28,7 @@ var _ = Describe("NFS", func() {
 		os.MkdirAll(tmpPath, 0700)
 		controlOutputDir, _ = ioutil.TempDir(tmpPath, "blobs")
 		fakeExecutor = &fakes.FakeExecutor{}
-		remoteNFS = NewNFS(fakeExecutor, controlOutputDir)
+		remoteNFS = NewNFSStore(fakeExecutor, controlOutputDir)
 	})
 	AfterEach(func() {
 		lo.G.Debug("removing: ", controlOutputDir)
