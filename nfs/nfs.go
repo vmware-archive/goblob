@@ -1,4 +1,4 @@
-package goblob
+package nfs
 
 import (
 	"errors"
@@ -8,30 +8,31 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/ssh"
 )
 
-type RemoteNFS struct {
+type NFS struct {
 	executor ssh.Executor
 	tempDir  string
-	blobs    []Blob
+	blobs    []goblob.Blob
 }
 
-func NewRemoteNFS(executor ssh.Executor, tempDir string) Store {
-	return &RemoteNFS{
+func NewNFS(executor ssh.Executor, tempDir string) goblob.Store {
+	return &NFS{
 		executor: executor,
 		tempDir:  tempDir,
 	}
 }
 
-func (r *RemoteNFS) List() ([]Blob, error) {
+func (r *NFS) List() ([]goblob.Blob, error) {
 	cmd := "cd /var/vcap/store/shared && tar -cz ."
 
 	reader, err := r.executor.ExecuteForRead(cmd)
 	if err != nil {
 		return nil, err
 	} else {
-		err = ExtractTar(reader, r.tempDir)
+		err = goblob.ExtractTar(reader, r.tempDir)
 		if err != nil {
 			return nil, err
 		}
@@ -42,14 +43,14 @@ func (r *RemoteNFS) List() ([]Blob, error) {
 	}
 }
 
-func (r *RemoteNFS) walk(path string, info os.FileInfo, e error) error {
+func (r *NFS) walk(path string, info os.FileInfo, e error) error {
 	if !info.IsDir() {
 		filePath := strings.Replace(path, "/"+info.Name(), "", -1)
-		checksum, checksumErr := MD5(path)
+		checksum, checksumErr := goblob.MD5(path)
 		if (checksumErr) != nil {
 			return checksumErr
 		}
-		r.blobs = append(r.blobs, Blob{
+		r.blobs = append(r.blobs, goblob.Blob{
 			Filename: info.Name(),
 			Path:     filePath,
 			Checksum: checksum,
@@ -59,9 +60,9 @@ func (r *RemoteNFS) walk(path string, info os.FileInfo, e error) error {
 	return e
 }
 
-func (r *RemoteNFS) Read(src Blob) (io.Reader, error) {
+func (r *NFS) Read(src goblob.Blob) (io.Reader, error) {
 	return os.Open(path.Join(src.Path, src.Filename))
 }
-func (r *RemoteNFS) Write(dst Blob, src io.Reader) error {
+func (r *NFS) Write(dst goblob.Blob, src io.Reader) error {
 	return errors.New("not implemented")
 }

@@ -1,4 +1,4 @@
-package goblob_test
+package nfs_test
 
 import (
 	"errors"
@@ -6,17 +6,18 @@ import (
 	"os"
 	"path"
 
-	. "github.com/c0-ops/goblob"
+	. "github.com/c0-ops/goblob/nfs"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/ssh/fakes"
 	"github.com/xchapter7x/lo"
 )
 
-var _ = Describe("RemoteNFS", func() {
-	var remoteNFS Store
+var _ = Describe("NFS", func() {
+	var remoteNFS goblob.Store
 	var fakeExecutor *fakes.FakeExecutor
 	var pwd, _ = os.Getwd()
 	var tmpDirName = "temp"
@@ -27,7 +28,7 @@ var _ = Describe("RemoteNFS", func() {
 		os.MkdirAll(tmpPath, 0700)
 		controlOutputDir, _ = ioutil.TempDir(tmpPath, "blobs")
 		fakeExecutor = &fakes.FakeExecutor{}
-		remoteNFS = NewRemoteNFS(fakeExecutor, controlOutputDir)
+		remoteNFS = NewNFS(fakeExecutor, controlOutputDir)
 	})
 	AfterEach(func() {
 		lo.G.Debug("removing: ", controlOutputDir)
@@ -63,7 +64,7 @@ var _ = Describe("RemoteNFS", func() {
 	Describe("Write()", func() {
 		It("Should return an error", func() {
 			err := errors.New("not implemented")
-			Ω(remoteNFS.Write(Blob{}, nil)).Should(BeEquivalentTo(err))
+			Ω(remoteNFS.Write(goblob.Blob{}, nil)).Should(BeEquivalentTo(err))
 		})
 	})
 })
