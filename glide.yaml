@@ -18,8 +18,6 @@ import:
   - proto
   - ptypes/any
 - package: github.com/mattn/go-runewidth
-- package: github.com/minio/minio
-- package: github.com/minio/minio-go
 - package: github.com/onsi/ginkgo
 - package: github.com/onsi/gomega
 - package: golang.org/x/sys
@@ -32,3 +30,6 @@ import:
   subpackages:
   - ssh
 - package: github.com/urfave/cli
+- package: github.com/aws/aws-sdk-go
+  subpackages:
+  - service/s3
