@@ -42,6 +42,7 @@ func (s *Store) Write(dst goblob.Blob, src io.Reader) error {
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(path),
 	})
+	//need to validate checksum?
 	return err
 }
 

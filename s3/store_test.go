@@ -82,6 +82,7 @@ var _ = Describe("S3Store", func() {
 			writeErr := store.Write(goblob.Blob{
 				Path:     controlBucket + "/aa/bb",
 				Filename: "test.txt",
+				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 			}, reader)
 			Ω(writeErr).ShouldNot(HaveOccurred())
 		})
