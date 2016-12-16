@@ -27,3 +27,4 @@ _testmain.go
 /goblob
 vendor
 .wercker
+.DS_Store
