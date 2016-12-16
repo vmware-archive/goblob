@@ -1,89 +1,70 @@
-hash: f0efa9dd2c84f86abdcfd8a1d2231c96a38e644f51f91abd3121f1c6d3f441c9
-updated: 2016-12-15T17:47:38.942122056-07:00
+hash: da70012dd0fc97b045e72d1d0a9ed71ad91c3288a20850b2db43dcf1c9900cd6
+updated: 2016-12-16T16:41:48.228169157-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 7b90d889699f15aa1121a9087c00b52471c676fc
+  version: 0df2a7ae7e82d2643e4a8fed1b2e36a1cf0580bc
   subpackages:
-  - service/s3
   - aws
-  - aws/session
-  - service/s3/s3manager
   - aws/awserr
-  - aws/credentials
-  - aws/endpoints
-  - aws/client
-  - aws/corehandlers
-  - aws/credentials/stscreds
-  - aws/defaults
-  - aws/request
   - aws/awsutil
+  - aws/client
   - aws/client/metadata
-  - aws/signer/v4
-  - private/protocol
-  - private/protocol/restxml
-  - private/waiter
-  - service/s3/s3iface
-  - service/sts
+  - aws/corehandlers
+  - aws/credentials
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
   - aws/ec2metadata
-  - private/protocol/rest
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - private/protocol
   - private/protocol/query
-  - private/protocol/xml/xmlutil
   - private/protocol/query/queryutil
-- name: github.com/cheggaaa/pb
-  version: d7e6ca3010b6f084d8056847f55d7f572f180678
-- name: github.com/cloudfoundry/bosh-utils
-  version: a2e8d06c06cf212117b2864bcc8e73c63198dda9
-  subpackages:
-  - logger
-  - blobstore
-  - crypto
-  - errors
-  - logger
-  - system
-  - uuid
-  - vendor/github.com/bmatcuk/doublestar
-  - vendor/github.com/charlievieth/fs
-  - vendor/github.com/nu7hatch/gouuid
+  - private/protocol/rest
+  - private/protocol/restxml
+  - private/protocol/xml/xmlutil
+  - private/waiter
+  - service/s3
+  - service/s3/s3iface
+  - service/s3/s3manager
+  - service/sts
 - name: github.com/go-ini/ini
   version: 2ba15ac2dc9cdf88c110ec2dc0ced7fa45f5678c
-- name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
-  subpackages:
-  - proto
-  - ptypes/any
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
-- name: github.com/kr/fs
-  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
-- name: github.com/mattn/go-runewidth
-  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
-- name: github.com/onsi/ginkgo
-  version: 00054c0bb96fc880d4e0be1b90937fad438c5290
-- name: github.com/onsi/gomega
-  version: f1f0f388b31eca4e2cbe7a6dd8a3a1dfddda5b1c
-- name: github.com/op/go-logging
-  version: 970db520ece77730c7e4724c61121037378659d9
-- name: github.com/pkg/errors
-  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
-- name: github.com/pkg/sftp
-  version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/urfave/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
-- name: github.com/xchapter7x/lo
-  version: e33b245fc7a8186582208abc2458c2691bff681c
-- name: golang.org/x/crypto
-  version: 01be46f62051d02cb6a36c9b47b37b24e5758c81
+testImports:
+- name: github.com/onsi/ginkgo
+  version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
   subpackages:
-  - ssh
-  - curve25519
-  - ed25519
-  - ed25519/internal/edwards25519
-- name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  - config
+  - internal/codelocation
+  - internal/containernode
+  - internal/failer
+  - internal/leafnodes
+  - internal/remote
+  - internal/spec
+  - internal/specrunner
+  - internal/suite
+  - internal/testingtproxy
+  - internal/writer
+  - reporters
+  - reporters/stenographer
+  - types
+- name: github.com/onsi/gomega
+  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
   subpackages:
-  - unix
-- name: gopkg.in/yaml.v2
-  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
-devImports: []
+  - format
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/testingtsupport
+  - matchers
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
+  - types

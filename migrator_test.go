@@ -23,6 +23,7 @@ var _ = Describe("Migrator", func() {
 		dstStore = &mock.FakeStore{}
 		srcStore = &mock.FakeStore{}
 	})
+
 	Describe("When the source store has no files", func() {
 		Describe("Migrate(store, cf)", func() {
 			It("Should return an error if the cloud foundry is empty", func() {
@@ -69,66 +70,68 @@ var _ = Describe("Migrator", func() {
 				Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			})
 		})
+	})
 
-		Describe("When the source store has files", func() {
-			Describe("Migrate(store, cf)", func() {
-				It("Should retrieve a file if the source store has one", func() {
-					cf.StoreReturns(srcStore, nil)
-					srcStore.ListReturns([]Blob{Blob{
-						Filename: "test",
-						Checksum: "123456789",
-						Path:     "root/src/file",
-					}}, nil)
-					srcStore.ReadReturns(nil, nil)
+	Describe("When the source store has files", func() {
+		It("Should retrieve a file if the source store has one", func() {
+			cf.StoreReturns(srcStore, nil)
+			srcStore.ListReturns([]Blob{Blob{
+				Filename: "test",
+				Checksum: "123456789",
+				Path:     "root/src/file",
+			}}, nil)
+			srcStore.ReadReturns(nil, nil)
 
-					err := m.Migrate(dstStore, cf)
-					Ω(err).Should(BeNil())
-					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
-					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
-				})
-
-				It("Should return an error reading file", func() {
-					cf.StoreReturns(srcStore, nil)
-					srcStore.ListReturns([]Blob{Blob{
-						Filename: "test",
-						Checksum: "123456789",
-						Path:     "root/src/file",
-					}}, nil)
-					readFileError := errors.New("error reading file")
-					srcStore.ReadReturns(nil, readFileError)
-					err := m.Migrate(dstStore, cf)
-					Ω(err).Should(BeEquivalentTo(readFileError))
-					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
-					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
-					Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(0))
-				})
-
-				It("Should call destination write", func() {
-					cf.StoreReturns(srcStore, nil)
-					srcStore.ListReturns([]Blob{Blob{
-						Filename: "aabbfile",
-						Checksum: "123456789",
-						Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
-					}}, nil)
-					reader := bytes.NewReader([]byte("hello"))
-					srcStore.ReadReturns(reader, nil)
-					dstStore.WriteReturns(nil)
-
-					err := m.Migrate(dstStore, cf)
-					Ω(err).Should(BeNil())
-					Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
-					Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
-					Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
-					writeBlob, writeReader := dstStore.WriteArgsForCall(0)
-					Ω(writeBlob).ShouldNot(BeNil())
-					/*Ω(writeBlob).To(Equal(Blob{
-						Filename: "aabbfile",
-						Checksum: "12345689",
-						Path:     "/cc-bucket/aa/bb",
-					}))*/
-					Ω(writeReader).To(Equal(reader))
-				})
-			})
+			err := m.Migrate(dstStore, cf)
+			Ω(err).Should(BeNil())
+			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
 		})
+
+		It("Should call destination write", func() {
+			cf.StoreReturns(srcStore, nil)
+			srcStore.ListReturns([]Blob{Blob{
+				Filename: "aabbfile",
+				Checksum: "123456789",
+				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+			}}, nil)
+			reader := bytes.NewReader([]byte("hello"))
+			srcStore.ReadReturns(reader, nil)
+			dstStore.WriteReturns(nil)
+
+			err := m.Migrate(dstStore, cf)
+			Ω(err).Should(BeNil())
+			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
+			Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
+			writeBlob, writeReader := dstStore.WriteArgsForCall(0)
+			Ω(writeBlob).ShouldNot(BeNil())
+			Ω(writeReader).To(Equal(reader))
+		})
+
+		// It("Should return an error when there is a checksum mismatch", func() {
+		// 	cf.StoreReturns(srcStore, nil)
+		// 	cf.IdentifierReturns("0987654321")
+		// 	srcStore.ListReturns([]Blob{Blob{
+		// 		Filename: "aabbfile",
+		// 		Checksum: "1234567890",
+		// 		Path:     "cc-buildpacks/aa/bb",
+		// 	}}, nil)
+		// 	reader := bytes.NewReader([]byte("hello"))
+		// 	srcStore.ReadReturns(reader, nil)
+		// 	dstStore.WriteReturns(nil)
+		//
+		// 	err := m.Migrate(dstStore, cf)
+		// 	Ω(err).ShouldNot(BeNil())
+		// 	Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+		// 	Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
+		// 	Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
+		// 	writeBlob, writeReader := dstStore.WriteArgsForCall(0)
+		// 	Ω(writeBlob).ShouldNot(BeNil())
+		// 	Ω(writeBlob.Filename).Should(BeEquivalentTo("aabbfile"))
+		// 	Ω(writeBlob.Checksum).Should(BeEquivalentTo("1234567890"))
+		// 	Ω(writeBlob.Path).Should(BeEquivalentTo("cc-buildpacks-0987654321/aa/bb"))
+		// 	Ω(writeReader).To(Equal(reader))
+		// })
 	})
 })

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/c0-ops/goblob"
+	"github.com/c0-ops/goblob/validation"
 )
 
 // Store is an NFS blob store
@@ -28,7 +29,7 @@ func (s *Store) List() ([]goblob.Blob, error) {
 	walk := func(path string, info os.FileInfo, e error) error {
 		if !info.IsDir() {
 			filePath := path[len(s.path)-1 : len(path)-len(info.Name())-1]
-			checksum, err := goblob.MD5(path)
+			checksum, err := validation.Checksum(path)
 			if (err) != nil {
 				return err
 			}
