@@ -30,29 +30,42 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return errors.New("the source store has no files")
 	}
 
+	migratedBlobs, err := dst.List()
+	if err != nil {
+		return err
+	}
 	for _, blob := range blobs {
-		reader, err := src.Read(blob)
-		if err != nil {
-			return err
+		if !m.alreadyMigrated(migratedBlobs, blob) {
+			reader, err := src.Read(blob)
+			if err != nil {
+				return err
+			}
+			err = dst.Write(blob, reader)
+			if err != nil {
+				return err
+			}
+			reader, err = dst.Read(blob)
+			if err != nil {
+				return err
+			}
+			checksum, err := validation.ChecksumReader(reader)
+			if err != nil {
+				return err
+			}
+			if checksum != blob.Checksum {
+				return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
+			}
 		}
-		err = dst.Write(blob, reader)
-		if err != nil {
-			return err
-		}
-		reader, err = dst.Read(blob)
-		if err != nil {
-			return err
-		}
-		checksum, err := validation.ChecksumReader(reader)
-		if err != nil {
-			return err
-		}
-		if checksum != blob.Checksum {
-			return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
-		}
-		return nil
-
 	}
 
 	return nil
+}
+
+func (m *CloudFoundryMigrator) alreadyMigrated(migratedBlobs []Blob, blob Blob) bool {
+	for _, migratedBlob := range migratedBlobs {
+		if migratedBlob.Equal(blob) {
+			return true
+		}
+	}
+	return false
 }
