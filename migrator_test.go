@@ -26,29 +26,16 @@ var _ = Describe("Migrator", func() {
 
 	Describe("When the source store has no files", func() {
 		Describe("Migrate(store, cf)", func() {
-			It("Should return an error if the cloud foundry is empty", func() {
-				var emptyStore = errors.New("cloud foundry is empty")
-				err := m.Migrate(dstStore, nil)
-				Ω(err).Should(Equal(emptyStore))
-			})
-
-			It("Should return an error if the cloud foundry store errors", func() {
-				var theErr = errors.New("error retrieving store")
-				cf.StoreReturns(nil, theErr)
-				err := m.Migrate(dstStore, cf)
-				Ω(err).Should(Equal(theErr))
-			})
 
 			It("Should return an error if the destination store is nil", func() {
 				var emptyStore = errors.New("src is an empty store")
-				err := m.Migrate(dstStore, cf)
+				err := m.Migrate(dstStore, nil)
 				Ω(err).Should(Equal(emptyStore))
 			})
 
 			It("Should return an error if the destination store is nil", func() {
 				var emptyStore = errors.New("dst is an empty store")
-				cf.StoreReturns(srcStore, nil)
-				err := m.Migrate(nil, cf)
+				err := m.Migrate(nil, srcStore)
 				Ω(err).Should(Equal(emptyStore))
 			})
 
@@ -56,7 +43,7 @@ var _ = Describe("Migrator", func() {
 				var emptyStore = errors.New("the source store has no files")
 				cf.StoreReturns(srcStore, nil)
 				srcStore.ListReturns(nil, nil)
-				err := m.Migrate(dstStore, cf)
+				err := m.Migrate(dstStore, srcStore)
 				Ω(err).Should(Equal(emptyStore))
 				Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			})
@@ -65,7 +52,7 @@ var _ = Describe("Migrator", func() {
 				var testErr = errors.New("test")
 				cf.StoreReturns(srcStore, nil)
 				srcStore.ListReturns(nil, testErr)
-				err := m.Migrate(dstStore, cf)
+				err := m.Migrate(dstStore, srcStore)
 				Ω(err).Should(Equal(testErr))
 				Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			})
@@ -82,7 +69,7 @@ var _ = Describe("Migrator", func() {
 			}}, nil)
 			srcStore.ReadReturns(nil, nil)
 
-			err := m.Migrate(dstStore, cf)
+			err := m.Migrate(dstStore, srcStore)
 			Ω(err).Should(BeNil())
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
@@ -99,7 +86,7 @@ var _ = Describe("Migrator", func() {
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
 
-			err := m.Migrate(dstStore, cf)
+			err := m.Migrate(dstStore, srcStore)
 			Ω(err).Should(BeNil())
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
