@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -25,9 +26,15 @@ type Store struct {
 	identifier string
 }
 
-func New(identifier string, config *aws.Config) goblob.Store {
+func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string) goblob.Store {
 	return &Store{
-		session:    session.New(config),
+		session: session.New(&aws.Config{
+			Region:           aws.String(region),
+			Credentials:      credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, ""),
+			Endpoint:         aws.String(endpoint),
+			DisableSSL:       aws.Bool(true),
+			S3ForcePathStyle: aws.Bool(true),
+		}),
 		identifier: identifier,
 	}
 }
@@ -89,7 +96,7 @@ func (s *Store) path(blob *goblob.Blob) string {
 func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {
 	bucketName := s.bucketName(src)
 	path := s.path(src)
-	lo.G.Info("Getting", path, "from bucket", bucketName)
+	lo.G.Debug("Getting", path, "from bucket", bucketName)
 	getObjectOutput, err := awss3.New(s.session).GetObject(&awss3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(path),

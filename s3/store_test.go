@@ -25,21 +25,24 @@ var _ = Describe("S3Store", func() {
 	var controlBucket string
 	var cleanup bool
 	BeforeEach(func() {
+		region := "us-east-1"
+		accessKey := "AKIAIOSFODNN7EXAMPLE"
+		secretKey := "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 		if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
 			s3Endpoint = "http://127.0.0.1:9000"
 		} else {
 			s3Endpoint = fmt.Sprintf("http://%s:9000", os.Getenv("MINIO_PORT_9000_TCP_ADDR"))
 		}
 		config = &aws.Config{
-			Region:           aws.String("us-east-1"),
-			Credentials:      credentials.NewStaticCredentials("AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", ""),
+			Region:           aws.String(region),
+			Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 			Endpoint:         aws.String(s3Endpoint),
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 		}
-		store = New("identifier", config)
+		store = New("identifier", accessKey, secretKey, region, s3Endpoint)
 		controlBucket = "cc-buildpackets-identifier"
-		cleanup = false
+		cleanup = true
 	})
 
 	AfterEach(func() {

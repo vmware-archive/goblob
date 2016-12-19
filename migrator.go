@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/c0-ops/goblob/validation"
+	"github.com/cheggaaa/pb"
 )
 
 // CloudFoundryMigrator moves blobs from Cloud Foundry to another store
@@ -34,6 +35,10 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("Migrating blobs from NFS to S3")
+	bar := pb.StartNew(len(blobs))
+	bar.Format("<.- >")
 	for _, blob := range blobs {
 		if !m.alreadyMigrated(migratedBlobs, blob) {
 			reader, err := src.Read(blob)
@@ -56,7 +61,10 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 				return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
 			}
 		}
+		bar.Increment()
 	}
+
+	bar.FinishPrint("Done Migrating blobs from NFS to S3")
 
 	return nil
 }
