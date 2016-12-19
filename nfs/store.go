@@ -46,7 +46,7 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	bar := pb.StartNew(len(blobs))
 	bar.Format("<.- >")
 	for _, blob := range blobs {
-		checksum, err := validation.Checksum(path.Join(s.path, blob.Path, blob.Filename))
+		checksum, err := s.Checksum(blob)
 		if (err) != nil {
 			return nil, err
 		}
@@ -55,6 +55,10 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	}
 	bar.FinishPrint("Done Getting list of files from NFS")
 	return blobs, nil
+}
+
+func (s *Store) Checksum(src *goblob.Blob) (string, error) {
+	return validation.Checksum(path.Join(s.path, src.Path, src.Filename))
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {

@@ -66,15 +66,10 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 					Path:     blobPath,
 				}
 
-				headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
-					Bucket: aws.String(s.bucketName(blob)),
-					Key:    aws.String(s.path(blob)),
-				})
+				checksum, err := s.Checksum(blob)
 				if err != nil {
 					return nil, err
 				}
-
-				checksum := *headObjectOutput.ETag
 				blob.Checksum = checksum
 				blobs = append(blobs, blob)
 				bar.Increment()
@@ -92,6 +87,17 @@ func (s *Store) bucketName(blob *goblob.Blob) string {
 func (s *Store) path(blob *goblob.Blob) string {
 	bucketName := blob.Path[:strings.Index(blob.Path, "/")]
 	return path.Join(blob.Path[len(bucketName)+1:], blob.Filename)
+}
+
+func (s *Store) Checksum(src *goblob.Blob) (string, error) {
+	headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
+		Bucket: aws.String(s.bucketName(src)),
+		Key:    aws.String(s.path(src)),
+	})
+	if err != nil {
+		return "", err
+	}
+	return *headObjectOutput.ETag, nil
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {

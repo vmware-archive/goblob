@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
 )
 
@@ -54,11 +53,7 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		if err != nil {
 			return err
 		}
-		reader, err = dst.Read(blob)
-		if err != nil {
-			return err
-		}
-		checksum, err := validation.ChecksumReader(reader)
+		checksum, err := dst.Checksum(blob)
 		if err != nil {
 			return err
 		}

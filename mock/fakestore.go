@@ -25,6 +25,15 @@ type FakeStore struct {
 		result1 io.Reader
 		result2 error
 	}
+	ChecksumStub        func(src *goblob.Blob) (string, error)
+	checksumMutex       sync.RWMutex
+	checksumArgsForCall []struct {
+		src *goblob.Blob
+	}
+	checksumReturns struct {
+		result1 string
+		result2 error
+	}
 	WriteStub        func(dst *goblob.Blob, src io.Reader) error
 	writeMutex       sync.RWMutex
 	writeArgsForCall []struct {
@@ -98,6 +107,40 @@ func (fake *FakeStore) ReadReturns(result1 io.Reader, result2 error) {
 	}{result1, result2}
 }
 
+func (fake *FakeStore) Checksum(src *goblob.Blob) (string, error) {
+	fake.checksumMutex.Lock()
+	fake.checksumArgsForCall = append(fake.checksumArgsForCall, struct {
+		src *goblob.Blob
+	}{src})
+	fake.recordInvocation("Checksum", []interface{}{src})
+	fake.checksumMutex.Unlock()
+	if fake.ChecksumStub != nil {
+		return fake.ChecksumStub(src)
+	} else {
+		return fake.checksumReturns.result1, fake.checksumReturns.result2
+	}
+}
+
+func (fake *FakeStore) ChecksumCallCount() int {
+	fake.checksumMutex.RLock()
+	defer fake.checksumMutex.RUnlock()
+	return len(fake.checksumArgsForCall)
+}
+
+func (fake *FakeStore) ChecksumArgsForCall(i int) *goblob.Blob {
+	fake.checksumMutex.RLock()
+	defer fake.checksumMutex.RUnlock()
+	return fake.checksumArgsForCall[i].src
+}
+
+func (fake *FakeStore) ChecksumReturns(result1 string, result2 error) {
+	fake.ChecksumStub = nil
+	fake.checksumReturns = struct {
+		result1 string
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeStore) Write(dst *goblob.Blob, src io.Reader) error {
 	fake.writeMutex.Lock()
 	fake.writeArgsForCall = append(fake.writeArgsForCall, struct {
@@ -139,6 +182,8 @@ func (fake *FakeStore) Invocations() map[string][][]interface{} {
 	defer fake.listMutex.RUnlock()
 	fake.readMutex.RLock()
 	defer fake.readMutex.RUnlock()
+	fake.checksumMutex.RLock()
+	defer fake.checksumMutex.RUnlock()
 	fake.writeMutex.RLock()
 	defer fake.writeMutex.RUnlock()
 	return fake.invocations

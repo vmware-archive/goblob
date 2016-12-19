@@ -70,14 +70,14 @@ var _ = Describe("Migrator", func() {
 			reader := bytes.NewReader([]byte("hello"))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
-			dstStore.ReadReturns(reader, nil)
+			dstStore.ChecksumReturns("5d41402abc4b2a76b9719d911017c592", nil)
 
 			err := m.Migrate(dstStore, srcStore)
 			Ω(err).Should(BeNil())
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
 			Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
-			Ω(dstStore.ReadCallCount()).Should(BeEquivalentTo(1))
+			Ω(dstStore.ChecksumCallCount()).Should(BeEquivalentTo(1))
 			writeBlob, writeReader := dstStore.WriteArgsForCall(0)
 			Ω(writeBlob).ShouldNot(BeNil())
 			Ω(writeReader).To(Equal(reader))
@@ -123,29 +123,6 @@ var _ = Describe("Migrator", func() {
 			Ω(writeReader).To(Equal(reader))
 		})
 
-		It("Should error on destination read", func() {
-			controlErr := errors.New("got an error")
-			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]*Blob{&Blob{
-				Filename: "aabbfile",
-				Checksum: "5d41402abc4b2a76b9719d911017c592",
-				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
-			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
-			srcStore.ReadReturns(reader, nil)
-			dstStore.WriteReturns(nil)
-			dstStore.ReadReturns(reader, controlErr)
-
-			err := m.Migrate(dstStore, srcStore)
-			Ω(err).Should(BeEquivalentTo(controlErr))
-			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
-			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
-			Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
-			writeBlob, writeReader := dstStore.WriteArgsForCall(0)
-			Ω(writeBlob).ShouldNot(BeNil())
-			Ω(writeReader).To(Equal(reader))
-		})
-
 		It("Should error on destination list", func() {
 			controlErr := errors.New("got an error")
 			cf.StoreReturns(srcStore, nil)
@@ -179,14 +156,14 @@ var _ = Describe("Migrator", func() {
 			reader := bytes.NewReader([]byte("hello"))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
-			dstStore.ReadReturns(reader, nil)
+			dstStore.ChecksumReturns("5d41402abc4b2a76b9719d911017c592", nil)
 
 			err := m.Migrate(dstStore, srcStore)
 			Ω(err).Should(BeEquivalentTo(controlErr))
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
 			Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
-			Ω(dstStore.ReadCallCount()).Should(BeEquivalentTo(1))
+			Ω(dstStore.ChecksumCallCount()).Should(BeEquivalentTo(1))
 			writeBlob, writeReader := dstStore.WriteArgsForCall(0)
 			Ω(writeBlob).ShouldNot(BeNil())
 			Ω(writeReader).To(Equal(reader))

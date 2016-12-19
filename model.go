@@ -17,6 +17,7 @@ type CloudFoundry interface {
 type Store interface {
 	List() ([]*Blob, error)
 	Read(src *Blob) (io.Reader, error)
+	Checksum(src *Blob) (string, error)
 	Write(dst *Blob, src io.Reader) error
 }
 
