@@ -9,18 +9,21 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/c0-ops/goblob"
+	"github.com/xchapter7x/lo"
 
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Store struct {
-	session *session.Session
+	session    *session.Session
+	identifier string
 }
 
-func New(config *aws.Config) goblob.Store {
+func New(identifier string, config *aws.Config) goblob.Store {
 	return &Store{
-		session: session.New(config),
+		session:    session.New(config),
+		identifier: identifier,
 	}
 }
 func (s *Store) List() ([]goblob.Blob, error) {
@@ -28,16 +31,17 @@ func (s *Store) List() ([]goblob.Blob, error) {
 }
 
 func (s *Store) bucketName(blob goblob.Blob) string {
-	return blob.Path[:strings.Index(blob.Path, "/")]
+	return blob.Path[:strings.Index(blob.Path, "/")] + "-" + s.identifier
 }
 
-func (s *Store) path(bucketName string, blob goblob.Blob) string {
+func (s *Store) path(blob goblob.Blob) string {
+	bucketName := blob.Path[:strings.Index(blob.Path, "/")]
 	return path.Join(blob.Path[len(bucketName)+1:], blob.Filename)
 }
 
 func (s *Store) Read(src goblob.Blob) (io.Reader, error) {
 	bucketName := s.bucketName(src)
-	path := s.path(bucketName, src)
+	path := s.path(src)
 	getObjectOutput, err := awss3.New(s.session).GetObject(&awss3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(path),
@@ -51,7 +55,8 @@ func (s *Store) Read(src goblob.Blob) (io.Reader, error) {
 
 func (s *Store) Write(dst goblob.Blob, src io.Reader) error {
 	bucketName := s.bucketName(dst)
-	path := s.path(bucketName, dst)
+	path := s.path(dst)
+	lo.G.Info("Using bucket", bucketName)
 	if err := s.createBucket(bucketName); err != nil {
 		return err
 	}

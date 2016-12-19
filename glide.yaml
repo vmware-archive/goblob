@@ -6,6 +6,7 @@ import:
   version: ^1.6.4
   subpackages:
   - service/s3
+- package: github.com/xchapter7x/lo
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

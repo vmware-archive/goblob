@@ -37,7 +37,7 @@ var _ = Describe("S3Store", func() {
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 		}
-		store = New(config)
+		store = New("identfier", config)
 		controlBucket = "cc-buildpackets-identifier"
 	})
 
@@ -73,13 +73,13 @@ var _ = Describe("S3Store", func() {
 			fileReader, err := os.Open("./fixtures/test.txt")
 			Ω(err).ShouldNot(HaveOccurred())
 			writeErr := store.Write(goblob.Blob{
-				Path:     controlBucket + "/aa/bb",
+				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 			}, fileReader)
 			Ω(writeErr).ShouldNot(HaveOccurred())
 			reader, err := store.Read(goblob.Blob{
-				Path:     controlBucket + "/aa/bb",
+				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249"})
 			Ω(err).ShouldNot(HaveOccurred())
@@ -91,7 +91,7 @@ var _ = Describe("S3Store", func() {
 			reader, err := os.Open("./fixtures/test.txt")
 			Ω(err).ShouldNot(HaveOccurred())
 			writeErr := store.Write(goblob.Blob{
-				Path:     controlBucket + "/aa/bb",
+				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 			}, reader)
