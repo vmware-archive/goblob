@@ -36,31 +36,36 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return err
 	}
 
-	fmt.Println("Migrating blobs from NFS to S3")
-	bar := pb.StartNew(len(blobs))
-	bar.Format("<.- >")
+	var blobsToMigrate []*Blob
 	for _, blob := range blobs {
 		if !m.alreadyMigrated(migratedBlobs, blob) {
-			reader, err := src.Read(blob)
-			if err != nil {
-				return err
-			}
-			err = dst.Write(blob, reader)
-			if err != nil {
-				return err
-			}
-			reader, err = dst.Read(blob)
-			if err != nil {
-				return err
-			}
-			checksum, err := validation.ChecksumReader(reader)
-			if err != nil {
-				return err
-			}
-			if checksum != blob.Checksum {
-				return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
-			}
+			blobsToMigrate = append(blobsToMigrate, blob)
 		}
+	}
+	fmt.Println("Migrating blobs from NFS to S3")
+	bar := pb.StartNew(len(blobsToMigrate))
+	bar.Format("<.- >")
+	for _, blob := range blobsToMigrate {
+		reader, err := src.Read(blob)
+		if err != nil {
+			return err
+		}
+		err = dst.Write(blob, reader)
+		if err != nil {
+			return err
+		}
+		reader, err = dst.Read(blob)
+		if err != nil {
+			return err
+		}
+		checksum, err := validation.ChecksumReader(reader)
+		if err != nil {
+			return err
+		}
+		if checksum != blob.Checksum {
+			return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
+		}
+
 		bar.Increment()
 	}
 
