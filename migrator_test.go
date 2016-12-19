@@ -146,7 +146,7 @@ var _ = Describe("Migrator", func() {
 		})
 
 		It("Should error on checksum mismatch", func() {
-			controlErr := errors.New("Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd]")
+			controlErr := errors.New("Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd] for [/var/vcap/store/shared/cc-buildpacks/aa/bb/aabbfile]")
 			cf.StoreReturns(srcStore, nil)
 			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",

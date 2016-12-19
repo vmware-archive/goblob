@@ -1,8 +1,10 @@
 package s3
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"path"
 	"strings"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/c0-ops/goblob"
 	"github.com/cheggaaa/pb"
 	"github.com/xchapter7x/lo"
@@ -97,7 +98,7 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return *headObjectOutput.ETag, nil
+	return strings.Replace(*headObjectOutput.ETag, "\"", "", -1), nil
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {
@@ -121,9 +122,14 @@ func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
 	if err := s.createBucket(bucketName); err != nil {
 		return err
 	}
-	uploader := s3manager.NewUploader(s.session)
-	_, err := uploader.Upload(&s3manager.UploadInput{
-		Body:   src,
+	s3Service := awss3.New(s.session)
+
+	fileBytes, err := ioutil.ReadAll(src)
+	if err != nil {
+		return err
+	}
+	_, err = s3Service.PutObject(&awss3.PutObjectInput{
+		Body:   bytes.NewReader(fileBytes),
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(path),
 	})

@@ -3,6 +3,7 @@ package goblob
 import (
 	"errors"
 	"fmt"
+	"path"
 
 	"github.com/cheggaaa/pb"
 )
@@ -41,30 +42,31 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 			blobsToMigrate = append(blobsToMigrate, blob)
 		}
 	}
-	fmt.Println("Migrating blobs from NFS to S3")
-	bar := pb.StartNew(len(blobsToMigrate))
-	bar.Format("<.- >")
-	for _, blob := range blobsToMigrate {
-		reader, err := src.Read(blob)
-		if err != nil {
-			return err
-		}
-		err = dst.Write(blob, reader)
-		if err != nil {
-			return err
-		}
-		checksum, err := dst.Checksum(blob)
-		if err != nil {
-			return err
-		}
-		if checksum != blob.Checksum {
-			return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
-		}
+	if len(blobsToMigrate) > 0 {
+		fmt.Println("Migrating blobs from NFS to S3")
+		bar := pb.StartNew(len(blobsToMigrate))
+		bar.Format("<.- >")
+		for _, blob := range blobsToMigrate {
+			reader, err := src.Read(blob)
+			if err != nil {
+				return err
+			}
+			err = dst.Write(blob, reader)
+			if err != nil {
+				return err
+			}
+			checksum, err := dst.Checksum(blob)
+			if err != nil {
+				return err
+			}
+			if checksum != blob.Checksum {
+				return fmt.Errorf("Checksum [%s] does not match [%s] for [%s]", checksum, blob.Checksum, path.Join(blob.Path, blob.Filename))
+			}
 
-		bar.Increment()
+			bar.Increment()
+		}
+		bar.FinishPrint("Done Migrating blobs from NFS to S3")
 	}
-
-	bar.FinishPrint("Done Migrating blobs from NFS to S3")
 
 	return nil
 }
