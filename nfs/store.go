@@ -30,7 +30,7 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	var blobs []*goblob.Blob
 	walk := func(path string, info os.FileInfo, e error) error {
 		if !info.IsDir() && info.Name() != ".nfs_test" {
-			filePath := path[len(s.path)-1 : len(path)-len(info.Name())-1]
+			filePath := path[len(s.path)+1 : len(path)-len(info.Name())-1]
 			blobs = append(blobs, &goblob.Blob{
 				Filename: info.Name(),
 				Path:     filePath,

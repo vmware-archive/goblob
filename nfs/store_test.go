@@ -14,7 +14,7 @@ import (
 var _ = Describe("NFSStore", func() {
 	var store goblob.Store
 	BeforeEach(func() {
-		store = New("./fixtures")
+		store = New("fixtures")
 	})
 
 	Describe("List()", func() {
