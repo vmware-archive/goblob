@@ -1,7 +1,6 @@
 package s3_test
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -24,6 +23,7 @@ var _ = Describe("S3Store", func() {
 	var s3Endpoint string
 	var config *aws.Config
 	var controlBucket string
+	var cleanup bool
 	BeforeEach(func() {
 		if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
 			s3Endpoint = "http://127.0.0.1:9000"
@@ -37,48 +37,61 @@ var _ = Describe("S3Store", func() {
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 		}
-		store = New("identfier", config)
+		store = New("identifier", config)
 		controlBucket = "cc-buildpackets-identifier"
+		cleanup = false
 	})
 
 	AfterEach(func() {
-		session := session.New(config)
-		s3Service := awss3.New(session)
-		listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
-			Bucket: aws.String(controlBucket),
-		})
-
-		if err == nil {
-			for _, item := range listObjectsOutput.Contents {
-				s3Service.DeleteObject(&awss3.DeleteObjectInput{
-					Bucket: aws.String(controlBucket),
-					Key:    item.Key,
-				})
-			}
-			s3Service.DeleteBucket(&awss3.DeleteBucketInput{
+		if cleanup {
+			session := session.New(config)
+			s3Service := awss3.New(session)
+			listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
 				Bucket: aws.String(controlBucket),
 			})
+
+			if err == nil {
+				for _, item := range listObjectsOutput.Contents {
+					s3Service.DeleteObject(&awss3.DeleteObjectInput{
+						Bucket: aws.String(controlBucket),
+						Key:    item.Key,
+					})
+				}
+				s3Service.DeleteBucket(&awss3.DeleteBucketInput{
+					Bucket: aws.String(controlBucket),
+				})
+			}
 		}
 	})
 
 	Describe("List()", func() {
-		It("Should return an error", func() {
-			err := errors.New("not implemented")
-			_, listErr := store.List()
-			Ω(listErr).Should(BeEquivalentTo(err))
+		It("Should return list of files", func() {
+			fileReader, err := os.Open("./fixtures/test.txt")
+			Ω(err).ShouldNot(HaveOccurred())
+			for _, path := range []string{"cc-buildpacks/aa/bb", "cc-buildpacks/aa/cc", "cc-buildpacks/aa/dd"} {
+				err := store.Write(&goblob.Blob{
+					Path:     path,
+					Filename: "test.txt",
+					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
+				}, fileReader)
+				Ω(err).ShouldNot(HaveOccurred())
+			}
+			blobs, err := store.List()
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(len(blobs)).Should(BeEquivalentTo(3))
 		})
 	})
 	Describe("Read()", func() {
 		It("Should read the file", func() {
 			fileReader, err := os.Open("./fixtures/test.txt")
 			Ω(err).ShouldNot(HaveOccurred())
-			writeErr := store.Write(goblob.Blob{
+			writeErr := store.Write(&goblob.Blob{
 				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 			}, fileReader)
 			Ω(writeErr).ShouldNot(HaveOccurred())
-			reader, err := store.Read(goblob.Blob{
+			reader, err := store.Read(&goblob.Blob{
 				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249"})
@@ -90,7 +103,7 @@ var _ = Describe("S3Store", func() {
 		It("Should write to s3 blob store", func() {
 			reader, err := os.Open("./fixtures/test.txt")
 			Ω(err).ShouldNot(HaveOccurred())
-			writeErr := store.Write(goblob.Blob{
+			writeErr := store.Write(&goblob.Blob{
 				Path:     "cc-buildpackets/aa/bb",
 				Filename: "test.txt",
 				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",

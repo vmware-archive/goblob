@@ -24,8 +24,8 @@ build:
           export GO15VENDOREXPERIMENT=1
           cd $WERCKER_SOURCE_DIR
           go version
-          wget https://github.com/Masterminds/glide/releases/download/v0.11.1/glide-v0.11.1-linux-amd64.tar.gz
-          tar xvzf glide-v0.11.1-linux-amd64.tar.gz
+          wget https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz
+          tar xvzf glide-v0.12.3-linux-amd64.tar.gz
           export PATH=./linux-amd64:$PATH
           export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
           glide install

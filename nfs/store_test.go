@@ -40,7 +40,7 @@ var _ = Describe("NFSStore", func() {
 	Describe("Write()", func() {
 		It("Should return an error", func() {
 			err := errors.New("writing to the NFS store is not supported")
-			Ω(store.Write(goblob.Blob{}, nil)).Should(BeEquivalentTo(err))
+			Ω(store.Write(&goblob.Blob{}, nil)).Should(BeEquivalentTo(err))
 		})
 	})
 })

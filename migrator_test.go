@@ -62,7 +62,7 @@ var _ = Describe("Migrator", func() {
 	Describe("When the source store has files", func() {
 		It("Should successfully migrate", func() {
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -86,7 +86,7 @@ var _ = Describe("Migrator", func() {
 		It("Should error on read from source", func() {
 			controlErr := errors.New("got an error")
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -103,7 +103,7 @@ var _ = Describe("Migrator", func() {
 		It("Should error on write", func() {
 			controlErr := errors.New("got an error")
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -126,7 +126,7 @@ var _ = Describe("Migrator", func() {
 		It("Should error on destination read", func() {
 			controlErr := errors.New("got an error")
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -149,7 +149,7 @@ var _ = Describe("Migrator", func() {
 		It("Should error on destination list", func() {
 			controlErr := errors.New("got an error")
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -171,7 +171,7 @@ var _ = Describe("Migrator", func() {
 		It("Should error on checksum mismatch", func() {
 			controlErr := errors.New("Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd]")
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "abcd",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
@@ -194,12 +194,12 @@ var _ = Describe("Migrator", func() {
 
 		It("not migrate already migrated files", func() {
 			cf.StoreReturns(srcStore, nil)
-			srcStore.ListReturns([]Blob{Blob{
+			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			dstStore.ListReturns([]Blob{Blob{
+			dstStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",

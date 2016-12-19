@@ -8,6 +8,11 @@ import:
   - service/s3
 - package: github.com/xchapter7x/lo
 - package: github.com/op/go-logging
+  version: master
+- package: github.com/cheggaaa/pb
+  version: ^1.0.7
+- package: github.com/mattn/go-runewidth
+  version: ^0.0.1
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

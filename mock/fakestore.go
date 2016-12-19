@@ -9,26 +9,26 @@ import (
 )
 
 type FakeStore struct {
-	ListStub        func() ([]goblob.Blob, error)
+	ListStub        func() ([]*goblob.Blob, error)
 	listMutex       sync.RWMutex
 	listArgsForCall []struct{}
 	listReturns     struct {
-		result1 []goblob.Blob
+		result1 []*goblob.Blob
 		result2 error
 	}
-	ReadStub        func(src goblob.Blob) (io.Reader, error)
+	ReadStub        func(src *goblob.Blob) (io.Reader, error)
 	readMutex       sync.RWMutex
 	readArgsForCall []struct {
-		src goblob.Blob
+		src *goblob.Blob
 	}
 	readReturns struct {
 		result1 io.Reader
 		result2 error
 	}
-	WriteStub        func(dst goblob.Blob, src io.Reader) error
+	WriteStub        func(dst *goblob.Blob, src io.Reader) error
 	writeMutex       sync.RWMutex
 	writeArgsForCall []struct {
-		dst goblob.Blob
+		dst *goblob.Blob
 		src io.Reader
 	}
 	writeReturns struct {
@@ -38,7 +38,7 @@ type FakeStore struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeStore) List() ([]goblob.Blob, error) {
+func (fake *FakeStore) List() ([]*goblob.Blob, error) {
 	fake.listMutex.Lock()
 	fake.listArgsForCall = append(fake.listArgsForCall, struct{}{})
 	fake.recordInvocation("List", []interface{}{})
@@ -56,18 +56,18 @@ func (fake *FakeStore) ListCallCount() int {
 	return len(fake.listArgsForCall)
 }
 
-func (fake *FakeStore) ListReturns(result1 []goblob.Blob, result2 error) {
+func (fake *FakeStore) ListReturns(result1 []*goblob.Blob, result2 error) {
 	fake.ListStub = nil
 	fake.listReturns = struct {
-		result1 []goblob.Blob
+		result1 []*goblob.Blob
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeStore) Read(src goblob.Blob) (io.Reader, error) {
+func (fake *FakeStore) Read(src *goblob.Blob) (io.Reader, error) {
 	fake.readMutex.Lock()
 	fake.readArgsForCall = append(fake.readArgsForCall, struct {
-		src goblob.Blob
+		src *goblob.Blob
 	}{src})
 	fake.recordInvocation("Read", []interface{}{src})
 	fake.readMutex.Unlock()
@@ -84,7 +84,7 @@ func (fake *FakeStore) ReadCallCount() int {
 	return len(fake.readArgsForCall)
 }
 
-func (fake *FakeStore) ReadArgsForCall(i int) goblob.Blob {
+func (fake *FakeStore) ReadArgsForCall(i int) *goblob.Blob {
 	fake.readMutex.RLock()
 	defer fake.readMutex.RUnlock()
 	return fake.readArgsForCall[i].src
@@ -98,10 +98,10 @@ func (fake *FakeStore) ReadReturns(result1 io.Reader, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeStore) Write(dst goblob.Blob, src io.Reader) error {
+func (fake *FakeStore) Write(dst *goblob.Blob, src io.Reader) error {
 	fake.writeMutex.Lock()
 	fake.writeArgsForCall = append(fake.writeArgsForCall, struct {
-		dst goblob.Blob
+		dst *goblob.Blob
 		src io.Reader
 	}{dst, src})
 	fake.recordInvocation("Write", []interface{}{dst, src})
@@ -119,7 +119,7 @@ func (fake *FakeStore) WriteCallCount() int {
 	return len(fake.writeArgsForCall)
 }
 
-func (fake *FakeStore) WriteArgsForCall(i int) (goblob.Blob, io.Reader) {
+func (fake *FakeStore) WriteArgsForCall(i int) (*goblob.Blob, io.Reader) {
 	fake.writeMutex.RLock()
 	defer fake.writeMutex.RUnlock()
 	return fake.writeArgsForCall[i].dst, fake.writeArgsForCall[i].src

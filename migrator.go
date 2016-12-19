@@ -61,9 +61,9 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	return nil
 }
 
-func (m *CloudFoundryMigrator) alreadyMigrated(migratedBlobs []Blob, blob Blob) bool {
+func (m *CloudFoundryMigrator) alreadyMigrated(migratedBlobs []*Blob, blob *Blob) bool {
 	for _, migratedBlob := range migratedBlobs {
-		if migratedBlob.Equal(blob) {
+		if migratedBlob.Equal(*blob) {
 			return true
 		}
 	}
