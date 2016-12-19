@@ -7,6 +7,7 @@ import:
   subpackages:
   - service/s3
 - package: github.com/xchapter7x/lo
+- package: github.com/op/go-logging
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

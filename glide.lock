@@ -1,5 +1,5 @@
-hash: 669e38b746a0dfa4b57d491faf44e665a0acc0599f05a8f35930370775a3ba36
-updated: 2016-12-19T09:10:20.871772542-07:00
+hash: 3e2ba0e6528ff4c69587a08ef9e9c538ac1f0ddfb5566b3b5e56ed343da726b8
+updated: 2016-12-19T09:41:39.693956849-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 0df2a7ae7e82d2643e4a8fed1b2e36a1cf0580bc
@@ -35,6 +35,8 @@ imports:
   version: 2ba15ac2dc9cdf88c110ec2dc0ced7fa45f5678c
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/urfave/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/xchapter7x/lo
