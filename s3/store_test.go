@@ -69,10 +69,21 @@ var _ = Describe("S3Store", func() {
 		})
 	})
 	Describe("Read()", func() {
-		It("Should return an error", func() {
-			err := errors.New("not implemented")
-			_, readerErr := store.Read(goblob.Blob{})
-			Ω(readerErr).Should(BeEquivalentTo(err))
+		It("Should read the file", func() {
+			fileReader, err := os.Open("./fixtures/test.txt")
+			Ω(err).ShouldNot(HaveOccurred())
+			writeErr := store.Write(goblob.Blob{
+				Path:     controlBucket + "/aa/bb",
+				Filename: "test.txt",
+				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
+			}, fileReader)
+			Ω(writeErr).ShouldNot(HaveOccurred())
+			reader, err := store.Read(goblob.Blob{
+				Path:     controlBucket + "/aa/bb",
+				Filename: "test.txt",
+				Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249"})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(reader).ShouldNot(BeNil())
 		})
 	})
 	Describe("Write()", func() {

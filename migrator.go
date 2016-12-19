@@ -1,6 +1,11 @@
 package goblob
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/c0-ops/goblob/validation"
+)
 
 // CloudFoundryMigrator moves blobs from Cloud Foundry to another store
 type CloudFoundryMigrator struct {
@@ -16,24 +21,37 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return errors.New("dst is an empty store")
 	}
 
-	files, err := src.List()
+	blobs, err := src.List()
 	if err != nil {
 		return err
 	}
 
-	if len(files) == 0 {
+	if len(blobs) == 0 {
 		return errors.New("the source store has no files")
 	}
 
-	for _, file := range files {
-		reader, err := src.Read(file)
+	for _, blob := range blobs {
+		reader, err := src.Read(blob)
 		if err != nil {
 			return err
 		}
-		err = dst.Write(file, reader)
+		err = dst.Write(blob, reader)
 		if err != nil {
 			return err
 		}
+		reader, err = dst.Read(blob)
+		if err != nil {
+			return err
+		}
+		checksum, err := validation.ChecksumReader(reader)
+		if err != nil {
+			return err
+		}
+		if checksum != blob.Checksum {
+			return fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
+		}
+		return nil
+
 	}
 
 	return nil

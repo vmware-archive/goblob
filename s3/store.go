@@ -27,12 +27,31 @@ func (s *Store) List() ([]goblob.Blob, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *Store) Read(src goblob.Blob) (io.Reader, error) {
-	return nil, errors.New("not implemented")
+func (s *Store) bucketName(blob goblob.Blob) string {
+	return blob.Path[:strings.Index(blob.Path, "/")]
 }
+
+func (s *Store) path(bucketName string, blob goblob.Blob) string {
+	return path.Join(blob.Path[len(bucketName)+1:], blob.Filename)
+}
+
+func (s *Store) Read(src goblob.Blob) (io.Reader, error) {
+	bucketName := s.bucketName(src)
+	path := s.path(bucketName, src)
+	getObjectOutput, err := awss3.New(s.session).GetObject(&awss3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(path),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return getObjectOutput.Body, nil
+
+}
+
 func (s *Store) Write(dst goblob.Blob, src io.Reader) error {
-	bucketName := dst.Path[:strings.Index(dst.Path, "/")]
-	path := path.Join(dst.Path[len(bucketName)+1:], dst.Filename)
+	bucketName := s.bucketName(dst)
+	path := s.path(bucketName, dst)
 	if err := s.createBucket(bucketName); err != nil {
 		return err
 	}
@@ -42,8 +61,10 @@ func (s *Store) Write(dst goblob.Blob, src io.Reader) error {
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(path),
 	})
-	//need to validate checksum?
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Store) createBucket(bucketName string) error {
