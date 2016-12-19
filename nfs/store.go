@@ -13,8 +13,7 @@ import (
 
 // Store is an NFS blob store
 type Store struct {
-	path  string
-	blobs []goblob.Blob
+	path string
 }
 
 // New creates an NFS blob store
@@ -26,6 +25,7 @@ func New(path string) goblob.Store {
 
 // List fetches a list of files with checksums
 func (s *Store) List() ([]goblob.Blob, error) {
+	var blobs []goblob.Blob
 	walk := func(path string, info os.FileInfo, e error) error {
 		if !info.IsDir() {
 			filePath := path[len(s.path)-1 : len(path)-len(info.Name())-1]
@@ -33,7 +33,7 @@ func (s *Store) List() ([]goblob.Blob, error) {
 			if (err) != nil {
 				return err
 			}
-			s.blobs = append(s.blobs, goblob.Blob{
+			blobs = append(blobs, goblob.Blob{
 				Filename: info.Name(),
 				Path:     filePath,
 				Checksum: checksum,
@@ -45,7 +45,7 @@ func (s *Store) List() ([]goblob.Blob, error) {
 	if err := filepath.Walk(s.path, walk); err != nil {
 		return nil, err
 	}
-	return s.blobs, nil
+	return blobs, nil
 }
 
 func (s *Store) Read(src goblob.Blob) (io.Reader, error) {
