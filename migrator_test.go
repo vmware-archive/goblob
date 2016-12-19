@@ -146,6 +146,28 @@ var _ = Describe("Migrator", func() {
 			Ω(writeReader).To(Equal(reader))
 		})
 
+		It("Should error on destination list", func() {
+			controlErr := errors.New("got an error")
+			cf.StoreReturns(srcStore, nil)
+			srcStore.ListReturns([]Blob{Blob{
+				Filename: "aabbfile",
+				Checksum: "5d41402abc4b2a76b9719d911017c592",
+				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+			}}, nil)
+			dstStore.ListReturns(nil, controlErr)
+			reader := bytes.NewReader([]byte("hello"))
+			srcStore.ReadReturns(reader, nil)
+			dstStore.WriteReturns(nil)
+			dstStore.ReadReturns(reader, controlErr)
+
+			err := m.Migrate(dstStore, srcStore)
+			Ω(err).Should(BeEquivalentTo(controlErr))
+			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(dstStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(0))
+
+		})
+
 		It("Should error on checksum mismatch", func() {
 			controlErr := errors.New("Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd]")
 			cf.StoreReturns(srcStore, nil)
@@ -169,29 +191,30 @@ var _ = Describe("Migrator", func() {
 			Ω(writeBlob).ShouldNot(BeNil())
 			Ω(writeReader).To(Equal(reader))
 		})
-		// It("Should return an error when there is a checksum mismatch", func() {
-		// 	cf.StoreReturns(srcStore, nil)
-		// 	cf.IdentifierReturns("0987654321")
-		// 	srcStore.ListReturns([]Blob{Blob{
-		// 		Filename: "aabbfile",
-		// 		Checksum: "1234567890",
-		// 		Path:     "cc-buildpacks/aa/bb",
-		// 	}}, nil)
-		// 	reader := bytes.NewReader([]byte("hello"))
-		// 	srcStore.ReadReturns(reader, nil)
-		// 	dstStore.WriteReturns(nil)
-		//
-		// 	err := m.Migrate(dstStore, cf)
-		// 	Ω(err).ShouldNot(BeNil())
-		// 	Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
-		// 	Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
-		// 	Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
-		// 	writeBlob, writeReader := dstStore.WriteArgsForCall(0)
-		// 	Ω(writeBlob).ShouldNot(BeNil())
-		// 	Ω(writeBlob.Filename).Should(BeEquivalentTo("aabbfile"))
-		// 	Ω(writeBlob.Checksum).Should(BeEquivalentTo("1234567890"))
-		// 	Ω(writeBlob.Path).Should(BeEquivalentTo("cc-buildpacks-0987654321/aa/bb"))
-		// 	Ω(writeReader).To(Equal(reader))
-		// })
+
+		It("not migrate already migrated files", func() {
+			cf.StoreReturns(srcStore, nil)
+			srcStore.ListReturns([]Blob{Blob{
+				Filename: "aabbfile",
+				Checksum: "5d41402abc4b2a76b9719d911017c592",
+				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+			}}, nil)
+			dstStore.ListReturns([]Blob{Blob{
+				Filename: "aabbfile",
+				Checksum: "5d41402abc4b2a76b9719d911017c592",
+				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+			}}, nil)
+			reader := bytes.NewReader([]byte("hello"))
+			srcStore.ReadReturns(reader, nil)
+			dstStore.WriteReturns(nil)
+			dstStore.ReadReturns(reader, nil)
+
+			err := m.Migrate(dstStore, srcStore)
+			Ω(err).Should(BeNil())
+			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(dstStore.ListCallCount()).Should(BeEquivalentTo(1))
+			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(0))
+		})
+
 	})
 })
