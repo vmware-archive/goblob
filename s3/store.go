@@ -12,7 +12,6 @@ import (
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
 	"github.com/xchapter7x/lo"
 )
@@ -66,14 +65,16 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 					Filename: fileName,
 					Path:     blobPath,
 				}
-				reader, err := s.Read(blob)
+
+				headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
+					Bucket: aws.String(s.bucketName(blob)),
+					Key:    aws.String(s.path(blob)),
+				})
 				if err != nil {
 					return nil, err
 				}
-				checksum, err := validation.ChecksumReader(reader)
-				if err != nil {
-					return nil, err
-				}
+
+				checksum := *headObjectOutput.ETag
 				blob.Checksum = checksum
 				blobs = append(blobs, blob)
 				bar.Increment()
