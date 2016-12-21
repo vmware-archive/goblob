@@ -1,8 +1,8 @@
-hash: c0391fdcaf74aa90470805518fef876b4c336dd10cd2514972395d88bcfb3cb8
-updated: 2016-12-20T16:23:24.036723733-07:00
+hash: 81632a86f211677541fb4d1955e5f807bc5c930f40c5abed4c4777a4a7475df4
+updated: 2016-12-21T13:14:50.405501212-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 710062ccd039349804d81ef164c16da3c0c1c454
+  version: 83d2e4131e326025fac43eef89873b340f4cc8c0
   subpackages:
   - aws
   - aws/awserr
@@ -34,7 +34,7 @@ imports:
 - name: github.com/cheggaaa/pb
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/go-ini/ini
-  version: 2ba15ac2dc9cdf88c110ec2dc0ced7fa45f5678c
+  version: 6f66b0e091edb3c7b380f7c4f0f884274d550b67
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/mattn/go-runewidth
@@ -45,8 +45,14 @@ imports:
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/xchapter7x/lo
   version: e33b245fc7a8186582208abc2458c2691bff681c
+- name: golang.org/x/net
+  version: 07b51741c1d6423d4a6abab1c49940ec09cb1aaf
+  subpackages:
+  - context
 - name: golang.org/x/sync
   version: 450f422ab23cf9881c94e2db30cac0eb1b7cf80c
+  subpackages:
+  - errgroup
 testImports:
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
