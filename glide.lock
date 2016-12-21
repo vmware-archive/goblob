@@ -1,8 +1,8 @@
-hash: 6a2b5479ac8606974a19df620972ee0bfcefccccb24a2796a1fcbd46073de803
-updated: 2016-12-19T10:52:22.842470082-07:00
+hash: c0391fdcaf74aa90470805518fef876b4c336dd10cd2514972395d88bcfb3cb8
+updated: 2016-12-20T16:23:24.036723733-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 0df2a7ae7e82d2643e4a8fed1b2e36a1cf0580bc
+  version: 710062ccd039349804d81ef164c16da3c0c1c454
   subpackages:
   - aws
   - aws/awserr
@@ -45,6 +45,8 @@ imports:
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/xchapter7x/lo
   version: e33b245fc7a8186582208abc2458c2691bff681c
+- name: golang.org/x/sync
+  version: 450f422ab23cf9881c94e2db30cac0eb1b7cf80c
 testImports:
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24

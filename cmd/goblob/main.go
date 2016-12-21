@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 
 	"github.com/c0-ops/goblob"
@@ -68,17 +69,35 @@ func CreateMigrateNFSCommand(eh *ErrorHandler) cli.Command {
 			cli.StringFlag{Name: "s3-secretkey", Value: "", Usage: "s3 secrety key", EnvVar: "S3_SECRETKEY"},
 			cli.StringFlag{Name: "s3-region", Value: "us-east-1", Usage: "s3 region", EnvVar: "S3_REGION"},
 			cli.StringFlag{Name: "s3-endpoint", Value: "https://s3.amazonaws.com", Usage: "s3 endpoint", EnvVar: "S3_ENDPOINT"},
+			cli.IntFlag{Name: "concurrent-uploads", Value: 20, Usage: "number of concurrent uploads", EnvVar: "CONCURRENT_UPLOADS"},
+			cli.BoolFlag{Name: "use-multipart-uploads", Usage: "use multi-part uploads", EnvVar: "USE_MULTIPART_UPLOADS"},
 		},
 	}
 }
 
 func nfsAction(c *cli.Context) error {
-	migrator := goblob.CloudFoundryMigrator{}
+	cfIdentifier := c.String("cf-identifier")
+	awsAccessKey := c.String("s3-accesskey")
+	awsSecretKey := c.String("s3-secretkey")
+
+	if cfIdentifier == "" {
+		return errors.New("Must provide cf-identifier")
+	}
+	if awsAccessKey == "" {
+		return errors.New("Must provide s3-accesskey")
+	}
+
+	if awsSecretKey == "" {
+		return errors.New("Must provide s3-secretkey")
+	}
+
+	migrator := goblob.New(c.Int("concurrent-uploads"))
 	srcStore := nfs.New(c.String("blobstore-path"))
 	dstStore := s3.New(c.String("cf-identifier"),
-		c.String("s3-accesskey"),
-		c.String("s3-secretkey"),
+		awsAccessKey,
+		awsSecretKey,
 		c.String("s3-region"),
-		c.String("s3-endpoint"))
+		c.String("s3-endpoint"),
+		c.Bool("use-multipart-uploads"))
 	return migrator.Migrate(dstStore, srcStore)
 }

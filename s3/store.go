@@ -1,10 +1,8 @@
 package s3
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"path"
 	"strings"
 
@@ -12,7 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/c0-ops/goblob"
+	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
 	"github.com/xchapter7x/lo"
 )
@@ -22,11 +22,12 @@ var (
 )
 
 type Store struct {
-	session    *session.Session
-	identifier string
+	session             *session.Session
+	identifier          string
+	useMultipartUploads bool
 }
 
-func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string) goblob.Store {
+func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) goblob.Store {
 	return &Store{
 		session: session.New(&aws.Config{
 			Region:           aws.String(region),
@@ -35,7 +36,8 @@ func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string) goblob
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 		}),
-		identifier: identifier,
+		identifier:          identifier,
+		useMultipartUploads: useMultipartUploads,
 	}
 }
 func (s *Store) List() ([]*goblob.Blob, error) {
@@ -67,7 +69,7 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 					Path:     blobPath,
 				}
 
-				checksum, err := s.Checksum(blob)
+				checksum, err := s.checksumFromMetadata(blob)
 				if err != nil {
 					return nil, err
 				}
@@ -91,6 +93,21 @@ func (s *Store) path(blob *goblob.Blob) string {
 }
 
 func (s *Store) Checksum(src *goblob.Blob) (string, error) {
+	if s.useMultipartUploads {
+		getObjectOutput, err := awss3.New(s.session).GetObject(&awss3.GetObjectInput{
+			Bucket: aws.String(s.bucketName(src)),
+			Key:    aws.String(s.path(src)),
+		})
+		if err != nil {
+			return "", err
+		}
+		return validation.ChecksumReader(getObjectOutput.Body)
+	} else {
+		return s.checksumFromETAG(src)
+	}
+}
+
+func (s *Store) checksumFromETAG(src *goblob.Blob) (string, error) {
 	headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
 		Bucket: aws.String(s.bucketName(src)),
 		Key:    aws.String(s.path(src)),
@@ -99,6 +116,22 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 		return "", err
 	}
 	return strings.Replace(*headObjectOutput.ETag, "\"", "", -1), nil
+}
+
+func (s *Store) checksumFromMetadata(src *goblob.Blob) (string, error) {
+	headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
+		Bucket: aws.String(s.bucketName(src)),
+		Key:    aws.String(s.path(src)),
+	})
+	if err != nil {
+		return "", err
+	}
+	value, ok := headObjectOutput.Metadata["Checksum"]
+	if ok {
+		return *value, nil
+	} else {
+		return "", nil
+	}
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {
@@ -122,20 +155,35 @@ func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
 	if err := s.createBucket(bucketName); err != nil {
 		return err
 	}
-	s3Service := awss3.New(s.session)
+	metadataMap := map[string]*string{
+		"Checksum": &dst.Checksum,
+	}
+	if s.useMultipartUploads {
+		uploader := s3manager.NewUploader(s.session)
+		_, err := uploader.Upload(&s3manager.UploadInput{
+			Body:     src,
+			Bucket:   aws.String(bucketName),
+			Key:      aws.String(path),
+			Metadata: metadataMap,
+		}, func(u *s3manager.Uploader) {
+			u.PartSize = 10 * 1024 * 1024 // 10MB part size
+			u.Concurrency = 20
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := awss3.New(s.session).PutObject(&awss3.PutObjectInput{
+			Body:     aws.ReadSeekCloser(src),
+			Bucket:   aws.String(bucketName),
+			Key:      aws.String(path),
+			Metadata: metadataMap,
+		})
+		if err != nil {
+			return err
+		}
+	}
 
-	fileBytes, err := ioutil.ReadAll(src)
-	if err != nil {
-		return err
-	}
-	_, err = s3Service.PutObject(&awss3.PutObjectInput{
-		Body:   bytes.NewReader(fileBytes),
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(path),
-	})
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

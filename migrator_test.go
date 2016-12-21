@@ -18,7 +18,7 @@ var _ = Describe("Migrator", func() {
 	var srcStore *mock.FakeStore
 
 	BeforeEach(func() {
-		m = &CloudFoundryMigrator{}
+		m = New(20)
 		cf = &mock.FakeCloudFoundry{}
 		dstStore = &mock.FakeStore{}
 		srcStore = &mock.FakeStore{}

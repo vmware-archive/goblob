@@ -11,6 +11,7 @@ import (
 	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
+	"golang.org/x/sync/errgroup"
 )
 
 // Store is an NFS blob store
@@ -41,20 +42,37 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	if err := filepath.Walk(s.path, walk); err != nil {
 		return nil, err
 	}
+	if err := s.processBlobsForChecksums(blobs); err != nil {
+		return nil, err
+	}
+	return blobs, nil
+}
+
+func (s *Store) processBlobsForChecksums(blobs []*goblob.Blob) error {
 
 	fmt.Println("Getting list of files from NFS")
 	bar := pb.StartNew(len(blobs))
 	bar.Format("<.- >")
+
+	var g errgroup.Group
 	for _, blob := range blobs {
-		checksum, err := s.Checksum(blob)
-		if (err) != nil {
-			return nil, err
-		}
-		blob.Checksum = checksum
-		bar.Increment()
+		blob := blob
+		g.Go(func() error {
+			checksum, err := s.Checksum(blob)
+			if (err) != nil {
+				return err
+			}
+			blob.Checksum = checksum
+			bar.Increment()
+			return nil
+		})
 	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
 	bar.FinishPrint("Done Getting list of files from NFS")
-	return blobs, nil
+	return nil
 }
 
 func (s *Store) Checksum(src *goblob.Blob) (string, error) {
