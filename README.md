@@ -6,7 +6,7 @@
 - make executable
 ``` chmod +x goblob-linux ```
 - run
-```./goblob-linux migrate --cf-identifier uniqueid --s3-accesskey XXXX --s3-secretkey XXXX ```
+```./goblob-linux migrate --cf-identifier uniqueid --s3-endpoint XXXX --s3-accesskey XXXX --s3-secretkey XXXX ```
 
 ## To run S3 tests without ./testrunner need to startup a minio docker container
 
