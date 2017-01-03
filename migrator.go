@@ -108,7 +108,7 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	}
 
 	if len(blobsToMigrate) > 0 {
-		bar := pb.StartNew(len(blobs))
+		bar := pb.StartNew(len(blobsToMigrate))
 		bar.Format("<.- >")
 		m.blobMigrator.Init(dst, src, bar)
 		return migrate(blobsToMigrate, m.blobMigrator, m.concurrentMigrators)
