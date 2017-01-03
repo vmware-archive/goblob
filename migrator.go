@@ -12,11 +12,66 @@ import (
 // CloudFoundryMigrator moves blobs from Cloud Foundry to another store
 type CloudFoundryMigrator struct {
 	concurrentMigrators int
+	blobMigrator        BlobMigrator
+}
+
+type StatusBar interface {
+	Increment() int
+	FinishPrint(str string)
+}
+
+type BlobMigrator interface {
+	MigrateSingleBlob(blob *Blob) error
+	Init(dst Store, src Store, bar StatusBar)
+	Finish(msg string)
+	SingleBlobError(blob *Blob, err error) error
+}
+
+type BlobMigrate struct {
+	bar StatusBar
+	dst Store
+	src Store
+}
+
+func (s *BlobMigrate) Init(dst Store, src Store, bar StatusBar) {
+	s.dst = dst
+	s.src = src
+	s.bar = bar
+}
+
+func (s *BlobMigrate) SingleBlobError(blob *Blob, err error) error {
+	return fmt.Errorf("error at %s: %s", path.Join(blob.Path, blob.Filename), err.Error())
+}
+
+func (s *BlobMigrate) Finish(msg string) {
+	s.bar.FinishPrint(msg)
+}
+
+func (s *BlobMigrate) MigrateSingleBlob(blob *Blob) error {
+	reader, err := s.src.Read(blob)
+	if err != nil {
+		return s.SingleBlobError(blob, err)
+	}
+	err = s.dst.Write(blob, reader)
+	if err != nil {
+		return s.SingleBlobError(blob, err)
+	}
+	checksum, err := s.dst.Checksum(blob)
+	if err != nil {
+		return s.SingleBlobError(blob, err)
+	}
+	if checksum != blob.Checksum {
+		err = fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
+		return s.SingleBlobError(blob, err)
+	}
+	s.bar.Increment()
+	return nil
 }
 
 func New(concurrent int) *CloudFoundryMigrator {
 	return &CloudFoundryMigrator{
 		concurrentMigrators: concurrent,
+		blobMigrator:        new(BlobMigrate),
 	}
 }
 
@@ -53,13 +108,16 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	}
 
 	if len(blobsToMigrate) > 0 {
-		return m.migrate(dst, src, blobsToMigrate)
+		bar := pb.StartNew(len(blobs))
+		bar.Format("<.- >")
+		m.blobMigrator.Init(dst, src, bar)
+		return migrate(blobsToMigrate, m.blobMigrator, m.concurrentMigrators)
 	}
 
 	return nil
 }
 
-func (m *CloudFoundryMigrator) migrate(dst Store, src Store, blobs []*Blob) error {
+func migrate(blobs []*Blob, blobMigrator BlobMigrator, concurrentMigrators int) error {
 	var g errgroup.Group
 
 	blobsToMigrate := make(chan *Blob, len(blobs))
@@ -69,37 +127,23 @@ func (m *CloudFoundryMigrator) migrate(dst Store, src Store, blobs []*Blob) erro
 	close(blobsToMigrate)
 
 	fmt.Println("Migrating blobs from NFS to S3")
-	bar := pb.StartNew(len(blobs))
-	bar.Format("<.- >")
 
-	for i := 0; i < m.concurrentMigrators; i++ {
+	for i := 0; i < concurrentMigrators; i++ {
 		g.Go(func() error {
 			for blob := range blobsToMigrate {
-				reader, err := src.Read(blob)
-				if err != nil {
+
+				if err := blobMigrator.MigrateSingleBlob(blob); err != nil {
 					return err
 				}
-				err = dst.Write(blob, reader)
-				if err != nil {
-					return err
-				}
-				checksum, err := dst.Checksum(blob)
-				if err != nil {
-					return err
-				}
-				if checksum != blob.Checksum {
-					return fmt.Errorf("Checksum [%s] does not match [%s] for [%s]", checksum, blob.Checksum, path.Join(blob.Path, blob.Filename))
-				}
-				bar.Increment()
 			}
 			return nil
 		})
 	}
 	if err := g.Wait(); err != nil {
-		bar.FinishPrint("Error Migrating blobs from NFS to S3")
+		blobMigrator.Finish("Error Migrating blobs from NFS to S3")
 		return err
 	}
-	bar.FinishPrint("Done Migrating blobs from NFS to S3")
+	blobMigrator.Finish("Done Migrating blobs from NFS to S3")
 	return nil
 }
 

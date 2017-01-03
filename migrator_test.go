@@ -6,6 +6,7 @@ import (
 
 	. "github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/mock"
+	"github.com/cheggaaa/pb"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -22,6 +23,145 @@ var _ = Describe("Migrator", func() {
 		cf = &mock.FakeCloudFoundry{}
 		dstStore = &mock.FakeStore{}
 		srcStore = &mock.FakeStore{}
+	})
+
+	Describe("BlobMigrator", func() {
+		var controlBlob *Blob
+		var err error
+
+		Context("when calling SingleBlobError", func() {
+			controlFilename := "filename"
+			controlFilepath := "pathapth"
+			controlErrorMessage := "messsage of something bad"
+			It("should compose a new error message from blob info and error info given", func() {
+				bm := new(BlobMigrate)
+				err := bm.SingleBlobError(&Blob{
+					Filename: controlFilename,
+					Path:     controlFilepath,
+				}, errors.New(controlErrorMessage))
+				Ω(err.Error()).Should(ContainSubstring(controlFilename))
+				Ω(err.Error()).Should(ContainSubstring(controlFilepath))
+				Ω(err.Error()).Should(ContainSubstring(controlErrorMessage))
+			})
+		})
+
+		Context("when called on a valid src, dst and blob set", func() {
+			BeforeEach(func() {
+				controlBlob = &Blob{
+					Filename: "aabbfile",
+					Checksum: "5d41402abc4b2a76b9719d911017c592",
+					Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+				}
+				cf.StoreReturns(srcStore, nil)
+				srcStore.ListReturns([]*Blob{controlBlob}, nil)
+				reader := bytes.NewReader([]byte("hello"))
+				srcStore.ReadReturns(reader, nil)
+				dstStore.WriteReturns(nil)
+				dstStore.ChecksumReturns(controlBlob.Checksum, nil)
+				bm := new(BlobMigrate)
+				bm.Init(dstStore, srcStore, pb.StartNew(1))
+				err = bm.MigrateSingleBlob(controlBlob)
+			})
+			It("Should complete successfully", func() {
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+		})
+
+		Context("when called on a src/dst/blob set which can not be migrated", func() {
+
+			BeforeEach(func() {
+				controlBlob = &Blob{
+					Filename: "aabbfile",
+					Checksum: "5d41402abc4b2a76b9719d911017c592",
+					Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
+				}
+				cf.StoreReturns(srcStore, nil)
+			})
+
+			Context("when we can not read from the source", func() {
+				var controlMessage = "something is wrong with reading"
+				var controlError = errors.New(controlMessage)
+				BeforeEach(func() {
+					srcStore.ReadReturns(nil, controlError)
+					bm := new(BlobMigrate)
+					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					err = bm.MigrateSingleBlob(controlBlob)
+				})
+
+				It("should yield an error", func() {
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(ContainSubstring(controlMessage))
+				})
+
+				It("should add the filename to the error message", func() {
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Filename))
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Path))
+				})
+			})
+
+			Context("when we can not write to the destination", func() {
+				var controlMessage = "something is wrong with writing"
+				var controlError = errors.New(controlMessage)
+				BeforeEach(func() {
+					dstStore.WriteReturns(controlError)
+					bm := new(BlobMigrate)
+					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					err = bm.MigrateSingleBlob(controlBlob)
+				})
+				It("should yield an error", func() {
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(ContainSubstring(controlMessage))
+				})
+
+				It("should add the filename to the error message", func() {
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Filename))
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Path))
+				})
+			})
+
+			Context("when we can not read the checksum", func() {
+				var controlMessage = "something is wrong with reading the checksum"
+				var controlError = errors.New(controlMessage)
+				BeforeEach(func() {
+					dstStore.ChecksumReturns("", controlError)
+					bm := new(BlobMigrate)
+					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					err = bm.MigrateSingleBlob(controlBlob)
+				})
+				It("should yield an error", func() {
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(ContainSubstring(controlMessage))
+				})
+
+				It("should add the filename to the error message", func() {
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Filename))
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Path))
+				})
+			})
+
+			Context("when the checksums do not match", func() {
+				BeforeEach(func() {
+					srcStore.ListReturns([]*Blob{controlBlob}, nil)
+					dstStore.ListReturns([]*Blob{controlBlob}, nil)
+					reader := bytes.NewReader([]byte("hello"))
+					srcStore.ReadReturns(reader, nil)
+					dstStore.WriteReturns(nil)
+					dstStore.ReadReturns(reader, nil)
+					bm := new(BlobMigrate)
+					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					err = bm.MigrateSingleBlob(controlBlob)
+				})
+				It("should yield an error", func() {
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(ContainSubstring("Checksum [] does not match"))
+				})
+
+				It("should add the filename to the error message", func() {
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Filename))
+					Ω(err.Error()).Should(ContainSubstring(controlBlob.Path))
+				})
+			})
+		})
 	})
 
 	Describe("When the source store has no files", func() {
@@ -84,7 +224,8 @@ var _ = Describe("Migrator", func() {
 		})
 
 		It("Should error on read from source", func() {
-			controlErr := errors.New("got an error")
+			controlErrorMessage := "got an error"
+			controlErr := errors.New(controlErrorMessage)
 			cf.StoreReturns(srcStore, nil)
 			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
@@ -95,13 +236,14 @@ var _ = Describe("Migrator", func() {
 			srcStore.ReadReturns(reader, controlErr)
 
 			err := m.Migrate(dstStore, srcStore)
-			Ω(err).Should(BeEquivalentTo(controlErr))
+			Ω(err.Error()).Should(ContainSubstring(controlErrorMessage))
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
 		})
 
 		It("Should error on write", func() {
-			controlErr := errors.New("got an error")
+			controlErrorMessage := "got an error"
+			controlErr := errors.New(controlErrorMessage)
 			cf.StoreReturns(srcStore, nil)
 			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
@@ -114,7 +256,7 @@ var _ = Describe("Migrator", func() {
 			dstStore.ReadReturns(reader, nil)
 
 			err := m.Migrate(dstStore, srcStore)
-			Ω(err).Should(BeEquivalentTo(controlErr))
+			Ω(err.Error()).Should(ContainSubstring(controlErrorMessage))
 			Ω(srcStore.ListCallCount()).Should(BeEquivalentTo(1))
 			Ω(srcStore.ReadCallCount()).Should(BeEquivalentTo(1))
 			Ω(dstStore.WriteCallCount()).Should(BeEquivalentTo(1))
@@ -146,7 +288,7 @@ var _ = Describe("Migrator", func() {
 		})
 
 		It("Should error on checksum mismatch", func() {
-			controlErr := errors.New("Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd] for [/var/vcap/store/shared/cc-buildpacks/aa/bb/aabbfile]")
+			controlErr := errors.New("error at /var/vcap/store/shared/cc-buildpacks/aa/bb/aabbfile: Checksum [5d41402abc4b2a76b9719d911017c592] does not match [abcd]")
 			cf.StoreReturns(srcStore, nil)
 			srcStore.ListReturns([]*Blob{&Blob{
 				Filename: "aabbfile",
