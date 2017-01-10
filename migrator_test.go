@@ -7,7 +7,6 @@ import (
 
 	. "github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/mock"
-	"github.com/cheggaaa/pb"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -60,7 +59,7 @@ var _ = Describe("Migrator", func() {
 				dstStore.WriteReturns(nil)
 				dstStore.ChecksumReturns(controlBlob.Checksum, nil)
 				bm := new(BlobMigrate)
-				bm.Init(dstStore, srcStore, pb.StartNew(1))
+				bm.Init(dstStore, srcStore)
 				err = bm.MigrateSingleBlob(controlBlob)
 			})
 			It("Should complete successfully", func() {
@@ -86,7 +85,7 @@ var _ = Describe("Migrator", func() {
 				BeforeEach(func() {
 					srcStore.ReadReturns(nil, controlError)
 					bm := new(BlobMigrate)
-					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					bm.Init(dstStore, srcStore)
 					err = bm.MigrateSingleBlob(controlBlob)
 				})
 
@@ -107,7 +106,7 @@ var _ = Describe("Migrator", func() {
 				BeforeEach(func() {
 					dstStore.WriteReturns(controlError)
 					bm := new(BlobMigrate)
-					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					bm.Init(dstStore, srcStore)
 					err = bm.MigrateSingleBlob(controlBlob)
 				})
 				It("should yield an error", func() {
@@ -127,7 +126,7 @@ var _ = Describe("Migrator", func() {
 				BeforeEach(func() {
 					dstStore.ChecksumReturns("", controlError)
 					bm := new(BlobMigrate)
-					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					bm.Init(dstStore, srcStore)
 					err = bm.MigrateSingleBlob(controlBlob)
 				})
 				It("should yield an error", func() {
@@ -150,7 +149,7 @@ var _ = Describe("Migrator", func() {
 					dstStore.WriteReturns(nil)
 					dstStore.ReadReturns(reader, nil)
 					bm := new(BlobMigrate)
-					bm.Init(dstStore, srcStore, pb.StartNew(1))
+					bm.Init(dstStore, srcStore)
 					err = bm.MigrateSingleBlob(controlBlob)
 				})
 				It("should yield an error", func() {

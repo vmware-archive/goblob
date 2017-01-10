@@ -22,29 +22,22 @@ type StatusBar interface {
 
 type BlobMigrator interface {
 	MigrateSingleBlob(blob *Blob) error
-	Init(dst Store, src Store, bar StatusBar)
-	Finish(msg string)
+	Init(dst Store, src Store)
 	SingleBlobError(blob *Blob, err error) error
 }
 
 type BlobMigrate struct {
-	bar StatusBar
 	dst Store
 	src Store
 }
 
-func (s *BlobMigrate) Init(dst Store, src Store, bar StatusBar) {
+func (s *BlobMigrate) Init(dst Store, src Store) {
 	s.dst = dst
 	s.src = src
-	s.bar = bar
 }
 
 func (s *BlobMigrate) SingleBlobError(blob *Blob, err error) error {
 	return fmt.Errorf("error at %s: %s", path.Join(blob.Path, blob.Filename), err.Error())
-}
-
-func (s *BlobMigrate) Finish(msg string) {
-	s.bar.FinishPrint(msg)
 }
 
 func (s *BlobMigrate) MigrateSingleBlob(blob *Blob) error {
@@ -66,7 +59,6 @@ func (s *BlobMigrate) MigrateSingleBlob(blob *Blob) error {
 		err = fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
 		return s.SingleBlobError(blob, err)
 	}
-	s.bar.Increment()
 	return nil
 }
 
@@ -98,7 +90,7 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 
 	bar := pb.StartNew(len(blobs))
 	bar.Format("<.- >")
-	m.blobMigrator.Init(dst, src, bar)
+	m.blobMigrator.Init(dst, src)
 
 	fmt.Printf("Migrating blobs from %s to %s\n", src.Name(), dst.Name())
 
@@ -121,16 +113,17 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 				if err != nil {
 					return err
 				}
+				bar.Increment()
 			}
 			return nil
 		})
 	}
 
 	if err := g.Wait(); err != nil {
-		m.blobMigrator.Finish(fmt.Sprintf("Error migrating blobs from %s to %s\n", src.Name(), dst.Name()))
+		bar.FinishPrint(fmt.Sprintf("Error migrating blobs from %s to %s\n", src.Name(), dst.Name()))
 		return err
 	}
 
-	m.blobMigrator.Finish(fmt.Sprintf("Done migrating blobs from %s to %s\n", src.Name(), dst.Name()))
+	bar.FinishPrint(fmt.Sprintf("Done migrating blobs from %s to %s\n", src.Name(), dst.Name()))
 	return nil
 }
