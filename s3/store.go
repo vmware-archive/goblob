@@ -101,6 +101,7 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		defer getObjectOutput.Body.Close()
 		return validation.ChecksumReader(getObjectOutput.Body)
 	} else {
 		return s.checksumFromETAG(src)
