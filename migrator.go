@@ -96,49 +96,41 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return errors.New("the source store has no files")
 	}
 
-	var blobsToMigrate []*Blob
-	for _, blob := range blobs {
-		if !dst.Exists(blob) {
-			blobsToMigrate = append(blobsToMigrate, blob)
-		}
-	}
-
-	if len(blobsToMigrate) > 0 {
-		bar := pb.StartNew(len(blobsToMigrate))
-		bar.Format("<.- >")
-		m.blobMigrator.Init(dst, src, bar)
-		return migrate(blobsToMigrate, m.blobMigrator, m.concurrentMigrators)
-	}
-
-	return nil
-}
-
-func migrate(blobs []*Blob, blobMigrator BlobMigrator, concurrentMigrators int) error {
-	var g errgroup.Group
-
-	blobsToMigrate := make(chan *Blob, len(blobs))
-	for _, blob := range blobs {
-		blobsToMigrate <- blob
-	}
-	close(blobsToMigrate)
+	bar := pb.StartNew(len(blobs))
+	bar.Format("<.- >")
+	m.blobMigrator.Init(dst, src, bar)
 
 	fmt.Println("Migrating blobs from NFS to S3")
 
-	for i := 0; i < concurrentMigrators; i++ {
+	blobsToMigrate := make(chan *Blob)
+	go func() {
+		for _, blob := range blobs {
+			if !dst.Exists(blob) {
+				blobsToMigrate <- blob
+			}
+		}
+
+		close(blobsToMigrate)
+	}()
+
+	var g errgroup.Group
+	for i := 0; i < m.concurrentMigrators; i++ {
 		g.Go(func() error {
 			for blob := range blobsToMigrate {
-
-				if err := blobMigrator.MigrateSingleBlob(blob); err != nil {
+				err := m.blobMigrator.MigrateSingleBlob(blob)
+				if err != nil {
 					return err
 				}
 			}
 			return nil
 		})
 	}
+
 	if err := g.Wait(); err != nil {
-		blobMigrator.Finish("Error Migrating blobs from NFS to S3")
+		m.blobMigrator.Finish("Error Migrating blobs from NFS to S3")
 		return err
 	}
-	blobMigrator.Finish("Done Migrating blobs from NFS to S3")
+
+	m.blobMigrator.Finish("Done Migrating blobs from NFS to S3")
 	return nil
 }
