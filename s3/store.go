@@ -219,3 +219,12 @@ func (s *Store) createBucket(bucketName string) error {
 	return err
 
 }
+
+func (s *Store) Exists(blob *goblob.Blob) bool {
+	checksum, err := s.Checksum(blob)
+	if err != nil {
+		return false
+	}
+
+	return checksum == blob.Checksum
+}

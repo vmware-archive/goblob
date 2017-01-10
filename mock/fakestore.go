@@ -43,6 +43,14 @@ type FakeStore struct {
 	writeReturns struct {
 		result1 error
 	}
+	ExistsStub        func(*goblob.Blob) bool
+	existsMutex       sync.RWMutex
+	existsArgsForCall []struct {
+		arg1 *goblob.Blob
+	}
+	existsReturns struct {
+		result1 bool
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -175,6 +183,39 @@ func (fake *FakeStore) WriteReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeStore) Exists(arg1 *goblob.Blob) bool {
+	fake.existsMutex.Lock()
+	fake.existsArgsForCall = append(fake.existsArgsForCall, struct {
+		arg1 *goblob.Blob
+	}{arg1})
+	fake.recordInvocation("Exists", []interface{}{arg1})
+	fake.existsMutex.Unlock()
+	if fake.ExistsStub != nil {
+		return fake.ExistsStub(arg1)
+	} else {
+		return fake.existsReturns.result1
+	}
+}
+
+func (fake *FakeStore) ExistsCallCount() int {
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
+	return len(fake.existsArgsForCall)
+}
+
+func (fake *FakeStore) ExistsArgsForCall(i int) *goblob.Blob {
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
+	return fake.existsArgsForCall[i].arg1
+}
+
+func (fake *FakeStore) ExistsReturns(result1 bool) {
+	fake.ExistsStub = nil
+	fake.existsReturns = struct {
+		result1 bool
+	}{result1}
+}
+
 func (fake *FakeStore) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -186,6 +227,8 @@ func (fake *FakeStore) Invocations() map[string][][]interface{} {
 	defer fake.checksumMutex.RUnlock()
 	fake.writeMutex.RLock()
 	defer fake.writeMutex.RUnlock()
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
 	return fake.invocations
 }
 

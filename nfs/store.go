@@ -85,3 +85,12 @@ func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
 func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
 	return errors.New("writing to the NFS store is not supported")
 }
+
+func (s *Store) Exists(blob *goblob.Blob) bool {
+	checksum, err := s.Checksum(blob)
+	if err != nil {
+		return false
+	}
+
+	return checksum == blob.Checksum
+}

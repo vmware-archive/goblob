@@ -96,15 +96,9 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 		return errors.New("the source store has no files")
 	}
 
-	migratedBlobs, err := dst.List()
-	if err != nil {
-		return err
-	}
-
 	var blobsToMigrate []*Blob
-
 	for _, blob := range blobs {
-		if !m.alreadyMigrated(migratedBlobs, blob) {
+		if !dst.Exists(blob) {
 			blobsToMigrate = append(blobsToMigrate, blob)
 		}
 	}
@@ -147,13 +141,4 @@ func migrate(blobs []*Blob, blobMigrator BlobMigrator, concurrentMigrators int) 
 	}
 	blobMigrator.Finish("Done Migrating blobs from NFS to S3")
 	return nil
-}
-
-func (m *CloudFoundryMigrator) alreadyMigrated(migratedBlobs []*Blob, blob *Blob) bool {
-	for _, migratedBlob := range migratedBlobs {
-		if migratedBlob.Equal(*blob) {
-			return true
-		}
-	}
-	return false
 }

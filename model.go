@@ -19,6 +19,7 @@ type Store interface {
 	Read(src *Blob) (io.ReadCloser, error)
 	Checksum(src *Blob) (string, error)
 	Write(dst *Blob, src io.Reader) error
+	Exists(*Blob) bool
 }
 
 // Blob is a file in a blob store
