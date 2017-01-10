@@ -108,9 +108,9 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 		}
 		defer getObjectOutput.Body.Close()
 		return validation.ChecksumReader(getObjectOutput.Body)
-	} else {
-		return s.checksumFromETAG(src)
 	}
+
+	return s.checksumFromETAG(src)
 }
 
 func (s *Store) checksumFromETAG(src *goblob.Blob) (string, error) {
@@ -135,9 +135,9 @@ func (s *Store) checksumFromMetadata(src *goblob.Blob) (string, error) {
 	value, ok := headObjectOutput.Metadata["Checksum"]
 	if ok {
 		return *value, nil
-	} else {
-		return "", nil
 	}
+
+	return "", nil
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {

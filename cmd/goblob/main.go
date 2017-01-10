@@ -15,9 +15,6 @@ var (
 	VERSION = ""
 )
 
-const mainLogTag = "main"
-
-//ErrorHandler -
 type ErrorHandler struct {
 	ExitCode int
 	Error    error
@@ -37,7 +34,6 @@ func main() {
 
 // NewApp creates a new cli app
 func NewApp(eh *ErrorHandler) *cli.App {
-	//cli.AppHelpTemplate = CfopsHelpTemplate
 	app := cli.NewApp()
 	app.Version = VERSION
 	app.Name = "goblob"
@@ -64,7 +60,7 @@ func CreateMigrateNFSCommand(eh *ErrorHandler) cli.Command {
 		Description: "migrate nfs blobs to s3",
 		Flags: []cli.Flag{
 			cli.StringFlag{Name: "blobstore-path", Value: "/var/vcap/store/shared", Usage: "path to root of blobstore", EnvVar: "BLOBSTORE_PATH"},
-			cli.StringFlag{Name: "cf-identifier", Value: "", Usage: "unique identifier for cloud foundary deployment", EnvVar: "CF_IDENTIFIER"},
+			cli.StringFlag{Name: "cf-identifier", Value: "", Usage: "unique identifier for Cloud Foundry deployment", EnvVar: "CF_IDENTIFIER"},
 			cli.StringFlag{Name: "s3-accesskey", Value: "", Usage: "s3 access key", EnvVar: "S3_ACCESSKEY"},
 			cli.StringFlag{Name: "s3-secretkey", Value: "", Usage: "s3 secrety key", EnvVar: "S3_SECRETKEY"},
 			cli.StringFlag{Name: "s3-region", Value: "us-east-1", Usage: "s3 region", EnvVar: "S3_REGION"},
@@ -93,11 +89,13 @@ func nfsAction(c *cli.Context) error {
 
 	migrator := goblob.New(c.Int("concurrent-uploads"))
 	srcStore := nfs.New(c.String("blobstore-path"))
-	dstStore := s3.New(c.String("cf-identifier"),
+	dstStore := s3.New(
+		c.String("cf-identifier"),
 		awsAccessKey,
 		awsSecretKey,
 		c.String("s3-region"),
 		c.String("s3-endpoint"),
 		c.Bool("use-multipart-uploads"))
+
 	return migrator.Migrate(dstStore, srcStore)
 }
