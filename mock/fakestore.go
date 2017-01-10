@@ -9,6 +9,12 @@ import (
 )
 
 type FakeStore struct {
+	NameStub        func() string
+	nameMutex       sync.RWMutex
+	nameArgsForCall []struct{}
+	nameReturns     struct {
+		result1 string
+	}
 	ListStub        func() ([]*goblob.Blob, error)
 	listMutex       sync.RWMutex
 	listArgsForCall []struct{}
@@ -53,6 +59,31 @@ type FakeStore struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeStore) Name() string {
+	fake.nameMutex.Lock()
+	fake.nameArgsForCall = append(fake.nameArgsForCall, struct{}{})
+	fake.recordInvocation("Name", []interface{}{})
+	fake.nameMutex.Unlock()
+	if fake.NameStub != nil {
+		return fake.NameStub()
+	} else {
+		return fake.nameReturns.result1
+	}
+}
+
+func (fake *FakeStore) NameCallCount() int {
+	fake.nameMutex.RLock()
+	defer fake.nameMutex.RUnlock()
+	return len(fake.nameArgsForCall)
+}
+
+func (fake *FakeStore) NameReturns(result1 string) {
+	fake.NameStub = nil
+	fake.nameReturns = struct {
+		result1 string
+	}{result1}
 }
 
 func (fake *FakeStore) List() ([]*goblob.Blob, error) {
@@ -219,6 +250,8 @@ func (fake *FakeStore) ExistsReturns(result1 bool) {
 func (fake *FakeStore) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.nameMutex.RLock()
+	defer fake.nameMutex.RUnlock()
 	fake.listMutex.RLock()
 	defer fake.listMutex.RUnlock()
 	fake.readMutex.RLock()

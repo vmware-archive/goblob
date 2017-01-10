@@ -40,6 +40,11 @@ func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMul
 		useMultipartUploads: useMultipartUploads,
 	}
 }
+
+func (s *Store) Name() string {
+	return "S3"
+}
+
 func (s *Store) List() ([]*goblob.Blob, error) {
 	var blobs []*goblob.Blob
 	s3Service := awss3.New(s.session)

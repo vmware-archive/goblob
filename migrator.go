@@ -100,7 +100,7 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	bar.Format("<.- >")
 	m.blobMigrator.Init(dst, src, bar)
 
-	fmt.Println("Migrating blobs from NFS to S3")
+	fmt.Printf("Migrating blobs from %s to %s\n", src.Name(), dst.Name())
 
 	blobsToMigrate := make(chan *Blob)
 	go func() {
@@ -127,10 +127,10 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 	}
 
 	if err := g.Wait(); err != nil {
-		m.blobMigrator.Finish("Error Migrating blobs from NFS to S3")
+		m.blobMigrator.Finish(fmt.Sprintf("Error migrating blobs from %s to %s\n", src.Name(), dst.Name()))
 		return err
 	}
 
-	m.blobMigrator.Finish("Done Migrating blobs from NFS to S3")
+	m.blobMigrator.Finish(fmt.Sprintf("Done migrating blobs from %s to %s\n", src.Name(), dst.Name()))
 	return nil
 }

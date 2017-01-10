@@ -26,6 +26,10 @@ func New(path string) goblob.Store {
 	}
 }
 
+func (s *Store) Name() string {
+	return "NFS"
+}
+
 // List fetches a list of files with checksums
 func (s *Store) List() ([]*goblob.Blob, error) {
 	var blobs []*goblob.Blob

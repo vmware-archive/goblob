@@ -15,6 +15,7 @@ type CloudFoundry interface {
 // Store lists, reads, and writes blobs
 //go:generate counterfeiter -o ./mock/fakestore.go . Store
 type Store interface {
+	Name() string
 	List() ([]*Blob, error)
 	Read(src *Blob) (io.ReadCloser, error)
 	Checksum(src *Blob) (string, error)
