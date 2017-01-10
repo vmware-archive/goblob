@@ -79,7 +79,7 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 	return validation.Checksum(path.Join(s.path, src.Path, src.Filename))
 }
 
-func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {
+func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
 	return os.Open(path.Join(s.path, src.Path, src.Filename))
 }
 func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {

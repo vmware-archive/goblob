@@ -16,13 +16,13 @@ type FakeStore struct {
 		result1 []*goblob.Blob
 		result2 error
 	}
-	ReadStub        func(src *goblob.Blob) (io.Reader, error)
+	ReadStub        func(src *goblob.Blob) (io.ReadCloser, error)
 	readMutex       sync.RWMutex
 	readArgsForCall []struct {
 		src *goblob.Blob
 	}
 	readReturns struct {
-		result1 io.Reader
+		result1 io.ReadCloser
 		result2 error
 	}
 	ChecksumStub        func(src *goblob.Blob) (string, error)
@@ -73,7 +73,7 @@ func (fake *FakeStore) ListReturns(result1 []*goblob.Blob, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeStore) Read(src *goblob.Blob) (io.Reader, error) {
+func (fake *FakeStore) Read(src *goblob.Blob) (io.ReadCloser, error) {
 	fake.readMutex.Lock()
 	fake.readArgsForCall = append(fake.readArgsForCall, struct {
 		src *goblob.Blob
@@ -99,10 +99,10 @@ func (fake *FakeStore) ReadArgsForCall(i int) *goblob.Blob {
 	return fake.readArgsForCall[i].src
 }
 
-func (fake *FakeStore) ReadReturns(result1 io.Reader, result2 error) {
+func (fake *FakeStore) ReadReturns(result1 io.ReadCloser, result2 error) {
 	fake.ReadStub = nil
 	fake.readReturns = struct {
-		result1 io.Reader
+		result1 io.ReadCloser
 		result2 error
 	}{result1, result2}
 }

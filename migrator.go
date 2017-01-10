@@ -52,6 +52,8 @@ func (s *BlobMigrate) MigrateSingleBlob(blob *Blob) error {
 	if err != nil {
 		return s.SingleBlobError(blob, err)
 	}
+	defer reader.Close()
+
 	err = s.dst.Write(blob, reader)
 	if err != nil {
 		return s.SingleBlobError(blob, err)

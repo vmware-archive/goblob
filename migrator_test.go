@@ -3,6 +3,7 @@ package goblob_test
 import (
 	"bytes"
 	"errors"
+	"io/ioutil"
 
 	. "github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/mock"
@@ -54,7 +55,7 @@ var _ = Describe("Migrator", func() {
 				}
 				cf.StoreReturns(srcStore, nil)
 				srcStore.ListReturns([]*Blob{controlBlob}, nil)
-				reader := bytes.NewReader([]byte("hello"))
+				reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 				srcStore.ReadReturns(reader, nil)
 				dstStore.WriteReturns(nil)
 				dstStore.ChecksumReturns(controlBlob.Checksum, nil)
@@ -68,7 +69,6 @@ var _ = Describe("Migrator", func() {
 		})
 
 		Context("when called on a src/dst/blob set which can not be migrated", func() {
-
 			BeforeEach(func() {
 				controlBlob = &Blob{
 					Filename: "aabbfile",
@@ -76,6 +76,8 @@ var _ = Describe("Migrator", func() {
 					Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 				}
 				cf.StoreReturns(srcStore, nil)
+				reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
+				srcStore.ReadReturns(reader, nil)
 			})
 
 			Context("when we can not read from the source", func() {
@@ -143,7 +145,7 @@ var _ = Describe("Migrator", func() {
 				BeforeEach(func() {
 					srcStore.ListReturns([]*Blob{controlBlob}, nil)
 					dstStore.ListReturns([]*Blob{controlBlob}, nil)
-					reader := bytes.NewReader([]byte("hello"))
+					reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 					srcStore.ReadReturns(reader, nil)
 					dstStore.WriteReturns(nil)
 					dstStore.ReadReturns(reader, nil)
@@ -207,7 +209,7 @@ var _ = Describe("Migrator", func() {
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
 			dstStore.ChecksumReturns("5d41402abc4b2a76b9719d911017c592", nil)
@@ -232,7 +234,7 @@ var _ = Describe("Migrator", func() {
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, controlErr)
 
 			err := m.Migrate(dstStore, srcStore)
@@ -250,7 +252,7 @@ var _ = Describe("Migrator", func() {
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(controlErr)
 			dstStore.ReadReturns(reader, nil)
@@ -274,7 +276,7 @@ var _ = Describe("Migrator", func() {
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
 			dstStore.ListReturns(nil, controlErr)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
 			dstStore.ReadReturns(reader, controlErr)
@@ -295,7 +297,7 @@ var _ = Describe("Migrator", func() {
 				Checksum: "abcd",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
 			dstStore.ChecksumReturns("5d41402abc4b2a76b9719d911017c592", nil)
@@ -323,7 +325,7 @@ var _ = Describe("Migrator", func() {
 				Checksum: "5d41402abc4b2a76b9719d911017c592",
 				Path:     "/var/vcap/store/shared/cc-buildpacks/aa/bb",
 			}}, nil)
-			reader := bytes.NewReader([]byte("hello"))
+			reader := ioutil.NopCloser(bytes.NewReader([]byte("hello")))
 			srcStore.ReadReturns(reader, nil)
 			dstStore.WriteReturns(nil)
 			dstStore.ReadReturns(reader, nil)

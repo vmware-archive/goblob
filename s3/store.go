@@ -134,7 +134,7 @@ func (s *Store) checksumFromMetadata(src *goblob.Blob) (string, error) {
 	}
 }
 
-func (s *Store) Read(src *goblob.Blob) (io.Reader, error) {
+func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
 	bucketName := s.bucketName(src)
 	path := s.path(src)
 	lo.G.Debug("Getting", path, "from bucket", bucketName)
