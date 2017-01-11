@@ -42,7 +42,7 @@ var _ = Describe("S3Store", func() {
 	testsToRun("non Multi-part", cleanup, config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, false))
 })
 
-func testsToRun(testSuiteName string, cleanup bool, config *aws.Config, controlBucket string, store goblob.Store) {
+func testsToRun(testSuiteName string, cleanup bool, config *aws.Config, controlBucket string, store goblob.Blobstore) {
 	AfterEach(func() {
 		if cleanup {
 			session := session.New(config)

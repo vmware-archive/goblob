@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Describe("NFSStore", func() {
-	var store goblob.Store
+	var store goblob.Blobstore
 	BeforeEach(func() {
 		store = New("fixtures")
 	})

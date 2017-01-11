@@ -97,7 +97,7 @@ func nfsAction(c *cli.Context) error {
 		c.Bool("use-multipart-uploads"))
 
 	blobMigrator := goblob.NewBlobMigrator(dstStore, srcStore)
-	migrator := goblob.New(c.Int("concurrent-uploads"), blobMigrator)
+	blobStoreMigrator := goblob.NewBlobstoreMigrator(c.Int("concurrent-uploads"), blobMigrator)
 
-	return migrator.Migrate(dstStore, srcStore)
+	return blobStoreMigrator.Migrate(dstStore, srcStore)
 }

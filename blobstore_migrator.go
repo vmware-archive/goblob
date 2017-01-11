@@ -3,17 +3,29 @@ package goblob
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/cheggaaa/pb"
 	"golang.org/x/sync/errgroup"
 )
 
-// Migrator moves blobs from one Store to another
-type Migrator interface {
-	Migrate(dst Store, src Store) error
+//go:generate counterfeiter . Blobstore
+
+type Blobstore interface {
+	Name() string
+	List() ([]*Blob, error)
+	Read(src *Blob) (io.ReadCloser, error)
+	Checksum(src *Blob) (string, error)
+	Write(dst *Blob, src io.Reader) error
+	Exists(*Blob) bool
 }
 
-type migrator struct {
+// BlobstoreMigrator moves blobs from one blobstore to another
+type BlobstoreMigrator interface {
+	Migrate(dst Blobstore, src Blobstore) error
+}
+
+type blobstoreMigrator struct {
 	concurrentMigrators int
 	blobMigrator        BlobMigrator
 }
@@ -23,14 +35,14 @@ type StatusBar interface {
 	FinishPrint(str string)
 }
 
-func New(concurrent int, blobMigrator BlobMigrator) Migrator {
-	return &migrator{
-		concurrentMigrators: concurrent,
+func NewBlobstoreMigrator(concurrentMigrators int, blobMigrator BlobMigrator) BlobstoreMigrator {
+	return &blobstoreMigrator{
+		concurrentMigrators: concurrentMigrators,
 		blobMigrator:        blobMigrator,
 	}
 }
 
-func (m *migrator) Migrate(dst Store, src Store) error {
+func (m *blobstoreMigrator) Migrate(dst Blobstore, src Blobstore) error {
 	if src == nil {
 		return errors.New("src is an empty store")
 	}

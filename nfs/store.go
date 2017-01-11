@@ -20,7 +20,7 @@ type Store struct {
 }
 
 // New creates an NFS blob store
-func New(path string) goblob.Store {
+func New(path string) goblob.Blobstore {
 	return &Store{
 		path: path,
 	}

@@ -5,25 +5,24 @@ import (
 
 	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/goblobfakes"
-	"github.com/c0-ops/goblob/mock"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Migrator", func() {
+var _ = Describe("BlobstoreMigrator", func() {
 	var (
-		migrator     goblob.Migrator
+		migrator     goblob.BlobstoreMigrator
 		blobMigrator *goblobfakes.FakeBlobMigrator
-		dstStore     *mock.FakeStore
-		srcStore     *mock.FakeStore
+		dstStore     *goblobfakes.FakeBlobstore
+		srcStore     *goblobfakes.FakeBlobstore
 	)
 
 	BeforeEach(func() {
-		dstStore = &mock.FakeStore{}
-		srcStore = &mock.FakeStore{}
+		dstStore = &goblobfakes.FakeBlobstore{}
+		srcStore = &goblobfakes.FakeBlobstore{}
 		blobMigrator = &goblobfakes.FakeBlobMigrator{}
-		migrator = goblob.New(1, blobMigrator)
+		migrator = goblob.NewBlobstoreMigrator(1, blobMigrator)
 	})
 
 	Describe("Migrate", func() {

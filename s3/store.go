@@ -27,7 +27,7 @@ type Store struct {
 	useMultipartUploads bool
 }
 
-func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) goblob.Store {
+func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) goblob.Blobstore {
 	return &Store{
 		session: session.New(&aws.Config{
 			Region:           aws.String(region),

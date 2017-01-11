@@ -5,6 +5,13 @@ import (
 	"path"
 )
 
+// Blob is a file in a blob store
+type Blob struct {
+	Filename string
+	Checksum string
+	Path     string
+}
+
 //go:generate counterfeiter . BlobMigrator
 
 type BlobMigrator interface {
@@ -12,11 +19,11 @@ type BlobMigrator interface {
 }
 
 type blobMigrator struct {
-	dst Store
-	src Store
+	dst Blobstore
+	src Blobstore
 }
 
-func NewBlobMigrator(dst Store, src Store) BlobMigrator {
+func NewBlobMigrator(dst Blobstore, src Blobstore) BlobMigrator {
 	return &blobMigrator{
 		dst: dst,
 		src: src,
