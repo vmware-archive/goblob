@@ -69,8 +69,7 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				Ω(err).ShouldNot(HaveOccurred())
 				for _, path := range []string{"cc-buildpacks/aa/bb", "cc-buildpacks/aa/cc", "cc-buildpacks/aa/dd"} {
 					err := store.Write(&goblob.Blob{
-						Path:     filepath.Join(path, "test.txt"),
-						Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
+						Path: filepath.Join(path, "test.txt"),
 					}, fileReader)
 					Ω(err).ShouldNot(HaveOccurred())
 				}
@@ -84,8 +83,7 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				fileReader, err := os.Open("./fixtures/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
 				writeErr := store.Write(&goblob.Blob{
-					Path:     "cc-buildpacks/aa/bb/test.txt",
-					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
+					Path: "cc-buildpacks/aa/bb/test.txt",
 				}, fileReader)
 				Ω(writeErr).ShouldNot(HaveOccurred())
 				reader, err := store.Read(&goblob.Blob{
@@ -100,8 +98,7 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				reader, err := os.Open("./fixtures/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
 				blob := &goblob.Blob{
-					Path:     "cc-buildpacks/aa/bb/test.txt",
-					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
+					Path: "cc-buildpacks/aa/bb/test.txt",
 				}
 				err = store.Write(blob, reader)
 				Ω(err).ShouldNot(HaveOccurred())
