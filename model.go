@@ -34,8 +34,3 @@ type Blob struct {
 type Copier interface {
 	Copy(dst io.Writer, src io.Reader) (int64, error)
 }
-
-// Migrator moves blobs from one Store to another
-type Migrator interface {
-	Migrate(dst Store, src Store) error
-}

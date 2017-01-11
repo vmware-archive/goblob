@@ -87,7 +87,6 @@ func nfsAction(c *cli.Context) error {
 		return errors.New("Must provide s3-secretkey")
 	}
 
-	migrator := goblob.New(c.Int("concurrent-uploads"))
 	srcStore := nfs.New(c.String("blobstore-path"))
 	dstStore := s3.New(
 		c.String("cf-identifier"),
@@ -96,6 +95,9 @@ func nfsAction(c *cli.Context) error {
 		c.String("s3-region"),
 		c.String("s3-endpoint"),
 		c.Bool("use-multipart-uploads"))
+
+	blobMigrator := goblob.NewBlobMigrator(dstStore, srcStore)
+	migrator := goblob.New(c.Int("concurrent-uploads"), blobMigrator)
 
 	return migrator.Migrate(dstStore, srcStore)
 }

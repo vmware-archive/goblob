@@ -3,14 +3,17 @@ package goblob
 import (
 	"errors"
 	"fmt"
-	"path"
 
 	"github.com/cheggaaa/pb"
 	"golang.org/x/sync/errgroup"
 )
 
-// CloudFoundryMigrator moves blobs from Cloud Foundry to another store
-type CloudFoundryMigrator struct {
+// Migrator moves blobs from one Store to another
+type Migrator interface {
+	Migrate(dst Store, src Store) error
+}
+
+type migrator struct {
 	concurrentMigrators int
 	blobMigrator        BlobMigrator
 }
@@ -20,57 +23,14 @@ type StatusBar interface {
 	FinishPrint(str string)
 }
 
-type BlobMigrator interface {
-	MigrateSingleBlob(blob *Blob) error
-	Init(dst Store, src Store)
-	SingleBlobError(blob *Blob, err error) error
-}
-
-type BlobMigrate struct {
-	dst Store
-	src Store
-}
-
-func (s *BlobMigrate) Init(dst Store, src Store) {
-	s.dst = dst
-	s.src = src
-}
-
-func (s *BlobMigrate) SingleBlobError(blob *Blob, err error) error {
-	return fmt.Errorf("error at %s: %s", path.Join(blob.Path, blob.Filename), err.Error())
-}
-
-func (s *BlobMigrate) MigrateSingleBlob(blob *Blob) error {
-	reader, err := s.src.Read(blob)
-	if err != nil {
-		return s.SingleBlobError(blob, err)
-	}
-	defer reader.Close()
-
-	err = s.dst.Write(blob, reader)
-	if err != nil {
-		return s.SingleBlobError(blob, err)
-	}
-	checksum, err := s.dst.Checksum(blob)
-	if err != nil {
-		return s.SingleBlobError(blob, err)
-	}
-	if checksum != blob.Checksum {
-		err = fmt.Errorf("Checksum [%s] does not match [%s]", checksum, blob.Checksum)
-		return s.SingleBlobError(blob, err)
-	}
-	return nil
-}
-
-func New(concurrent int) *CloudFoundryMigrator {
-	return &CloudFoundryMigrator{
+func New(concurrent int, blobMigrator BlobMigrator) Migrator {
+	return &migrator{
 		concurrentMigrators: concurrent,
-		blobMigrator:        new(BlobMigrate),
+		blobMigrator:        blobMigrator,
 	}
 }
 
-// Migrate from a source CloudFoundry to a destination Store
-func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
+func (m *migrator) Migrate(dst Store, src Store) error {
 	if src == nil {
 		return errors.New("src is an empty store")
 	}
@@ -90,7 +50,6 @@ func (m *CloudFoundryMigrator) Migrate(dst Store, src Store) error {
 
 	bar := pb.StartNew(len(blobs))
 	bar.Format("<.- >")
-	m.blobMigrator.Init(dst, src)
 
 	fmt.Printf("Migrating blobs from %s to %s\n", src.Name(), dst.Name())
 
