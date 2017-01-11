@@ -3,7 +3,7 @@ package s3
 import (
 	"fmt"
 	"io"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -65,13 +65,8 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 			bar := pb.StartNew(len(listObjectsOutput.Contents))
 			bar.Format("<.- >")
 			for _, item := range listObjectsOutput.Contents {
-				thePath := *item.Key
-				fileName := thePath[strings.LastIndex(thePath, "/")+1:]
-				filePath := thePath[:strings.LastIndex(thePath, "/")]
-				blobPath := path.Join(bucket, filePath)
 				blob := &goblob.Blob{
-					Filename: fileName,
-					Path:     blobPath,
+					Path: filepath.Join(bucket, *item.Key),
 				}
 
 				checksum, err := s.checksumFromMetadata(blob)
@@ -94,7 +89,7 @@ func (s *Store) bucketName(blob *goblob.Blob) string {
 
 func (s *Store) path(blob *goblob.Blob) string {
 	bucketName := blob.Path[:strings.Index(blob.Path, "/")]
-	return path.Join(blob.Path[len(bucketName)+1:], blob.Filename)
+	return blob.Path[len(bucketName)+1:]
 }
 
 func (s *Store) Checksum(src *goblob.Blob) (string, error) {

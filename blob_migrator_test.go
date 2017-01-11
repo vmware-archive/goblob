@@ -36,9 +36,8 @@ var _ = Describe("BlobMigrator", func() {
 			srcStore.ReadReturns(expectedReader, nil)
 			dstStore.ChecksumReturns("some-checksum", nil)
 			controlBlob = &goblob.Blob{
-				Filename: "some-filename",
 				Checksum: "some-checksum",
-				Path:     "some-path",
+				Path:     "some-path/some-filename",
 			}
 		})
 

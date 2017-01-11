@@ -35,10 +35,9 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	var blobs []*goblob.Blob
 	walk := func(path string, info os.FileInfo, e error) error {
 		if !info.IsDir() && info.Name() != ".nfs_test" {
-			filePath := path[len(s.path)+1 : len(path)-len(info.Name())-1]
+			relPath := path[len(s.path)+1:]
 			blobs = append(blobs, &goblob.Blob{
-				Filename: info.Name(),
-				Path:     filePath,
+				Path: relPath,
 			})
 		}
 		return e
@@ -80,11 +79,11 @@ func (s *Store) processBlobsForChecksums(blobs []*goblob.Blob) error {
 }
 
 func (s *Store) Checksum(src *goblob.Blob) (string, error) {
-	return validation.Checksum(path.Join(s.path, src.Path, src.Filename))
+	return validation.Checksum(path.Join(s.path, src.Path))
 }
 
 func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
-	return os.Open(path.Join(s.path, src.Path, src.Filename))
+	return os.Open(path.Join(s.path, src.Path))
 }
 func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
 	return errors.New("writing to the NFS store is not supported")

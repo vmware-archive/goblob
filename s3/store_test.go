@@ -3,6 +3,7 @@ package s3_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	. "github.com/c0-ops/goblob/s3"
 
@@ -35,7 +36,7 @@ var _ = Describe("S3Store", func() {
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
-	controlBucket := "cc-buildpackets-identifier"
+	controlBucket := "cc-buildpacks-identifier"
 
 	testsToRun("Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, true))
 	testsToRun("non Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, false))
@@ -68,8 +69,7 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				Ω(err).ShouldNot(HaveOccurred())
 				for _, path := range []string{"cc-buildpacks/aa/bb", "cc-buildpacks/aa/cc", "cc-buildpacks/aa/dd"} {
 					err := store.Write(&goblob.Blob{
-						Path:     path,
-						Filename: "test.txt",
+						Path:     filepath.Join(path, "test.txt"),
 						Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 					}, fileReader)
 					Ω(err).ShouldNot(HaveOccurred())
@@ -84,14 +84,12 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				fileReader, err := os.Open("./fixtures/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
 				writeErr := store.Write(&goblob.Blob{
-					Path:     "cc-buildpackets/aa/bb",
-					Filename: "test.txt",
+					Path:     "cc-buildpacks/aa/bb/test.txt",
 					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 				}, fileReader)
 				Ω(writeErr).ShouldNot(HaveOccurred())
 				reader, err := store.Read(&goblob.Blob{
-					Path:     "cc-buildpackets/aa/bb",
-					Filename: "test.txt",
+					Path:     "cc-buildpacks/aa/bb/test.txt",
 					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249"})
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(reader).ShouldNot(BeNil())
@@ -102,8 +100,7 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				reader, err := os.Open("./fixtures/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
 				blob := &goblob.Blob{
-					Path:     "cc-buildpackets/aa/bb",
-					Filename: "test.txt",
+					Path:     "cc-buildpacks/aa/bb/test.txt",
 					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249",
 				}
 				err = store.Write(blob, reader)

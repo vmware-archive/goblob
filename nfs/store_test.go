@@ -22,9 +22,8 @@ var _ = Describe("NFSStore", func() {
 			blobs, err := store.List()
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(len(blobs)).Should(BeEquivalentTo(7))
-			Ω(blobs[0].Filename).Should(BeEquivalentTo("ea07de9b-dd94-477c-b904-0f77d47dd111_a32d9ae40371d557c7c90eb2affc3d7bba6abe69"))
 			Ω(blobs[0].Checksum).Should(BeEquivalentTo("b026324c6904b2a9cb4b88d6d61c81d1"))
-			Ω(blobs[0].Path).Should(BeEquivalentTo("cc-buildpacks/ea/07"))
+			Ω(blobs[0].Path).Should(BeEquivalentTo("cc-buildpacks/ea/07/ea07de9b-dd94-477c-b904-0f77d47dd111_a32d9ae40371d557c7c90eb2affc3d7bba6abe69"))
 		})
 	})
 	Describe("Read()", func() {
