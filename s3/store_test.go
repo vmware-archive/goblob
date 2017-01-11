@@ -87,8 +87,8 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 				}, fileReader)
 				Ω(writeErr).ShouldNot(HaveOccurred())
 				reader, err := store.Read(&goblob.Blob{
-					Path:     "cc-buildpacks/aa/bb/test.txt",
-					Checksum: "d8e8fca2dc0f896fd7cb4cb0031ba249"})
+					Path: "cc-buildpacks/aa/bb/test.txt",
+				})
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(reader).ShouldNot(BeNil())
 			})
