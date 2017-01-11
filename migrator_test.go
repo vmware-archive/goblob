@@ -54,10 +54,10 @@ var _ = Describe("Migrator", func() {
 		It("uploads all the files from the source", func() {
 			err := migrator.Migrate(dstStore, srcStore)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(blobMigrator.MigrateSingleBlobCallCount()).To(Equal(3))
-			Expect(blobMigrator.MigrateSingleBlobArgsForCall(0)).To(Equal(firstBlob))
-			Expect(blobMigrator.MigrateSingleBlobArgsForCall(1)).To(Equal(secondBlob))
-			Expect(blobMigrator.MigrateSingleBlobArgsForCall(2)).To(Equal(thirdBlob))
+			Expect(blobMigrator.MigrateCallCount()).To(Equal(3))
+			Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
+			Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(secondBlob))
+			Expect(blobMigrator.MigrateArgsForCall(2)).To(Equal(thirdBlob))
 		})
 
 		Context("when a file already exists", func() {
@@ -70,15 +70,15 @@ var _ = Describe("Migrator", func() {
 			It("uploads only the new files", func() {
 				err := migrator.Migrate(dstStore, srcStore)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(blobMigrator.MigrateSingleBlobCallCount()).To(Equal(2))
-				Expect(blobMigrator.MigrateSingleBlobArgsForCall(0)).To(Equal(firstBlob))
-				Expect(blobMigrator.MigrateSingleBlobArgsForCall(1)).To(Equal(thirdBlob))
+				Expect(blobMigrator.MigrateCallCount()).To(Equal(2))
+				Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
+				Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(thirdBlob))
 			})
 		})
 
 		Context("when there is an error uploading one blob", func() {
 			BeforeEach(func() {
-				blobMigrator.MigrateSingleBlobStub = func(blob *goblob.Blob) error {
+				blobMigrator.MigrateStub = func(blob *goblob.Blob) error {
 					if blob.Filename == "some-other-file" {
 						return errors.New("migrate-err")
 					}
@@ -88,9 +88,9 @@ var _ = Describe("Migrator", func() {
 
 			It("stops uploading", func() {
 				migrator.Migrate(dstStore, srcStore)
-				Expect(blobMigrator.MigrateSingleBlobCallCount()).To(Equal(2))
-				Expect(blobMigrator.MigrateSingleBlobArgsForCall(0)).To(Equal(firstBlob))
-				Expect(blobMigrator.MigrateSingleBlobArgsForCall(1)).To(Equal(secondBlob))
+				Expect(blobMigrator.MigrateCallCount()).To(Equal(2))
+				Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
+				Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(secondBlob))
 			})
 
 			It("returns an error", func() {

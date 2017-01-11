@@ -8,90 +8,47 @@ import (
 )
 
 type FakeBlobMigrator struct {
-	MigrateSingleBlobStub        func(blob *goblob.Blob) error
-	migrateSingleBlobMutex       sync.RWMutex
-	migrateSingleBlobArgsForCall []struct {
+	MigrateStub        func(blob *goblob.Blob) error
+	migrateMutex       sync.RWMutex
+	migrateArgsForCall []struct {
 		blob *goblob.Blob
 	}
-	migrateSingleBlobReturns struct {
-		result1 error
-	}
-	SingleBlobErrorStub        func(blob *goblob.Blob, err error) error
-	singleBlobErrorMutex       sync.RWMutex
-	singleBlobErrorArgsForCall []struct {
-		blob *goblob.Blob
-		err  error
-	}
-	singleBlobErrorReturns struct {
+	migrateReturns struct {
 		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeBlobMigrator) MigrateSingleBlob(blob *goblob.Blob) error {
-	fake.migrateSingleBlobMutex.Lock()
-	fake.migrateSingleBlobArgsForCall = append(fake.migrateSingleBlobArgsForCall, struct {
+func (fake *FakeBlobMigrator) Migrate(blob *goblob.Blob) error {
+	fake.migrateMutex.Lock()
+	fake.migrateArgsForCall = append(fake.migrateArgsForCall, struct {
 		blob *goblob.Blob
 	}{blob})
-	fake.recordInvocation("MigrateSingleBlob", []interface{}{blob})
-	fake.migrateSingleBlobMutex.Unlock()
-	if fake.MigrateSingleBlobStub != nil {
-		return fake.MigrateSingleBlobStub(blob)
+	fake.recordInvocation("Migrate", []interface{}{blob})
+	fake.migrateMutex.Unlock()
+	if fake.MigrateStub != nil {
+		return fake.MigrateStub(blob)
 	} else {
-		return fake.migrateSingleBlobReturns.result1
+		return fake.migrateReturns.result1
 	}
 }
 
-func (fake *FakeBlobMigrator) MigrateSingleBlobCallCount() int {
-	fake.migrateSingleBlobMutex.RLock()
-	defer fake.migrateSingleBlobMutex.RUnlock()
-	return len(fake.migrateSingleBlobArgsForCall)
+func (fake *FakeBlobMigrator) MigrateCallCount() int {
+	fake.migrateMutex.RLock()
+	defer fake.migrateMutex.RUnlock()
+	return len(fake.migrateArgsForCall)
 }
 
-func (fake *FakeBlobMigrator) MigrateSingleBlobArgsForCall(i int) *goblob.Blob {
-	fake.migrateSingleBlobMutex.RLock()
-	defer fake.migrateSingleBlobMutex.RUnlock()
-	return fake.migrateSingleBlobArgsForCall[i].blob
+func (fake *FakeBlobMigrator) MigrateArgsForCall(i int) *goblob.Blob {
+	fake.migrateMutex.RLock()
+	defer fake.migrateMutex.RUnlock()
+	return fake.migrateArgsForCall[i].blob
 }
 
-func (fake *FakeBlobMigrator) MigrateSingleBlobReturns(result1 error) {
-	fake.MigrateSingleBlobStub = nil
-	fake.migrateSingleBlobReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeBlobMigrator) SingleBlobError(blob *goblob.Blob, err error) error {
-	fake.singleBlobErrorMutex.Lock()
-	fake.singleBlobErrorArgsForCall = append(fake.singleBlobErrorArgsForCall, struct {
-		blob *goblob.Blob
-		err  error
-	}{blob, err})
-	fake.recordInvocation("SingleBlobError", []interface{}{blob, err})
-	fake.singleBlobErrorMutex.Unlock()
-	if fake.SingleBlobErrorStub != nil {
-		return fake.SingleBlobErrorStub(blob, err)
-	} else {
-		return fake.singleBlobErrorReturns.result1
-	}
-}
-
-func (fake *FakeBlobMigrator) SingleBlobErrorCallCount() int {
-	fake.singleBlobErrorMutex.RLock()
-	defer fake.singleBlobErrorMutex.RUnlock()
-	return len(fake.singleBlobErrorArgsForCall)
-}
-
-func (fake *FakeBlobMigrator) SingleBlobErrorArgsForCall(i int) (*goblob.Blob, error) {
-	fake.singleBlobErrorMutex.RLock()
-	defer fake.singleBlobErrorMutex.RUnlock()
-	return fake.singleBlobErrorArgsForCall[i].blob, fake.singleBlobErrorArgsForCall[i].err
-}
-
-func (fake *FakeBlobMigrator) SingleBlobErrorReturns(result1 error) {
-	fake.SingleBlobErrorStub = nil
-	fake.singleBlobErrorReturns = struct {
+func (fake *FakeBlobMigrator) MigrateReturns(result1 error) {
+	fake.MigrateStub = nil
+	fake.migrateReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -99,10 +56,8 @@ func (fake *FakeBlobMigrator) SingleBlobErrorReturns(result1 error) {
 func (fake *FakeBlobMigrator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.migrateSingleBlobMutex.RLock()
-	defer fake.migrateSingleBlobMutex.RUnlock()
-	fake.singleBlobErrorMutex.RLock()
-	defer fake.singleBlobErrorMutex.RUnlock()
+	fake.migrateMutex.RLock()
+	defer fake.migrateMutex.RUnlock()
 	return fake.invocations
 }
 

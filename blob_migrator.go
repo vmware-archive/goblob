@@ -8,7 +8,7 @@ import (
 //go:generate counterfeiter . BlobMigrator
 
 type BlobMigrator interface {
-	MigrateSingleBlob(blob *Blob) error
+	Migrate(blob *Blob) error
 }
 
 type blobMigrator struct {
@@ -23,7 +23,7 @@ func NewBlobMigrator(dst Store, src Store) BlobMigrator {
 	}
 }
 
-func (m *blobMigrator) MigrateSingleBlob(blob *Blob) error {
+func (m *blobMigrator) Migrate(blob *Blob) error {
 	reader, err := m.src.Read(blob)
 	if err != nil {
 		return fmt.Errorf("error at %s: %s", path.Join(blob.Path, blob.Filename), err)

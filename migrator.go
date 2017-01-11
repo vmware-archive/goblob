@@ -68,7 +68,7 @@ func (m *migrator) Migrate(dst Store, src Store) error {
 	for i := 0; i < m.concurrentMigrators; i++ {
 		g.Go(func() error {
 			for blob := range blobsToMigrate {
-				err := m.blobMigrator.MigrateSingleBlob(blob)
+				err := m.blobMigrator.Migrate(blob)
 				if err != nil {
 					return err
 				}
