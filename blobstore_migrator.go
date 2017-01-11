@@ -30,11 +30,6 @@ type blobstoreMigrator struct {
 	blobMigrator        BlobMigrator
 }
 
-type StatusBar interface {
-	Increment() int
-	FinishPrint(str string)
-}
-
 func NewBlobstoreMigrator(concurrentMigrators int, blobMigrator BlobMigrator) BlobstoreMigrator {
 	return &blobstoreMigrator{
 		concurrentMigrators: concurrentMigrators,
