@@ -20,7 +20,6 @@ func Checksum(filePath string) (string, error) {
 
 // ChecksumReader calculates a checksum for a file
 func ChecksumReader(reader io.Reader) (string, error) {
-
 	hash := md5.New()
 	if _, err := io.Copy(hash, reader); err != nil {
 		return "", err
