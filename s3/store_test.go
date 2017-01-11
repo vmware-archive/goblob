@@ -36,32 +36,29 @@ var _ = Describe("S3Store", func() {
 		S3ForcePathStyle: aws.Bool(true),
 	}
 	controlBucket := "cc-buildpackets-identifier"
-	cleanup := true
 
-	testsToRun("Multi-part", cleanup, config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, true))
-	testsToRun("non Multi-part", cleanup, config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, false))
+	testsToRun("Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, true))
+	testsToRun("non Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, false))
 })
 
-func testsToRun(testSuiteName string, cleanup bool, config *aws.Config, controlBucket string, store goblob.Blobstore) {
+func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, store goblob.Blobstore) {
 	AfterEach(func() {
-		if cleanup {
-			session := session.New(config)
-			s3Service := awss3.New(session)
-			listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
-				Bucket: aws.String(controlBucket),
-			})
+		session := session.New(config)
+		s3Service := awss3.New(session)
+		listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
+			Bucket: aws.String(controlBucket),
+		})
 
-			if err == nil {
-				for _, item := range listObjectsOutput.Contents {
-					s3Service.DeleteObject(&awss3.DeleteObjectInput{
-						Bucket: aws.String(controlBucket),
-						Key:    item.Key,
-					})
-				}
-				s3Service.DeleteBucket(&awss3.DeleteBucketInput{
+		if err == nil {
+			for _, item := range listObjectsOutput.Contents {
+				s3Service.DeleteObject(&awss3.DeleteObjectInput{
 					Bucket: aws.String(controlBucket),
+					Key:    item.Key,
 				})
 			}
+			s3Service.DeleteBucket(&awss3.DeleteBucketInput{
+				Bucket: aws.String(controlBucket),
+			})
 		}
 	})
 	Describe(testSuiteName, func() {
