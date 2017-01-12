@@ -5,8 +5,7 @@ import (
 	"os"
 
 	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/nfs"
-	"github.com/c0-ops/goblob/s3"
+	"github.com/c0-ops/goblob/blobstore"
 	"github.com/urfave/cli"
 	"github.com/xchapter7x/lo"
 )
@@ -87,8 +86,8 @@ func nfsAction(c *cli.Context) error {
 		return errors.New("Must provide s3-secretkey")
 	}
 
-	srcStore := nfs.New(c.String("blobstore-path"))
-	dstStore := s3.New(
+	srcStore := blobstore.NewNFS(c.String("blobstore-path"))
+	dstStore := blobstore.NewS3(
 		c.String("cf-identifier"),
 		awsAccessKey,
 		awsSecretKey,

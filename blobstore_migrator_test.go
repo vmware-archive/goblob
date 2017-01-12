@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"github.com/c0-ops/goblob"
+	"github.com/c0-ops/goblob/blobstore"
+	"github.com/c0-ops/goblob/blobstore/blobstorefakes"
 	"github.com/c0-ops/goblob/goblobfakes"
 
 	. "github.com/onsi/ginkgo"
@@ -14,37 +16,37 @@ var _ = Describe("BlobstoreMigrator", func() {
 	var (
 		migrator     goblob.BlobstoreMigrator
 		blobMigrator *goblobfakes.FakeBlobMigrator
-		dstStore     *goblobfakes.FakeBlobstore
-		srcStore     *goblobfakes.FakeBlobstore
+		dstStore     *blobstorefakes.FakeBlobstore
+		srcStore     *blobstorefakes.FakeBlobstore
 	)
 
 	BeforeEach(func() {
-		dstStore = &goblobfakes.FakeBlobstore{}
-		srcStore = &goblobfakes.FakeBlobstore{}
+		dstStore = &blobstorefakes.FakeBlobstore{}
+		srcStore = &blobstorefakes.FakeBlobstore{}
 		blobMigrator = &goblobfakes.FakeBlobMigrator{}
 		migrator = goblob.NewBlobstoreMigrator(1, blobMigrator)
 	})
 
 	Describe("Migrate", func() {
-		var firstBlob, secondBlob, thirdBlob *goblob.Blob
+		var firstBlob, secondBlob, thirdBlob *blobstore.Blob
 
 		BeforeEach(func() {
-			firstBlob = &goblob.Blob{
+			firstBlob = &blobstore.Blob{
 				Checksum: "some-file-checksum",
 				Path:     "some-file-path/some-file",
 			}
 
-			secondBlob = &goblob.Blob{
+			secondBlob = &blobstore.Blob{
 				Checksum: "some-other-file-checksum",
 				Path:     "some-other-path/some-other-file",
 			}
 
-			thirdBlob = &goblob.Blob{
+			thirdBlob = &blobstore.Blob{
 				Checksum: "yet-another-file-checksum",
 				Path:     "yet-another-path/yet-another-file",
 			}
 
-			srcStore.ListReturns([]*goblob.Blob{firstBlob, secondBlob, thirdBlob}, nil)
+			srcStore.ListReturns([]*blobstore.Blob{firstBlob, secondBlob, thirdBlob}, nil)
 		})
 
 		It("uploads all the files from the source", func() {
@@ -58,7 +60,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 
 		Context("when a file already exists", func() {
 			BeforeEach(func() {
-				dstStore.ExistsStub = func(blob *goblob.Blob) bool {
+				dstStore.ExistsStub = func(blob *blobstore.Blob) bool {
 					return blob.Path == "some-other-path/some-other-file"
 				}
 			})
@@ -74,7 +76,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 
 		Context("when there is an error uploading one blob", func() {
 			BeforeEach(func() {
-				blobMigrator.MigrateStub = func(blob *goblob.Blob) error {
+				blobMigrator.MigrateStub = func(blob *blobstore.Blob) error {
 					if blob.Path == "some-other-path/some-other-file" {
 						return errors.New("migrate-err")
 					}

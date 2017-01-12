@@ -1,4 +1,4 @@
-package s3
+package blobstore
 
 import (
 	"fmt"
@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
 	"github.com/xchapter7x/lo"
@@ -21,14 +20,14 @@ var (
 	buckets = []string{"cc-buildpacks", "cc-droplets", "cc-packages", "cc-resources"}
 )
 
-type Store struct {
+type s3Store struct {
 	session             *session.Session
 	identifier          string
 	useMultipartUploads bool
 }
 
-func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) goblob.Blobstore {
-	return &Store{
+func NewS3(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) Blobstore {
+	return &s3Store{
 		session: session.New(&aws.Config{
 			Region:           aws.String(region),
 			Credentials:      credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, ""),
@@ -41,12 +40,12 @@ func New(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMul
 	}
 }
 
-func (s *Store) Name() string {
+func (s *s3Store) Name() string {
 	return "S3"
 }
 
-func (s *Store) List() ([]*goblob.Blob, error) {
-	var blobs []*goblob.Blob
+func (s *s3Store) List() ([]*Blob, error) {
+	var blobs []*Blob
 	s3Service := awss3.New(s.session)
 	for _, bucket := range buckets {
 		bucketName := bucket + "-" + s.identifier
@@ -65,7 +64,7 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 			bar := pb.StartNew(len(listObjectsOutput.Contents))
 			bar.Format("<.- >")
 			for _, item := range listObjectsOutput.Contents {
-				blob := &goblob.Blob{
+				blob := &Blob{
 					Path: filepath.Join(bucket, *item.Key),
 				}
 
@@ -83,16 +82,16 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	return blobs, nil
 }
 
-func (s *Store) bucketName(blob *goblob.Blob) string {
+func (s *s3Store) bucketName(blob *Blob) string {
 	return blob.Path[:strings.Index(blob.Path, "/")] + "-" + s.identifier
 }
 
-func (s *Store) path(blob *goblob.Blob) string {
+func (s *s3Store) path(blob *Blob) string {
 	bucketName := blob.Path[:strings.Index(blob.Path, "/")]
 	return blob.Path[len(bucketName)+1:]
 }
 
-func (s *Store) Checksum(src *goblob.Blob) (string, error) {
+func (s *s3Store) Checksum(src *Blob) (string, error) {
 	if s.useMultipartUploads {
 		getObjectOutput, err := awss3.New(s.session).GetObject(&awss3.GetObjectInput{
 			Bucket: aws.String(s.bucketName(src)),
@@ -108,7 +107,7 @@ func (s *Store) Checksum(src *goblob.Blob) (string, error) {
 	return s.checksumFromETAG(src)
 }
 
-func (s *Store) checksumFromETAG(src *goblob.Blob) (string, error) {
+func (s *s3Store) checksumFromETAG(src *Blob) (string, error) {
 	headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
 		Bucket: aws.String(s.bucketName(src)),
 		Key:    aws.String(s.path(src)),
@@ -119,7 +118,7 @@ func (s *Store) checksumFromETAG(src *goblob.Blob) (string, error) {
 	return strings.Replace(*headObjectOutput.ETag, "\"", "", -1), nil
 }
 
-func (s *Store) checksumFromMetadata(src *goblob.Blob) (string, error) {
+func (s *s3Store) checksumFromMetadata(src *Blob) (string, error) {
 	headObjectOutput, err := awss3.New(s.session).HeadObject(&awss3.HeadObjectInput{
 		Bucket: aws.String(s.bucketName(src)),
 		Key:    aws.String(s.path(src)),
@@ -135,7 +134,7 @@ func (s *Store) checksumFromMetadata(src *goblob.Blob) (string, error) {
 	return "", nil
 }
 
-func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
+func (s *s3Store) Read(src *Blob) (io.ReadCloser, error) {
 	bucketName := s.bucketName(src)
 	path := s.path(src)
 	lo.G.Debug("Getting", path, "from bucket", bucketName)
@@ -150,7 +149,7 @@ func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
 
 }
 
-func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
+func (s *s3Store) Write(dst *Blob, src io.Reader) error {
 	bucketName := s.bucketName(dst)
 	path := s.path(dst)
 	if err := s.createBucket(bucketName); err != nil {
@@ -188,7 +187,7 @@ func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
 	return nil
 }
 
-func (s *Store) doesBucketExist(bucketName string) (bool, error) {
+func (s *s3Store) doesBucketExist(bucketName string) (bool, error) {
 	var listBucketOutput *awss3.ListBucketsOutput
 	var err error
 	s3Service := awss3.New(s.session)
@@ -203,7 +202,7 @@ func (s *Store) doesBucketExist(bucketName string) (bool, error) {
 	return false, nil
 }
 
-func (s *Store) createBucket(bucketName string) error {
+func (s *s3Store) createBucket(bucketName string) error {
 
 	s3Service := awss3.New(s.session)
 	bucketExists, err := s.doesBucketExist(bucketName)
@@ -221,7 +220,7 @@ func (s *Store) createBucket(bucketName string) error {
 
 }
 
-func (s *Store) Exists(blob *goblob.Blob) bool {
+func (s *s3Store) Exists(blob *Blob) bool {
 	checksum, err := s.Checksum(blob)
 	if err != nil {
 		return false

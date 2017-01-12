@@ -5,13 +5,14 @@ import (
 	"sync"
 
 	"github.com/c0-ops/goblob"
+	"github.com/c0-ops/goblob/blobstore"
 )
 
 type FakeBlobMigrator struct {
-	MigrateStub        func(blob *goblob.Blob) error
+	MigrateStub        func(blob *blobstore.Blob) error
 	migrateMutex       sync.RWMutex
 	migrateArgsForCall []struct {
-		blob *goblob.Blob
+		blob *blobstore.Blob
 	}
 	migrateReturns struct {
 		result1 error
@@ -20,10 +21,10 @@ type FakeBlobMigrator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeBlobMigrator) Migrate(blob *goblob.Blob) error {
+func (fake *FakeBlobMigrator) Migrate(blob *blobstore.Blob) error {
 	fake.migrateMutex.Lock()
 	fake.migrateArgsForCall = append(fake.migrateArgsForCall, struct {
-		blob *goblob.Blob
+		blob *blobstore.Blob
 	}{blob})
 	fake.recordInvocation("Migrate", []interface{}{blob})
 	fake.migrateMutex.Unlock()
@@ -40,7 +41,7 @@ func (fake *FakeBlobMigrator) MigrateCallCount() int {
 	return len(fake.migrateArgsForCall)
 }
 
-func (fake *FakeBlobMigrator) MigrateArgsForCall(i int) *goblob.Blob {
+func (fake *FakeBlobMigrator) MigrateArgsForCall(i int) *blobstore.Blob {
 	fake.migrateMutex.RLock()
 	defer fake.migrateMutex.RUnlock()
 	return fake.migrateArgsForCall[i].blob

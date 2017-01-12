@@ -1,20 +1,18 @@
-package nfs_test
+package blobstore_test
 
 import (
 	"errors"
 
-	. "github.com/c0-ops/goblob/nfs"
+	"github.com/c0-ops/goblob/blobstore"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"github.com/c0-ops/goblob"
 )
 
-var _ = Describe("NFSStore", func() {
-	var store goblob.Blobstore
+var _ = Describe("NFS", func() {
+	var store blobstore.Blobstore
 	BeforeEach(func() {
-		store = New("fixtures")
+		store = blobstore.NewNFS("nfs_testdata")
 	})
 
 	Describe("List()", func() {
@@ -39,7 +37,7 @@ var _ = Describe("NFSStore", func() {
 	Describe("Write()", func() {
 		It("Should return an error", func() {
 			err := errors.New("writing to the NFS store is not supported")
-			Ω(store.Write(&goblob.Blob{}, nil)).Should(BeEquivalentTo(err))
+			Ω(store.Write(&blobstore.Blob{}, nil)).Should(BeEquivalentTo(err))
 		})
 	})
 })

@@ -7,7 +7,8 @@ import (
 	"strings"
 
 	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/goblobfakes"
+	"github.com/c0-ops/goblob/blobstore"
+	"github.com/c0-ops/goblob/blobstore/blobstorefakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -15,19 +16,19 @@ import (
 var _ = Describe("BlobMigrator", func() {
 	var (
 		blobMigrator goblob.BlobMigrator
-		dstStore     *goblobfakes.FakeBlobstore
-		srcStore     *goblobfakes.FakeBlobstore
+		dstStore     *blobstorefakes.FakeBlobstore
+		srcStore     *blobstorefakes.FakeBlobstore
 	)
 
 	BeforeEach(func() {
-		dstStore = &goblobfakes.FakeBlobstore{}
-		srcStore = &goblobfakes.FakeBlobstore{}
+		dstStore = &blobstorefakes.FakeBlobstore{}
+		srcStore = &blobstorefakes.FakeBlobstore{}
 		blobMigrator = goblob.NewBlobMigrator(dstStore, srcStore)
 	})
 
 	Describe("Migrate", func() {
 		var (
-			controlBlob    *goblob.Blob
+			controlBlob    *blobstore.Blob
 			expectedReader io.ReadCloser
 		)
 
@@ -35,7 +36,7 @@ var _ = Describe("BlobMigrator", func() {
 			expectedReader = ioutil.NopCloser(strings.NewReader("some content"))
 			srcStore.ReadReturns(expectedReader, nil)
 			dstStore.ChecksumReturns("some-checksum", nil)
-			controlBlob = &goblob.Blob{
+			controlBlob = &blobstore.Blob{
 				Checksum: "some-checksum",
 				Path:     "some-path/some-filename",
 			}

@@ -3,26 +3,15 @@ package goblob
 import (
 	"errors"
 	"fmt"
-	"io"
 
+	"github.com/c0-ops/goblob/blobstore"
 	"github.com/cheggaaa/pb"
 	"golang.org/x/sync/errgroup"
 )
 
-//go:generate counterfeiter . Blobstore
-
-type Blobstore interface {
-	Name() string
-	List() ([]*Blob, error)
-	Read(src *Blob) (io.ReadCloser, error)
-	Checksum(src *Blob) (string, error)
-	Write(dst *Blob, src io.Reader) error
-	Exists(*Blob) bool
-}
-
 // BlobstoreMigrator moves blobs from one blobstore to another
 type BlobstoreMigrator interface {
-	Migrate(dst Blobstore, src Blobstore) error
+	Migrate(dst blobstore.Blobstore, src blobstore.Blobstore) error
 }
 
 type blobstoreMigrator struct {
@@ -37,7 +26,7 @@ func NewBlobstoreMigrator(concurrentMigrators int, blobMigrator BlobMigrator) Bl
 	}
 }
 
-func (m *blobstoreMigrator) Migrate(dst Blobstore, src Blobstore) error {
+func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobstore) error {
 	if src == nil {
 		return errors.New("src is an empty store")
 	}
@@ -60,7 +49,7 @@ func (m *blobstoreMigrator) Migrate(dst Blobstore, src Blobstore) error {
 
 	fmt.Printf("Migrating blobs from %s to %s\n", src.Name(), dst.Name())
 
-	blobsToMigrate := make(chan *Blob)
+	blobsToMigrate := make(chan *blobstore.Blob)
 	go func() {
 		for _, blob := range blobs {
 			if !dst.Exists(blob) {

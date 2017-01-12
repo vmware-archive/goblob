@@ -1,4 +1,4 @@
-package nfs
+package blobstore
 
 import (
 	"errors"
@@ -8,35 +8,33 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
 	"golang.org/x/sync/errgroup"
 )
 
-// Store is an NFS blob store
-type Store struct {
+type nfsStore struct {
 	path string
 }
 
-// New creates an NFS blob store
-func New(path string) goblob.Blobstore {
-	return &Store{
+// NewNFS creates an NFS blobstore
+func NewNFS(path string) Blobstore {
+	return &nfsStore{
 		path: path,
 	}
 }
 
-func (s *Store) Name() string {
+func (s *nfsStore) Name() string {
 	return "NFS"
 }
 
 // List fetches a list of files with checksums
-func (s *Store) List() ([]*goblob.Blob, error) {
-	var blobs []*goblob.Blob
+func (s *nfsStore) List() ([]*Blob, error) {
+	var blobs []*Blob
 	walk := func(path string, info os.FileInfo, e error) error {
 		if !info.IsDir() && info.Name() != ".nfs_test" {
 			relPath := path[len(s.path)+1:]
-			blobs = append(blobs, &goblob.Blob{
+			blobs = append(blobs, &Blob{
 				Path: relPath,
 			})
 		}
@@ -51,7 +49,7 @@ func (s *Store) List() ([]*goblob.Blob, error) {
 	return blobs, nil
 }
 
-func (s *Store) processBlobsForChecksums(blobs []*goblob.Blob) error {
+func (s *nfsStore) processBlobsForChecksums(blobs []*Blob) error {
 
 	fmt.Println("Getting list of files from NFS")
 	bar := pb.StartNew(len(blobs))
@@ -78,18 +76,18 @@ func (s *Store) processBlobsForChecksums(blobs []*goblob.Blob) error {
 	return nil
 }
 
-func (s *Store) Checksum(src *goblob.Blob) (string, error) {
+func (s *nfsStore) Checksum(src *Blob) (string, error) {
 	return validation.Checksum(path.Join(s.path, src.Path))
 }
 
-func (s *Store) Read(src *goblob.Blob) (io.ReadCloser, error) {
+func (s *nfsStore) Read(src *Blob) (io.ReadCloser, error) {
 	return os.Open(path.Join(s.path, src.Path))
 }
-func (s *Store) Write(dst *goblob.Blob, src io.Reader) error {
+func (s *nfsStore) Write(dst *Blob, src io.Reader) error {
 	return errors.New("writing to the NFS store is not supported")
 }
 
-func (s *Store) Exists(blob *goblob.Blob) bool {
+func (s *nfsStore) Exists(blob *Blob) bool {
 	checksum, err := s.Checksum(blob)
 	if err != nil {
 		return false

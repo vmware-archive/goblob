@@ -1,4 +1,4 @@
-package nfs_test
+package blobstore_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGoblob(t *testing.T) {
+func TestBlobstore(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "NFS Suite")
+	RunSpecs(t, "Blobstore Suite")
 }

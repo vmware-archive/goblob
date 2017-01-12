@@ -1,11 +1,11 @@
-package s3_test
+package blobstore_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 
-	. "github.com/c0-ops/goblob/s3"
+	"github.com/c0-ops/goblob/blobstore"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/c0-ops/goblob"
 
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 )
@@ -38,11 +37,11 @@ var _ = Describe("S3Store", func() {
 	}
 	controlBucket := "cc-buildpacks-identifier"
 
-	testsToRun("Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, true))
-	testsToRun("non Multi-part", config, controlBucket, New("identifier", accessKey, secretKey, region, s3Endpoint, false))
+	testsToRun("Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, true))
+	testsToRun("non Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, false))
 })
 
-func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, store goblob.Blobstore) {
+func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, store blobstore.Blobstore) {
 	AfterEach(func() {
 		session := session.New(config)
 		s3Service := awss3.New(session)
@@ -65,10 +64,10 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 	Describe(testSuiteName, func() {
 		Describe("List()", func() {
 			It("Should return list of files", func() {
-				fileReader, err := os.Open("./fixtures/test.txt")
+				fileReader, err := os.Open("./s3_testdata/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
 				for _, path := range []string{"cc-buildpacks/aa/bb", "cc-buildpacks/aa/cc", "cc-buildpacks/aa/dd"} {
-					err := store.Write(&goblob.Blob{
+					err := store.Write(&blobstore.Blob{
 						Path: filepath.Join(path, "test.txt"),
 					}, fileReader)
 					Ω(err).ShouldNot(HaveOccurred())
@@ -80,13 +79,13 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 		})
 		Describe("Read()", func() {
 			It("Should read the file", func() {
-				fileReader, err := os.Open("./fixtures/test.txt")
+				fileReader, err := os.Open("./s3_testdata/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
-				writeErr := store.Write(&goblob.Blob{
+				writeErr := store.Write(&blobstore.Blob{
 					Path: "cc-buildpacks/aa/bb/test.txt",
 				}, fileReader)
 				Ω(writeErr).ShouldNot(HaveOccurred())
-				reader, err := store.Read(&goblob.Blob{
+				reader, err := store.Read(&blobstore.Blob{
 					Path: "cc-buildpacks/aa/bb/test.txt",
 				})
 				Ω(err).ShouldNot(HaveOccurred())
@@ -95,9 +94,9 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 		})
 		Describe("Write()", func() {
 			It("Should write to s3 blob store with correct checksum", func() {
-				reader, err := os.Open("./fixtures/test.txt")
+				reader, err := os.Open("./s3_testdata/test.txt")
 				Ω(err).ShouldNot(HaveOccurred())
-				blob := &goblob.Blob{
+				blob := &blobstore.Blob{
 					Path: "cc-buildpacks/aa/bb/test.txt",
 				}
 				err = store.Write(blob, reader)
