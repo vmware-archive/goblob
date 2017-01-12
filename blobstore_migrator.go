@@ -22,9 +22,8 @@ type BlobstoreMigrator interface {
 }
 
 type blobstoreMigrator struct {
-	concurrentMigrators int
-	pool                *workpool.WorkPool
-	blobMigrator        BlobMigrator
+	pool         *workpool.WorkPool
+	blobMigrator BlobMigrator
 }
 
 func NewBlobstoreMigrator(
