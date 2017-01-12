@@ -2,6 +2,7 @@ package blobstore_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -27,7 +28,13 @@ var _ = Describe("S3BucketIterator", func() {
 	)
 
 	BeforeEach(func() {
-		s3Endpoint := "http://127.0.0.1:9000"
+		var s3Endpoint string
+
+		if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
+			s3Endpoint = "http://127.0.0.1:9000"
+		} else {
+			s3Endpoint = fmt.Sprintf("http://%s:9000", os.Getenv("MINIO_PORT_9000_TCP_ADDR"))
+		}
 
 		session := session.New(&aws.Config{
 			Region: aws.String(s3Region),
