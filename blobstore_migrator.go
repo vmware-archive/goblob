@@ -3,6 +3,7 @@ package goblob
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/c0-ops/goblob/blobstore"
 	"github.com/cheggaaa/pb"
@@ -50,13 +51,16 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 	fmt.Printf("Migrating blobs from %s to %s\n", src.Name(), dst.Name())
 
 	blobsToMigrate := make(chan *blobstore.Blob)
+	wg := sync.WaitGroup{}
 	go func() {
 		for _, blob := range blobs {
+			wg.Add(1)
 			if !dst.Exists(blob) {
 				blobsToMigrate <- blob
 			}
 		}
 
+		wg.Wait()
 		close(blobsToMigrate)
 	}()
 
@@ -69,6 +73,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 					return err
 				}
 				bar.Increment()
+				wg.Done()
 			}
 			return nil
 		})
