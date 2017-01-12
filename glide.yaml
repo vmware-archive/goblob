@@ -1,18 +1,18 @@
 package: github.com/c0-ops/goblob
 import:
 - package: github.com/urfave/cli
-  version: ^1.19.1
+  version: master
 - package: github.com/aws/aws-sdk-go
-  version: ^1.6.4
+  version: master
   subpackages:
   - service/s3
 - package: github.com/xchapter7x/lo
 - package: github.com/op/go-logging
   version: master
 - package: github.com/cheggaaa/pb
-  version: ^1.0.7
+  version: master
 - package: github.com/mattn/go-runewidth
-  version: ^0.0.1
+  version: master
 - package: golang.org/x/sync
 - package: golang.org/x/net
   subpackages:
@@ -20,6 +20,6 @@ import:
 - package: code.cloudfoundry.org/workpool
 testImport:
 - package: github.com/onsi/ginkgo
-  version: ^1.2.0
+  version: master
 - package: github.com/onsi/gomega
-  version: ^1.0.0
+  version: master
