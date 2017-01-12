@@ -3,6 +3,7 @@ package goblob
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	"code.cloudfoundry.org/workpool"
@@ -46,7 +47,6 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 	}
 
 	var migrateWG sync.WaitGroup
-	var migrateError error
 	for _, bucket := range buckets {
 		iterator, err := src.NewBucketIterator(bucket)
 		if err != nil {
@@ -61,10 +61,6 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 		var bucketWG sync.WaitGroup
 
 		for {
-			if migrateError != nil {
-				return migrateError
-			}
-
 			blob, err := iterator.Next()
 			if err == blobstore.ErrIteratorDone {
 				break
@@ -92,7 +88,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 				if !dst.Exists(blob) {
 					err := m.blobMigrator.Migrate(blob)
 					if err != nil {
-						migrateError = fmt.Errorf("error migrating %s: %s", blob.Path, err)
+						fmt.Fprintf(os.Stderr, "error migrating %s: %s", blob.Path, err)
 						return
 					}
 				}
@@ -101,10 +97,6 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 		bucketWG.Wait()
 		progressBar.Finish()
-	}
-
-	if migrateError != nil {
-		return migrateError
 	}
 
 	migrateWG.Wait()

@@ -106,17 +106,14 @@ var _ = Describe("BlobstoreMigrator", func() {
 				}
 			})
 
-			It("stops uploading", func() {
-				_ = migrator.Migrate(dstStore, srcStore)
-				Expect(blobMigrator.MigrateCallCount()).To(Equal(2))
+			It("continues uploading", func() {
+				err := migrator.Migrate(dstStore, srcStore)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(blobMigrator.MigrateCallCount()).To(Equal(3))
 				Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
 				Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(secondBlob))
-			})
-
-			It("returns an error", func() {
-				err := migrator.Migrate(dstStore, srcStore)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("error migrating some-other-path/some-other-file: migrate-err"))
+				Expect(blobMigrator.MigrateArgsForCall(2)).To(Equal(thirdBlob))
 			})
 		})
 
