@@ -51,12 +51,12 @@ func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, 
 
 		if err == nil {
 			for _, item := range listObjectsOutput.Contents {
-				s3Service.DeleteObject(&awss3.DeleteObjectInput{
+				_, _ = s3Service.DeleteObject(&awss3.DeleteObjectInput{
 					Bucket: aws.String(controlBucket),
 					Key:    item.Key,
 				})
 			}
-			s3Service.DeleteBucket(&awss3.DeleteBucketInput{
+			_, _ = s3Service.DeleteBucket(&awss3.DeleteBucketInput{
 				Bucket: aws.String(controlBucket),
 			})
 		}

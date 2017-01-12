@@ -85,7 +85,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 			})
 
 			It("stops uploading", func() {
-				migrator.Migrate(dstStore, srcStore)
+				_ = migrator.Migrate(dstStore, srcStore)
 				Expect(blobMigrator.MigrateCallCount()).To(Equal(2))
 				Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
 				Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(secondBlob))
