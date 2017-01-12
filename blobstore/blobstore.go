@@ -17,4 +17,5 @@ type Blobstore interface {
 	Checksum(src *Blob) (string, error)
 	Write(dst *Blob, src io.Reader) error
 	Exists(*Blob) bool
+	NewBucketIterator(string) (BucketIterator, error)
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
+
+	"code.cloudfoundry.org/workpool"
 
 	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/blobstore"
@@ -96,7 +99,12 @@ func nfsAction(c *cli.Context) error {
 		c.Bool("use-multipart-uploads"))
 
 	blobMigrator := goblob.NewBlobMigrator(dstStore, srcStore)
-	blobStoreMigrator := goblob.NewBlobstoreMigrator(c.Int("concurrent-uploads"), blobMigrator)
+	pool, err := workpool.NewWorkPool(c.Int("concurrent-uploads"))
+	if err != nil {
+		return fmt.Errorf("error creating workpool: %s", err)
+	}
+
+	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator)
 
 	return blobStoreMigrator.Migrate(dstStore, srcStore)
 }

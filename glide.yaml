@@ -17,6 +17,7 @@ import:
 - package: golang.org/x/net
   subpackages:
   - context
+- package: code.cloudfoundry.org/workpool
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

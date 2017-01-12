@@ -57,6 +57,15 @@ type FakeBlobstore struct {
 	existsReturns struct {
 		result1 bool
 	}
+	NewBucketIteratorStub        func(string) (blobstore.BucketIterator, error)
+	newBucketIteratorMutex       sync.RWMutex
+	newBucketIteratorArgsForCall []struct {
+		arg1 string
+	}
+	newBucketIteratorReturns struct {
+		result1 blobstore.BucketIterator
+		result2 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -247,6 +256,40 @@ func (fake *FakeBlobstore) ExistsReturns(result1 bool) {
 	}{result1}
 }
 
+func (fake *FakeBlobstore) NewBucketIterator(arg1 string) (blobstore.BucketIterator, error) {
+	fake.newBucketIteratorMutex.Lock()
+	fake.newBucketIteratorArgsForCall = append(fake.newBucketIteratorArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("NewBucketIterator", []interface{}{arg1})
+	fake.newBucketIteratorMutex.Unlock()
+	if fake.NewBucketIteratorStub != nil {
+		return fake.NewBucketIteratorStub(arg1)
+	} else {
+		return fake.newBucketIteratorReturns.result1, fake.newBucketIteratorReturns.result2
+	}
+}
+
+func (fake *FakeBlobstore) NewBucketIteratorCallCount() int {
+	fake.newBucketIteratorMutex.RLock()
+	defer fake.newBucketIteratorMutex.RUnlock()
+	return len(fake.newBucketIteratorArgsForCall)
+}
+
+func (fake *FakeBlobstore) NewBucketIteratorArgsForCall(i int) string {
+	fake.newBucketIteratorMutex.RLock()
+	defer fake.newBucketIteratorMutex.RUnlock()
+	return fake.newBucketIteratorArgsForCall[i].arg1
+}
+
+func (fake *FakeBlobstore) NewBucketIteratorReturns(result1 blobstore.BucketIterator, result2 error) {
+	fake.NewBucketIteratorStub = nil
+	fake.newBucketIteratorReturns = struct {
+		result1 blobstore.BucketIterator
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeBlobstore) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -262,6 +305,8 @@ func (fake *FakeBlobstore) Invocations() map[string][][]interface{} {
 	defer fake.writeMutex.RUnlock()
 	fake.existsMutex.RLock()
 	defer fake.existsMutex.RUnlock()
+	fake.newBucketIteratorMutex.RLock()
+	defer fake.newBucketIteratorMutex.RUnlock()
 	return fake.invocations
 }
 

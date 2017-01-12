@@ -1,6 +1,7 @@
 package blobstore
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -227,4 +228,62 @@ func (s *s3Store) Exists(blob *Blob) bool {
 	}
 
 	return checksum == blob.Checksum
+}
+
+func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
+	s3Client := awss3.New(s.session)
+
+	realBucketName := bucketName + "-" + s.identifier
+
+	bucketExists, err := s.doesBucketExist(realBucketName)
+	if err != nil {
+		return nil, err
+	}
+
+	if !bucketExists {
+		return nil, errors.New("bucket does not exist")
+	}
+
+	listObjectsOutput, err := s3Client.ListObjects(
+		&awss3.ListObjectsInput{
+			Bucket: aws.String(realBucketName),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(listObjectsOutput.Contents) == 0 {
+		return &s3BucketIterator{}, nil
+	}
+
+	doneCh := make(chan struct{})
+	blobCh := make(chan *Blob)
+
+	iterator := &s3BucketIterator{
+		doneCh:    doneCh,
+		blobCh:    blobCh,
+		blobCount: uint(len(listObjectsOutput.Contents)),
+	}
+
+	go func() {
+		for _, item := range listObjectsOutput.Contents {
+			select {
+			case <-doneCh:
+				doneCh = nil
+				return
+			default:
+				blobCh <- &Blob{
+					Path: filepath.Join(
+						bucketName,
+						strings.TrimPrefix(*item.Key, realBucketName),
+					),
+				}
+			}
+		}
+
+		close(blobCh)
+	}()
+
+	return iterator, nil
 }

@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/c0-ops/goblob/validation"
 	"github.com/cheggaaa/pb"
@@ -94,4 +96,59 @@ func (s *nfsStore) Exists(blob *Blob) bool {
 	}
 
 	return checksum == blob.Checksum
+}
+
+func (s *nfsStore) NewBucketIterator(folder string) (BucketIterator, error) {
+	blobCh := make(chan *Blob)
+	doneCh := make(chan struct{})
+	errCh := make(chan error)
+
+	actualPath := filepath.Join(s.path, folder)
+
+	files, err := ioutil.ReadDir(actualPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(files) == 0 {
+		return &nfsBucketIterator{}, nil
+	}
+
+	iterator := &nfsBucketIterator{
+		blobCh:    blobCh,
+		doneCh:    doneCh,
+		errCh:     errCh,
+		blobCount: uint(len(files)),
+	}
+
+	walkFn := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() || info.Name() == ".nfs_test" {
+			return nil
+		}
+
+		select {
+		case <-doneCh:
+			doneCh = nil
+			return ErrIteratorAborted
+		default:
+			blob := &Blob{
+				Path: strings.TrimPrefix(path, s.path+string(os.PathSeparator)),
+			}
+
+			blobCh <- blob
+
+			return nil
+		}
+	}
+
+	go func() {
+		errCh <- filepath.Walk(actualPath, walkFn)
+		close(blobCh)
+	}()
+
+	return iterator, nil
 }

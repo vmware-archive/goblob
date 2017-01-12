@@ -3,6 +3,8 @@ package goblob_test
 import (
 	"errors"
 
+	"code.cloudfoundry.org/workpool"
+
 	"github.com/c0-ops/goblob"
 	"github.com/c0-ops/goblob/blobstore"
 	"github.com/c0-ops/goblob/blobstore/blobstorefakes"
@@ -18,13 +20,21 @@ var _ = Describe("BlobstoreMigrator", func() {
 		blobMigrator *goblobfakes.FakeBlobMigrator
 		dstStore     *blobstorefakes.FakeBlobstore
 		srcStore     *blobstorefakes.FakeBlobstore
+		iterator     *blobstorefakes.FakeBucketIterator
 	)
 
 	BeforeEach(func() {
 		dstStore = &blobstorefakes.FakeBlobstore{}
 		srcStore = &blobstorefakes.FakeBlobstore{}
 		blobMigrator = &goblobfakes.FakeBlobMigrator{}
-		migrator = goblob.NewBlobstoreMigrator(1, blobMigrator)
+
+		pool, err := workpool.NewWorkPool(1)
+		Expect(err).NotTo(HaveOccurred())
+
+		migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator)
+
+		iterator = &blobstorefakes.FakeBucketIterator{}
+		srcStore.NewBucketIteratorReturns(iterator, nil)
 	})
 
 	Describe("Migrate", func() {
@@ -46,7 +56,19 @@ var _ = Describe("BlobstoreMigrator", func() {
 				Path:     "yet-another-path/yet-another-file",
 			}
 
-			srcStore.ListReturns([]*blobstore.Blob{firstBlob, secondBlob, thirdBlob}, nil)
+			iterator.CountReturns(3)
+			iterator.NextStub = func() (*blobstore.Blob, error) {
+				switch iterator.NextCallCount() {
+				case 1:
+					return firstBlob, nil
+				case 2:
+					return secondBlob, nil
+				case 3:
+					return thirdBlob, nil
+				default:
+					return nil, blobstore.ErrIteratorDone
+				}
+			}
 		})
 
 		It("uploads all the files from the source", func() {
@@ -94,7 +116,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 			It("returns an error", func() {
 				err := migrator.Migrate(dstStore, srcStore)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("migrate-err"))
+				Expect(err.Error()).To(ContainSubstring("error migrating some-other-path/some-other-file: migrate-err"))
 			})
 		})
 
@@ -112,19 +134,21 @@ var _ = Describe("BlobstoreMigrator", func() {
 
 		Context("when the source store has no files", func() {
 			BeforeEach(func() {
-				srcStore.ListReturns(nil, nil)
+				iterator.NextStub = func() (*blobstore.Blob, error) {
+					return nil, errors.New("no more files!") // <-- this needs to be an exported err
+				}
 			})
 
 			It("returns an error", func() {
 				err := migrator.Migrate(dstStore, srcStore)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("the source store has no files"))
+				Expect(err.Error()).To(Equal("no more files!"))
 			})
 		})
 
-		Context("when there is an error listing the source's files", func() {
+		XContext("when there is an error listing the source's files", func() {
 			BeforeEach(func() {
-				srcStore.ListReturns(nil, errors.New("list-error"))
+				// srcStore.ListReturns(nil, errors.New("list-error"))
 			})
 
 			It("returns an error", func() {
