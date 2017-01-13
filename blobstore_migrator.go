@@ -71,6 +71,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 		var bucketWG sync.WaitGroup
 
+		var migrateErrors []error
 		for {
 			blob, err := iterator.Next()
 			if err == blobstore.ErrIteratorDone {
@@ -99,7 +100,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 				if !dst.Exists(blob) {
 					err := m.blobMigrator.Migrate(blob)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "error migrating %s: %s", blob.Path, err)
+						migrateErrors = append(migrateErrors, err)
 						return
 					}
 				}
@@ -108,6 +109,12 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 		bucketWG.Wait()
 		progressBar.Finish()
+
+		if migrateErrors != nil {
+			for i := range migrateErrors {
+				fmt.Fprintln(os.Stderr, migrateErrors[i])
+			}
+		}
 	}
 
 	migrateWG.Wait()
