@@ -6,8 +6,6 @@ S3-compatible one.
 
 ## Installing
 
-### Install pre-built binaries
-
 Download the [latest release](https://github.com/pivotalservices/goblob/releases/latest).
 
 ### Install from source
@@ -27,13 +25,11 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 ### Options
 
 * `concurrent-uploads`: Number of concurrent uploads (default: 20)
-* `use-multipart-uploads`: Whether to use multi-part uploads
 * `exclude`: Directory to exclude (may be given more than once)
 
 #### NFS-specific Options
 
-* `blobstore-path`: The path to the root of the NFS blobstore, e.g. /var/vcap/store/shared.
-* `cf-identifier`: The suffix appended to the blobstore directories in NFS. In `cc-buildpacks-some-guid-here`, `some-guid-here` is the identifier.
+* `blobstore-path`: The path to the root of the NFS blobstore, e.g. /var/vcap/store/shared
 
 #### S3-specific Options
 
@@ -41,6 +37,8 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 * `s3-accesskey`: The access key to use with the S3-compatible blobstore
 * `s3-secretkey`: The secret key to use with the S3-compatible blobstore
 * `s3-region`: The region to use with the S3-compatible blobstore
+* `cf-identifier`: The suffix appended to the blobstore directories.
+* `use-multipart-uploads`: Whether to use multi-part uploads
 
 ## Post-migration Tasks
 
