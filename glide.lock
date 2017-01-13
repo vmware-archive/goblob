@@ -1,10 +1,10 @@
-hash: 27f0c32dbc04fa40e97b4e87fea69c90d5c5ae58426cacc32fe57dfc1730d8cd
-updated: 2017-01-12T15:26:38.462756209-08:00
+hash: b917d8a83799c004edff9d99240a0182c76489d49e8e33af2051814bb57f9ff6
+updated: 2017-01-13T11:48:16.386959925-08:00
 imports:
 - name: code.cloudfoundry.org/workpool
   version: 24756b8d25e8a6a601284a5900005c8bfdcaa766
 - name: github.com/aws/aws-sdk-go
-  version: 63ce630574a5ec05ecd8e8de5cea16332a5a684d
+  version: 5e1afe1c0a077fb2da9b5f74232b790d99397ce8
   subpackages:
   - aws
   - aws/awserr
@@ -37,14 +37,14 @@ imports:
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/go-ini/ini
   version: 6f66b0e091edb3c7b380f7c4f0f884274d550b67
+- name: github.com/jessevdk/go-flags
+  version: 4e64e4a4e2552194cf594243e23aa9baf3b4297e
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/mattn/go-runewidth
   version: 737072b4e32b7a5018b4a7125da8d12de90e8045
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
-- name: github.com/urfave/cli
-  version: 8ef3805c9de2519805c3f060524b695bba2cd715
 - name: github.com/xchapter7x/lo
   version: e33b245fc7a8186582208abc2458c2691bff681c
 - name: golang.org/x/net

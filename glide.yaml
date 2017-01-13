@@ -1,7 +1,5 @@
 package: github.com/pivotalservices/goblob
 import:
-- package: github.com/urfave/cli
-  version: master
 - package: github.com/aws/aws-sdk-go
   version: master
   subpackages:
@@ -18,6 +16,7 @@ import:
   subpackages:
   - context
 - package: code.cloudfoundry.org/workpool
+- package: github.com/jessevdk/go-flags
 testImport:
 - package: github.com/onsi/ginkgo
   version: master

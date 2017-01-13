@@ -1,106 +1,20 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
-	"code.cloudfoundry.org/workpool"
-
-	"github.com/pivotalservices/goblob"
-	"github.com/pivotalservices/goblob/blobstore"
-	"github.com/urfave/cli"
-	"github.com/xchapter7x/lo"
+	flags "github.com/jessevdk/go-flags"
+	"github.com/pivotalservices/goblob/commands"
 )
 
-type ErrorHandler struct {
-	ExitCode int
-	Error    error
-}
-
 func main() {
-	eh := new(ErrorHandler)
-	eh.ExitCode = 0
-	app := NewApp(eh)
-	if err := app.Run(os.Args); err != nil {
-		eh.ExitCode = 1
-		eh.Error = err
-		lo.G.Error(eh.Error)
-	}
-	os.Exit(eh.ExitCode)
-}
+	parser := flags.NewParser(&commands.Goblob, flags.HelpFlag)
+	parser.NamespaceDelimiter = "-"
 
-// NewApp creates a new cli app
-func NewApp(eh *ErrorHandler) *cli.App {
-	app := cli.NewApp()
-	app.Version = goblob.Version
-	app.Name = "goblob"
-	app.Usage = "goblob"
-	app.Commands = []cli.Command{
-		cli.Command{
-			Name:  "version",
-			Usage: "shows the application version currently in use",
-			Action: func(c *cli.Context) (err error) {
-				cli.ShowVersion(c)
-				return
-			},
-		},
-		CreateMigrateNFSCommand(eh),
-	}
-	return app
-}
-
-func CreateMigrateNFSCommand(eh *ErrorHandler) cli.Command {
-	return cli.Command{
-		Action:      nfsAction,
-		Name:        "migrate",
-		Usage:       "migrate nfs blobs to s3",
-		Description: "migrate nfs blobs to s3",
-		Flags: []cli.Flag{
-			cli.StringFlag{Name: "blobstore-path", Value: "/var/vcap/store/shared", Usage: "path to root of blobstore", EnvVar: "BLOBSTORE_PATH"},
-			cli.StringFlag{Name: "cf-identifier", Value: "", Usage: "unique identifier for Cloud Foundry deployment", EnvVar: "CF_IDENTIFIER"},
-			cli.StringFlag{Name: "s3-accesskey", Value: "", Usage: "s3 access key", EnvVar: "S3_ACCESSKEY"},
-			cli.StringFlag{Name: "s3-secretkey", Value: "", Usage: "s3 secrety key", EnvVar: "S3_SECRETKEY"},
-			cli.StringFlag{Name: "s3-region", Value: "us-east-1", Usage: "s3 region", EnvVar: "S3_REGION"},
-			cli.StringFlag{Name: "s3-endpoint", Value: "https://s3.amazonaws.com", Usage: "s3 endpoint", EnvVar: "S3_ENDPOINT"},
-			cli.IntFlag{Name: "concurrent-uploads", Value: 20, Usage: "number of concurrent uploads", EnvVar: "CONCURRENT_UPLOADS"},
-			cli.BoolFlag{Name: "use-multipart-uploads", Usage: "use multi-part uploads", EnvVar: "USE_MULTIPART_UPLOADS"},
-		},
-	}
-}
-
-func nfsAction(c *cli.Context) error {
-	cfIdentifier := c.String("cf-identifier")
-	awsAccessKey := c.String("s3-accesskey")
-	awsSecretKey := c.String("s3-secretkey")
-
-	if cfIdentifier == "" {
-		return errors.New("Must provide cf-identifier")
-	}
-	if awsAccessKey == "" {
-		return errors.New("Must provide s3-accesskey")
-	}
-
-	if awsSecretKey == "" {
-		return errors.New("Must provide s3-secretkey")
-	}
-
-	srcStore := blobstore.NewNFS(c.String("blobstore-path"))
-	dstStore := blobstore.NewS3(
-		c.String("cf-identifier"),
-		awsAccessKey,
-		awsSecretKey,
-		c.String("s3-region"),
-		c.String("s3-endpoint"),
-		c.Bool("use-multipart-uploads"))
-
-	blobMigrator := goblob.NewBlobMigrator(dstStore, srcStore)
-	pool, err := workpool.NewWorkPool(c.Int("concurrent-uploads"))
+	_, err := parser.Parse()
 	if err != nil {
-		return fmt.Errorf("error creating workpool: %s", err)
+		fmt.Fprintf(os.Stderr, "error: %s\n", err)
+		os.Exit(1)
 	}
-
-	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator)
-
-	return blobStoreMigrator.Migrate(dstStore, srcStore)
 }
