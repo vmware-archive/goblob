@@ -13,10 +13,6 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
-var (
-	VERSION = ""
-)
-
 type ErrorHandler struct {
 	ExitCode int
 	Error    error
@@ -37,7 +33,7 @@ func main() {
 // NewApp creates a new cli app
 func NewApp(eh *ErrorHandler) *cli.App {
 	app := cli.NewApp()
-	app.Version = VERSION
+	app.Version = goblob.Version
 	app.Name = "goblob"
 	app.Usage = "goblob"
 	app.Commands = []cli.Command{
