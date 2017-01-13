@@ -28,6 +28,7 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 
 * `concurrent-uploads`: Number of concurrent uploads (default: 20)
 * `use-multipart-uploads`: Whether to use multi-part uploads
+* `exclude`: Directory to exclude (may be given more than once)
 
 #### NFS-specific Options
 

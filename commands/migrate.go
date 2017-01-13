@@ -9,7 +9,8 @@ import (
 )
 
 type MigrateCommand struct {
-	ConcurrentUploads int `long:"concurrent-uploads" env:"CONCURRENT_UPLOADS" default:"20"`
+	ConcurrentUploads int      `long:"concurrent-uploads" env:"CONCURRENT_UPLOADS" default:"20"`
+	Exclusions        []string `long:"exclude" description:"blobstore directories to exclude, e.g. cc-resources"`
 
 	NFS struct {
 		Path string `long:"blobstore-path" env:"BLOBSTORE_PATH" description:"path to root of blobstore" default:"/var/vcap/store/shared"`
@@ -43,7 +44,7 @@ func (c *MigrateCommand) Execute([]string) error {
 		return fmt.Errorf("error creating workpool: %s", err)
 	}
 
-	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator)
+	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator, c.Exclusions)
 
 	return blobStoreMigrator.Migrate(s3Store, nfsStore)
 }

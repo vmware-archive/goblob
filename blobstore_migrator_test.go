@@ -21,6 +21,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 		dstStore     *blobstorefakes.FakeBlobstore
 		srcStore     *blobstorefakes.FakeBlobstore
 		iterator     *blobstorefakes.FakeBucketIterator
+		pool         *workpool.WorkPool
 	)
 
 	BeforeEach(func() {
@@ -28,10 +29,13 @@ var _ = Describe("BlobstoreMigrator", func() {
 		srcStore = &blobstorefakes.FakeBlobstore{}
 		blobMigrator = &goblobfakes.FakeBlobMigrator{}
 
-		pool, err := workpool.NewWorkPool(1)
+		var err error
+		pool, err = workpool.NewWorkPool(1)
 		Expect(err).NotTo(HaveOccurred())
 
-		migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator)
+		exclusions := []string{}
+
+		migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions)
 
 		iterator = &blobstorefakes.FakeBucketIterator{}
 		srcStore.NewBucketIteratorReturns(iterator, nil)
@@ -78,6 +82,26 @@ var _ = Describe("BlobstoreMigrator", func() {
 			Expect(blobMigrator.MigrateArgsForCall(0)).To(Equal(firstBlob))
 			Expect(blobMigrator.MigrateArgsForCall(1)).To(Equal(secondBlob))
 			Expect(blobMigrator.MigrateArgsForCall(2)).To(Equal(thirdBlob))
+		})
+
+		Context("when an exclusion list is given", func() {
+			BeforeEach(func() {
+				exclusions := []string{"cc-resources", "cc-buildpacks"}
+				migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions)
+			})
+
+			It("does not migrate those paths", func() {
+				err := migrator.Migrate(dstStore, srcStore)
+				Expect(err).NotTo(HaveOccurred())
+
+				var dirs []string
+				for i := 0; i < srcStore.NewBucketIteratorCallCount(); i++ {
+					dirs = append(dirs, srcStore.NewBucketIteratorArgsForCall(i))
+				}
+
+				Expect(dirs).NotTo(ContainElement("cc-resources"))
+				Expect(dirs).NotTo(ContainElement("cc-buildpacks"))
+			})
 		})
 
 		Context("when a file already exists", func() {

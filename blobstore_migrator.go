@@ -8,8 +8,8 @@ import (
 
 	"code.cloudfoundry.org/workpool"
 
-	"github.com/pivotalservices/goblob/blobstore"
 	"github.com/cheggaaa/pb"
+	"github.com/pivotalservices/goblob/blobstore"
 )
 
 var (
@@ -24,15 +24,23 @@ type BlobstoreMigrator interface {
 type blobstoreMigrator struct {
 	pool         *workpool.WorkPool
 	blobMigrator BlobMigrator
+	skip         map[string]struct{}
 }
 
 func NewBlobstoreMigrator(
 	pool *workpool.WorkPool,
 	blobMigrator BlobMigrator,
+	exclusions []string,
 ) BlobstoreMigrator {
+	skip := make(map[string]struct{})
+	for i := range exclusions {
+		skip[exclusions[i]] = struct{}{}
+	}
+
 	return &blobstoreMigrator{
 		pool:         pool,
 		blobMigrator: blobMigrator,
+		skip:         skip,
 	}
 }
 
@@ -47,6 +55,10 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 	var migrateWG sync.WaitGroup
 	for _, bucket := range buckets {
+		if _, ok := m.skip[bucket]; ok {
+			continue
+		}
+
 		iterator, err := src.NewBucketIterator(bucket)
 		if err != nil {
 			return fmt.Errorf("could not create bucket iterator for bucket %s: %s", bucket, err)
