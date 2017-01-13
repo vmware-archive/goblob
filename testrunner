@@ -7,5 +7,5 @@ if [[ $(docker images|grep golang) ]]; then
   DOCKER_LOCAL="--docker-local"
 fi
 rm -fR _builds _steps _projects _cache _temp
-wercker --verbose --environment ".testrunner_env_defaults" build --git-domain github.com --git-owner c0-ops --git-repository goblob ${DOCKER_LOCAL}
+wercker --verbose --environment ".testrunner_env_defaults" build --git-domain github.com --git-owner pivotalservices --git-repository goblob ${DOCKER_LOCAL}
 rm -fR _builds _steps _projects _cache _temp .wercker

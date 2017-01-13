@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob/blobstore"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

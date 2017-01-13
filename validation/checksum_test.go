@@ -3,7 +3,7 @@ package validation_test
 import (
 	"path"
 
-	. "github.com/c0-ops/goblob/validation"
+	. "github.com/pivotalservices/goblob/validation"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

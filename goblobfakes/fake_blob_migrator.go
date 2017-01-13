@@ -4,8 +4,8 @@ package goblobfakes
 import (
 	"sync"
 
-	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob"
+	"github.com/pivotalservices/goblob/blobstore"
 )
 
 type FakeBlobMigrator struct {

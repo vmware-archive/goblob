@@ -8,16 +8,16 @@ S3-compatible one.
 
 ### Install pre-built binaries
 
-Download the [latest release](https://github.com/c0-ops/goblob/releases/latest).
+Download the [latest release](https://github.com/pivotalservices/goblob/releases/latest).
 
 ### Install from source
 
 ```
-mkdir -p $GOPATH/src/github.com/c0-ops/goblob
-git clone git@github.com:c0-ops/goblob.git $GOPATH/src/github.com/c0-ops/goblob
-cd $GOPATH/src/github.com/c0-ops/goblob
+mkdir -p $GOPATH/src/github.com/pivotalservices/goblob
+git clone git@github.com:pivotalservices/goblob.git $GOPATH/src/github.com/pivotalservices/goblob
+cd $GOPATH/src/github.com/pivotalservices/goblob
 glide install
-GOOARCH=amd64 GOOS=linux go install github.com/c0-ops/goblob/cmd/goblob
+GOOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 ```
 
 ## Usage

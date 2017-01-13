@@ -3,7 +3,7 @@ package blobstore_test
 import (
 	"errors"
 
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob/blobstore"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

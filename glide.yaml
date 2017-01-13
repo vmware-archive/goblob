@@ -1,4 +1,4 @@
-package: github.com/c0-ops/goblob
+package: github.com/pivotalservices/goblob
 import:
 - package: github.com/urfave/cli
   version: master

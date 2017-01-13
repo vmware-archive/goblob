@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/c0-ops/goblob/validation"
+	"github.com/pivotalservices/goblob/validation"
 	"github.com/cheggaaa/pb"
 	"golang.org/x/sync/errgroup"
 )

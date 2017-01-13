@@ -7,8 +7,8 @@ import (
 
 	"code.cloudfoundry.org/workpool"
 
-	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob"
+	"github.com/pivotalservices/goblob/blobstore"
 	"github.com/urfave/cli"
 	"github.com/xchapter7x/lo"
 )

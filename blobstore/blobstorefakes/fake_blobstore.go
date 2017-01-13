@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob/blobstore"
 )
 
 type FakeBlobstore struct {

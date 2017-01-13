@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/c0-ops/goblob/blobstore"
+	"github.com/pivotalservices/goblob/blobstore"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/c0-ops/goblob"
-	"github.com/c0-ops/goblob/blobstore"
-	"github.com/c0-ops/goblob/blobstore/blobstorefakes"
+	"github.com/pivotalservices/goblob"
+	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotalservices/goblob/blobstore/blobstorefakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
