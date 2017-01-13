@@ -10,6 +10,11 @@ Download the [latest release](https://github.com/pivotalservices/goblob/releases
 
 ### Install from source
 
+Requirements:
+
+* [glide](https://github.com/masterminds/glide)
+* [go](https://golang.org)
+
 ```
 mkdir -p $GOPATH/src/github.com/pivotalservices/goblob
 git clone git@github.com:pivotalservices/goblob.git $GOPATH/src/github.com/pivotalservices/goblob
