@@ -17,7 +17,7 @@ mkdir -p $GOPATH/src/github.com/pivotalservices/goblob
 git clone git@github.com:pivotalservices/goblob.git $GOPATH/src/github.com/pivotalservices/goblob
 cd $GOPATH/src/github.com/pivotalservices/goblob
 glide install
-GOOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
+GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 ```
 
 ## Usage
