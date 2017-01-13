@@ -12,8 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/pivotalservices/goblob/validation"
 	"github.com/cheggaaa/pb"
+	"github.com/pivotalservices/goblob/validation"
 	"github.com/xchapter7x/lo"
 )
 
@@ -27,13 +27,21 @@ type s3Store struct {
 	useMultipartUploads bool
 }
 
-func NewS3(identifier, awsAccessKey, awsSecretKey, region, endpoint string, useMultipartUploads bool) Blobstore {
+func NewS3(
+	identifier string,
+	awsAccessKey string,
+	awsSecretKey string,
+	region string,
+	endpoint string,
+	useMultipartUploads bool,
+	disableSSL bool,
+) Blobstore {
 	return &s3Store{
 		session: session.New(&aws.Config{
 			Region:           aws.String(region),
 			Credentials:      credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, ""),
 			Endpoint:         aws.String(endpoint),
-			DisableSSL:       aws.Bool(true),
+			DisableSSL:       aws.Bool(disableSSL),
 			S3ForcePathStyle: aws.Bool(true),
 		}),
 		identifier:          identifier,

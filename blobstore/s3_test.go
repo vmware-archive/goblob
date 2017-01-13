@@ -37,8 +37,8 @@ var _ = Describe("S3Store", func() {
 	}
 	controlBucket := "cc-buildpacks-identifier"
 
-	testsToRun("Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, true))
-	testsToRun("non Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, false))
+	testsToRun("Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, true, true))
+	testsToRun("non Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, false, true))
 })
 
 func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, store blobstore.Blobstore) {

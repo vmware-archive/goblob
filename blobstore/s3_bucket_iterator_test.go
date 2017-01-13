@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
-	"github.com/pivotalservices/goblob/blobstore"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotalservices/goblob/blobstore"
 )
 
 var _ = Describe("S3BucketIterator", func() {
@@ -64,6 +64,7 @@ var _ = Describe("S3BucketIterator", func() {
 			"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 			s3Region,
 			s3Endpoint,
+			true,
 			true,
 		)
 

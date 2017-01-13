@@ -24,6 +24,7 @@ type MigrateCommand struct {
 		Region              string `long:"region" default:"us-east-1" env:"S3_REGION" description:"S3 region"`
 		Endpoint            string `long:"s3-endpoint" default:"https://s3.amazonaws.com" env:"S3_ENDPOINT"`
 		UseMultipartUploads bool   `long:"use-multipart-uploads" env:"USE_MULTIPART_UPLOADS"`
+		DisableSSL          bool   `long:"disable-ssl" description:"disable SSL connections to S3 endpoint"`
 	} `group:"S3"`
 }
 
@@ -36,6 +37,7 @@ func (c *MigrateCommand) Execute([]string) error {
 		c.S3.Region,
 		c.S3.Endpoint,
 		c.S3.UseMultipartUploads,
+		c.S3.DisableSSL,
 	)
 
 	blobMigrator := goblob.NewBlobMigrator(s3Store, nfsStore)
