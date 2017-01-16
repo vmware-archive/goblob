@@ -1,0 +1,32 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: latest
+
+inputs:
+- name: goblob
+  path: go/src/github.com/pivotalservices/goblob
+
+outputs:
+- name: goblob-with-dependencies
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    export GOPATH=$PWD/go
+    export PATH=$GOPATH/bin:$PATH
+
+    ROOT=$(cd $(dirname $0) && pwd)
+
+    go get -u github.com/Masterminds/glide
+
+    cd go/src/github.com/pivotalservices/goblob
+      glide install
+      cp -R . "${ROOT}/goblob-with-dependencies"
+    cd -

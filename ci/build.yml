@@ -1,0 +1,33 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: latest
+
+inputs:
+- name: goblob-with-dependencies
+  path: go/src/github.com/pivotalservices/goblob
+- name: version
+
+outputs:
+- name: tarball
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    export GOPATH=$PWD/go
+    export PATH=$GOPATH/bin:$PATH
+
+    ROOT=$(cd $(dirname $0) && pwd)
+    version=$(cat $ROOT/version/version)
+
+    cd go/src/github.com/pivotalservices/goblob
+      GOOS=linux GOARCH=amd64 go build github.com/pivotalservices/goblob/cmd/goblob
+
+      tar -czvf "${ROOT}/tarball/goblob-${version}.tgz" goblob
+    cd -

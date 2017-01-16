@@ -1,0 +1,36 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: latest
+
+inputs:
+- name: goblob-with-dependencies
+  path: go/src/github.com/pivotalservices/goblob
+
+params:
+  MINIO_ACCESS_KEY:
+  MINIO_SECRET_KEY:
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    export GOPATH=$PWD/go
+    export PATH=$GOPATH/bin:$PATH
+
+    wget https://dl.minio.io/server/minio/release/linux-amd64/minio
+    chmod +x minio
+
+    tmpdir=$(mktemp -d)
+    ./minio server $tmpdir &
+
+    go get -u github.com/onsi/ginkgo/ginkgo
+
+    cd go/src/github.com/pivotalservices/goblob
+      ginkgo -r -race -randomizeAllSpecs
+    cd -
