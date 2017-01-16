@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: busybox
+    version: latest
+
+inputs:
+- name: goblob-rc
+- name: version
+
+outputs:
+- name: goblob-final-release
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    version=$(cat version/version)
+    cp goblob-rc/goblob-*.tgz goblob-final-release/goblob${version}.linux-amd64.tgz

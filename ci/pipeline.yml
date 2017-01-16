@@ -81,26 +81,29 @@ jobs:
       params: {bump: final}
     - get: goblob
       passed: [create-rc]
-  - task: create-release-notes
-    file: goblob/ci/create-release-notes.yml
+  - aggregate:
+    - task: finalize-release
+      file: goblob/ci/finalize-release.yml
+    - task: create-release-notes
+      file: goblob/ci/create-release-notes.yml
   - put: goblob
     params:
       repository: goblob
       only_tag: true
       tag: version/version
       tag_prefix: v
-  - put: version
-    params:
-      bump: minor
-      pre: rc
   - aggregate:
     - put: goblob-gcs-release
       params:
-        file: goblob-rc/goblob-*.tgz
+        file: goblob-final-release/goblob*.tgz
     - put: goblob-gh-release
       params:
         name: version/version
         tag: version/version
         tag_prefix: v
         globs:
-        - goblob-rc/goblob-**.tgz
+        - goblob-final-release/goblob*.tgz
+    - put: version
+      params:
+        bump: minor
+        pre: rc
