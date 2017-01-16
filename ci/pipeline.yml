@@ -21,12 +21,20 @@ resources:
     json_key: {{gcs-private-key}}
     regexp: rc/goblob-(.*).tgz
 
-# - name: goblob-gh-release
-#   type: github-release
-#   source:
-#     user: pivotalservices
-#     repository: goblob
-#     access_token: {{github-access-token}}
+- name: goblob-gcs-release
+  type: gcs-resource
+  source:
+    bucket: goblob-releases
+    json_key: {{gcs-private-key}}
+    regexp: final/goblob-(.*).tgz
+
+- name: goblob-gh-release
+  type: github-release
+  source:
+    drafts: false
+    user: pivotalservices
+    repository: goblob
+    access_token: {{github-access-token}}
 
 - name: version
   type: semver
@@ -54,7 +62,6 @@ jobs:
       params:
         MINIO_ACCESS_KEY: example-access-key
         MINIO_SECRET_KEY: example-secret-key
-
     - task: build
       file: goblob/ci/build.yml
   - aggregate:
@@ -64,35 +71,36 @@ jobs:
       params:
         file: tarball/goblob-*.tgz
 
-# - name: shipit
-#   serial_groups: [version]
-#   plan:
-#   - aggregate:
-#     - get: goblob-rc
-#       passed: [create-rc]
-#     - get: version
-#       params: {bump: final}
-#     - get: goblob
-#       passed: [create-rc]
-#   - aggregate:
-#     - put: goblob
-#       params:
-#         only_tag: true
-#         tag: version/version
-#         tag_prefix: v
-#     - put: version
-#       params:
-#         bump: minor
-#         pre: rc
-#     - put: goblob-gcs-release
-#       params:
-#         file: goblob-rc/goblob-*.tgz
-#     - put: goblob-gh-release
-#       params:
-#         name: version/version
-#         tag: version/version
-#         tag_prefix: v
-#         body: path/to/body/file
-#         globs:
-#         - paths/to/files/to/upload-*.tgz
-
+- name: shipit
+  serial_groups: [version]
+  plan:
+  - aggregate:
+    - get: goblob-rc
+      passed: [create-rc]
+    - get: version
+      params: {bump: final}
+    - get: goblob
+      passed: [create-rc]
+  - task: create-release-notes
+    file: goblob/ci/create-release-notes.yml
+  - put: goblob
+    params:
+      repository: goblob
+      only_tag: true
+      tag: version/version
+      tag_prefix: v
+  - put: version
+    params:
+      bump: minor
+      pre: rc
+  - aggregate:
+    - put: goblob-gcs-release
+      params:
+        file: goblob-rc/goblob-*.tgz
+    - put: goblob-gh-release
+      params:
+        name: version/version
+        tag: version/version
+        tag_prefix: v
+        globs:
+        - goblob-rc/goblob-**.tgz
