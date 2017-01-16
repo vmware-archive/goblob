@@ -44,6 +44,7 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 * `s3-region`: The region to use with the S3-compatible blobstore
 * `cf-identifier`: The suffix appended to the blobstore directories.
 * `use-multipart-uploads`: Whether to use multi-part uploads
+* `disable-ssl`: Whether to disable SSL when uploading blobs
 
 ## Post-migration Tasks
 
