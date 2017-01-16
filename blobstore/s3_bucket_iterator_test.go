@@ -21,6 +21,8 @@ var _ = Describe("S3BucketIterator", func() {
 		bucketName               string
 		bucketNameWithIdentifier string
 		s3Client                 *awss3.S3
+		minioAccessKey           string
+		minioSecretKey           string
 	)
 
 	const (
@@ -29,6 +31,18 @@ var _ = Describe("S3BucketIterator", func() {
 
 	BeforeEach(func() {
 		var s3Endpoint string
+
+		if os.Getenv("MINIO_ACCESS_KEY") == "" {
+			minioAccessKey = "example-access-key"
+		} else {
+			minioAccessKey = os.Getenv("MINIO_ACCESS_KEY")
+		}
+
+		if os.Getenv("MINIO_SECRET_KEY") == "" {
+			minioSecretKey = "example-secret-key"
+		} else {
+			minioSecretKey = os.Getenv("MINIO_SECRET_KEY")
+		}
 
 		if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
 			s3Endpoint = "http://127.0.0.1:9000"
@@ -39,8 +53,8 @@ var _ = Describe("S3BucketIterator", func() {
 		session := session.New(&aws.Config{
 			Region: aws.String(s3Region),
 			Credentials: credentials.NewStaticCredentials(
-				"AKIAIOSFODNN7EXAMPLE",
-				"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+				minioAccessKey,
+				minioSecretKey,
 				"example-token",
 			),
 			Endpoint:         aws.String(s3Endpoint),
@@ -60,8 +74,8 @@ var _ = Describe("S3BucketIterator", func() {
 
 		store = blobstore.NewS3(
 			"identifier",
-			"AKIAIOSFODNN7EXAMPLE",
-			"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+			minioAccessKey,
+			minioSecretKey,
 			s3Region,
 			s3Endpoint,
 			true,

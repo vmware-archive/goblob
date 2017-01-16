@@ -19,26 +19,43 @@ import (
 )
 
 var _ = Describe("S3Store", func() {
-	var s3Endpoint string
+	var (
+		s3Endpoint     string
+		minioAccessKey string
+		minioSecretKey string
+	)
+
 	region := "us-east-1"
-	accessKey := "AKIAIOSFODNN7EXAMPLE"
-	secretKey := "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+
+	if os.Getenv("MINIO_ACCESS_KEY") == "" {
+		minioAccessKey = "example-access-key"
+	} else {
+		minioAccessKey = os.Getenv("MINIO_ACCESS_KEY")
+	}
+
+	if os.Getenv("MINIO_SECRET_KEY") == "" {
+		minioSecretKey = "example-secret-key"
+	} else {
+		minioSecretKey = os.Getenv("MINIO_SECRET_KEY")
+	}
+
 	if os.Getenv("MINIO_PORT_9000_TCP_ADDR") == "" {
 		s3Endpoint = "http://127.0.0.1:9000"
 	} else {
 		s3Endpoint = fmt.Sprintf("http://%s:9000", os.Getenv("MINIO_PORT_9000_TCP_ADDR"))
 	}
+
 	config := &aws.Config{
 		Region:           aws.String(region),
-		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
+		Credentials:      credentials.NewStaticCredentials(minioAccessKey, minioSecretKey, ""),
 		Endpoint:         aws.String(s3Endpoint),
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
 	controlBucket := "cc-buildpacks-identifier"
 
-	testsToRun("Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, true, true))
-	testsToRun("non Multi-part", config, controlBucket, blobstore.NewS3("identifier", accessKey, secretKey, region, s3Endpoint, false, true))
+	testsToRun("Multi-part", config, controlBucket, blobstore.NewS3("identifier", minioAccessKey, minioSecretKey, region, s3Endpoint, true, true))
+	testsToRun("non Multi-part", config, controlBucket, blobstore.NewS3("identifier", minioAccessKey, minioSecretKey, region, s3Endpoint, false, true))
 })
 
 func testsToRun(testSuiteName string, config *aws.Config, controlBucket string, store blobstore.Blobstore) {
