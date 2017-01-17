@@ -9,6 +9,6 @@ version=$(cat $ROOT/version/version)
 
 cd go/src/github.com/pivotalservices/goblob
   go build \
-    -o $BINARY_FILENAME github.com/pivotalservices/goblob/cmd/goblob
+    -o $BINARY_FILENAME github.com/pivotalservices/goblob/cmd/goblob \
     -ldflags "-X goblob.Version=${version}"
 cd -
