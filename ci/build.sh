@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
--ex
+set -ex
 
 export GOPATH=$PWD/go
 
