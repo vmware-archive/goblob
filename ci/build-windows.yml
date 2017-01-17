@@ -16,7 +16,7 @@ outputs:
 - name: windows-binary
 
 params:
-  BINARY_FILENAME: goblob-darwin
+  OUTPUT_PATH: windows-binary/goblob.exe
 
 run:
   path: go/src/github.com/pivotalservices/goblob/ci/build.sh

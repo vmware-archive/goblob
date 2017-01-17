@@ -16,7 +16,7 @@ outputs:
 - name: linux-binary
 
 params:
-  BINARY_FILENAME: goblob-darwin
+  OUTPUT_PATH: linux-binary/goblob-darwin
 
 run:
   path: go/src/github.com/pivotalservices/goblob/ci/build.sh
