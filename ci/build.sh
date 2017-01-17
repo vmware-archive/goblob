@@ -10,6 +10,7 @@ version=$(cat $root/version/version)
 
 cd go/src/github.com/pivotalservices/goblob
   go build \
-    -o $output_path github.com/pivotalservices/goblob/cmd/goblob \
-    -ldflags "-s -w -X goblob.Version=${version}"
+    -o $output_path \
+    -ldflags "-s -w -X goblob.Version=${version}" \
+    github.com/pivotalservices/goblob/cmd/goblob
 cd -
