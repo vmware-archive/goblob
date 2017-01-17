@@ -19,4 +19,4 @@ params:
   BINARY_FILENAME: goblob-darwin
 
 run:
-  file: go/src/github.com/pivotalservices/goblob/ci/build.sh
+  path: go/src/github.com/pivotalservices/goblob/ci/build.sh
