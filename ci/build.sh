@@ -4,8 +4,7 @@ set -ex
 
 export GOPATH=$PWD/go
 
-ROOT=$(cd $(dirname $0) && pwd)
-version=$(cat $ROOT/version/version)
+version=$(cat $PWD/version/version)
 
 cd go/src/github.com/pivotalservices/goblob
   go build \
