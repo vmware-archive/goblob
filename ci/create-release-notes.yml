@@ -16,4 +16,5 @@ run:
   - -exc
   - |
     version=$(cat version/version)
-    echo v${version} > release-notes/release-name
+    echo v${version} > release-notes/name
+    echo v${version} > release-notes/tag
