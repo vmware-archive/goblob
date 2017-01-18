@@ -7,8 +7,6 @@ import:
 - package: github.com/xchapter7x/lo
 - package: github.com/op/go-logging
   version: master
-- package: github.com/cheggaaa/pb
-  version: master
 - package: github.com/mattn/go-runewidth
   version: master
 - package: golang.org/x/sync

@@ -1,14 +1,9 @@
 package blobstore
 
 type nfsBucketIterator struct {
-	blobCh    chan *Blob
-	doneCh    chan struct{}
-	errCh     chan error
-	blobCount uint
-}
-
-func (i *nfsBucketIterator) Count() uint {
-	return i.blobCount
+	blobCh chan *Blob
+	doneCh chan struct{}
+	errCh  chan error
 }
 
 func (i *nfsBucketIterator) Next() (*Blob, error) {

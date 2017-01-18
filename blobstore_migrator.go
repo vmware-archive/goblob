@@ -8,7 +8,6 @@ import (
 
 	"code.cloudfoundry.org/workpool"
 
-	"github.com/cheggaaa/pb"
 	"github.com/pivotalservices/goblob/blobstore"
 )
 
@@ -64,13 +63,9 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 			return fmt.Errorf("could not create bucket iterator for bucket %s: %s", bucket, err)
 		}
 
-		progressBar := pb.New(int(iterator.Count()))
-		progressBar.Prefix(bucket + "\t")
-		progressBar.SetMaxWidth(80)
-		progressBar.Start()
+		fmt.Printf("Migrating %s ", bucket)
 
 		var bucketWG sync.WaitGroup
-
 		var migrateErrors []error
 		for {
 			blob, err := iterator.Next()
@@ -95,7 +90,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 				defer bucketWG.Done()
 				defer migrateWG.Done()
 
-				progressBar.Increment()
+				fmt.Print(".")
 
 				if !dst.Exists(blob) {
 					err := m.blobMigrator.Migrate(blob)
@@ -108,7 +103,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 		}
 
 		bucketWG.Wait()
-		progressBar.Finish()
+		fmt.Println(" done.")
 
 		if migrateErrors != nil {
 			for i := range migrateErrors {

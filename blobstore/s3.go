@@ -269,9 +269,8 @@ func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
 	blobCh := make(chan *Blob)
 
 	iterator := &s3BucketIterator{
-		doneCh:    doneCh,
-		blobCh:    blobCh,
-		blobCount: uint(len(listObjectsOutput.Contents)),
+		doneCh: doneCh,
+		blobCh: blobCh,
 	}
 
 	go func() {

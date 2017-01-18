@@ -1,9 +1,8 @@
 package blobstore
 
 type s3BucketIterator struct {
-	blobCh    chan *Blob
-	doneCh    chan struct{}
-	blobCount uint
+	blobCh chan *Blob
+	doneCh chan struct{}
 }
 
 func (i *s3BucketIterator) Next() (*Blob, error) {
@@ -23,8 +22,4 @@ func (i *s3BucketIterator) Next() (*Blob, error) {
 func (i *s3BucketIterator) Done() {
 	i.blobCh = nil
 	close(i.doneCh)
-}
-
-func (i *s3BucketIterator) Count() uint {
-	return i.blobCount
 }

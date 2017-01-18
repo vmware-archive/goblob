@@ -1,10 +1,10 @@
-hash: b917d8a83799c004edff9d99240a0182c76489d49e8e33af2051814bb57f9ff6
-updated: 2017-01-13T11:48:16.386959925-08:00
+hash: 156f595c4c23e2bea53616ae7dd580963665de9c0489601ddae8f65313ef4416
+updated: 2017-01-17T16:20:19.861393781-08:00
 imports:
 - name: code.cloudfoundry.org/workpool
   version: 24756b8d25e8a6a601284a5900005c8bfdcaa766
 - name: github.com/aws/aws-sdk-go
-  version: 5e1afe1c0a077fb2da9b5f74232b790d99397ce8
+  version: cee57925ecc1aa1c91caa884b6668e2ccb291b1c
   subpackages:
   - aws
   - aws/awserr
@@ -76,7 +76,7 @@ testImports:
   - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: f1f0f388b31eca4e2cbe7a6dd8a3a1dfddda5b1c
+  version: e85f63af4302dc0e4277c6008ecf803f1d80e4f0
   subpackages:
   - format
   - gbytes

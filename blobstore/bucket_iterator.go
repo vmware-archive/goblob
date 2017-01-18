@@ -10,5 +10,4 @@ var ErrIteratorAborted = errors.New("iterator aborted")
 type BucketIterator interface {
 	Next() (*Blob, error)
 	Done()
-	Count() uint
 }

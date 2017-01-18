@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pivotalservices/goblob/validation"
 	"github.com/cheggaaa/pb"
+	"github.com/pivotalservices/goblob/validation"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -115,10 +115,9 @@ func (s *nfsStore) NewBucketIterator(folder string) (BucketIterator, error) {
 	}
 
 	iterator := &nfsBucketIterator{
-		blobCh:    blobCh,
-		doneCh:    doneCh,
-		errCh:     errCh,
-		blobCount: uint(len(files)),
+		blobCh: blobCh,
+		doneCh: doneCh,
+		errCh:  errCh,
 	}
 
 	walkFn := func(path string, info os.FileInfo, err error) error {
