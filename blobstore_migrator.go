@@ -119,10 +119,8 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 		bucketWG.Wait()
 		fmt.Println(" done.")
 
-		if migrateErrors != nil {
-			for i := range migrateErrors {
-				fmt.Fprintln(os.Stderr, migrateErrors[i])
-			}
+		for i := range migrateErrors {
+			fmt.Fprintln(os.Stderr, migrateErrors[i])
 		}
 	}
 
