@@ -1,10 +1,14 @@
 package goblob
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"os"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"code.cloudfoundry.org/workpool"
 
@@ -52,6 +56,11 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 		return errors.New("dst is an empty store")
 	}
 
+	fmt.Printf("Migrating from %s to %s\n\n", src.Name(), dst.Name())
+
+	stats := &migrateStats{}
+	stats.Start()
+
 	var migrateWG sync.WaitGroup
 	for _, bucket := range buckets {
 		if _, ok := m.skip[bucket]; ok {
@@ -63,7 +72,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 			return fmt.Errorf("could not create bucket iterator for bucket %s: %s", bucket, err)
 		}
 
-		fmt.Printf("Migrating %s ", bucket)
+		fmt.Print(bucket)
 
 		var bucketWG sync.WaitGroup
 		var migrateErrors []error
@@ -90,14 +99,19 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 				defer bucketWG.Done()
 				defer migrateWG.Done()
 
-				fmt.Print(".")
-
 				if !dst.Exists(blob) {
 					err := m.blobMigrator.Migrate(blob)
 					if err != nil {
+						fmt.Print("x")
+						stats.AddFailed()
 						migrateErrors = append(migrateErrors, err)
 						return
 					}
+					stats.AddSuccess()
+					fmt.Print(".")
+				} else {
+					stats.AddSkipped()
+					fmt.Print("-")
 				}
 			})
 		}
@@ -113,6 +127,57 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 	}
 
 	migrateWG.Wait()
+	stats.Finish()
+
+	fmt.Println(stats)
 
 	return nil
+}
+
+type migrateStats struct {
+	startTime  time.Time
+	finishTime time.Time
+	Duration   time.Duration
+	Migrated   int64
+	Skipped    int64
+	Failed     int64
+}
+
+func (m *migrateStats) Start() {
+	m.startTime = time.Now()
+}
+
+func (m *migrateStats) Finish() {
+	m.finishTime = time.Now()
+	m.Duration = m.finishTime.Sub(m.startTime)
+}
+
+func (m *migrateStats) AddSuccess() {
+	atomic.AddInt64(&m.Migrated, 1)
+}
+
+func (m *migrateStats) AddSkipped() {
+	atomic.AddInt64(&m.Skipped, 1)
+}
+
+func (m *migrateStats) AddFailed() {
+	atomic.AddInt64(&m.Failed, 1)
+}
+
+func (m *migrateStats) String() string {
+	t := template.Must(template.New("stats").Parse(`
+Took {{.Duration}}
+
+(.) Migrated files:    {{.Migrated}}
+(-) Already migrated:  {{.Skipped}}
+(x) Failed to migrate: {{.Failed}}
+`))
+
+	buf := new(bytes.Buffer)
+	err := t.Execute(buf, m)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return buf.String()
 }
