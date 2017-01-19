@@ -16,7 +16,7 @@ outputs:
 run:
   path: sh
   args:
-  - -ex
+  - -exc
   - |
     version=v$(cat version/version)
     release_date=$(date +%Y-%m-%d)
