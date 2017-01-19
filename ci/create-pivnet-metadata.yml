@@ -18,7 +18,7 @@ run:
   args:
   - -ex
   - |
-    version="v$(cat version/version)"
+    version=v$(cat version/version)
     release_date=$(date +%Y-%m-%d)
 
     cat >> pivnet-metadata/metadata.yml <<EOF
