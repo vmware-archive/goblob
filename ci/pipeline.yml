@@ -30,7 +30,7 @@ resources:
     access_key_id: {{pivnet-aws-access-key}}
     secret_access_key: {{pivnet-aws-secret-key}}
 
-- name: goblob-github-rc
+- name: github-rc
   type: github-release
   source:
     release: false
@@ -39,7 +39,7 @@ resources:
     repository: goblob
     access_token: {{github-access-token}}
 
-- name: goblob-gh-release
+- name: github-release
   type: github-release
   source:
     user: pivotalservices
@@ -84,7 +84,7 @@ jobs:
     - do:
       - task: create-release-notes
         file: goblob/ci/create-release-notes.yml
-      - put: goblob-github-rc
+      - put: github-rc
         params:
           name: release-notes/name
           tag: release-notes/tag
@@ -97,7 +97,7 @@ jobs:
   serial_groups: [version]
   plan:
   - aggregate:
-    - get: goblob-github-rc
+    - get: github-rc
       passed: [create-rc]
     - get: version
       params: {bump: final}
@@ -116,17 +116,17 @@ jobs:
       - put: pivnet-release
         params:
           metadata_file: pivnet-metadata/metadata.yml
-          file_glob: goblob-github-rc/goblob*
+          file_glob: github-rc/goblob*
           s3_filepath_prefix: {{pivnet-filepath-prefix}}
     - do:
       - task: create-release-notes
         file: goblob/ci/create-release-notes.yml
-      - put: goblob-gh-release
+      - put: github-release
         params:
           name: release-notes/name
           tag: release-notes/tag
           globs:
-          - goblob-github-rc/*
+          - github-rc/*
     - put: version
       params:
         bump: minor
