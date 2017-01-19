@@ -56,7 +56,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 	m.watcher.MigrationDidStart(dst, src)
 
-	var migrateWG sync.WaitGroup
+	migrateWG := &sync.WaitGroup{}
 	for _, bucket := range buckets {
 		if _, ok := m.skip[bucket]; ok {
 			continue
@@ -69,7 +69,7 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 
 		m.watcher.MigrateBucketDidStart(bucket)
 
-		var bucketWG sync.WaitGroup
+		bucketWG := &sync.WaitGroup{}
 		for {
 			blob, err := iterator.Next()
 			if err == blobstore.ErrIteratorDone {
