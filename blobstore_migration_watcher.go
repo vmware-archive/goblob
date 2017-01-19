@@ -9,8 +9,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/mgutz/ansi"
 	"github.com/pivotalservices/goblob/blobstore"
 )
+
+var red = ansi.ColorFunc("red+b")
+var yellow = ansi.ColorFunc("yellow+b")
+var green = ansi.ColorFunc("green+b")
 
 type BlobstoreMigrationWatcher interface {
 	MigrationDidStart(blobstore.Blobstore, blobstore.Blobstore)
@@ -65,17 +70,17 @@ func (w *blobstoreMigrationWatcher) MigrateBlobDidFailWithError(err error) {
 	defer w.errorsMutex.Unlock()
 	w.stats.AddFailed()
 	w.errors = append(w.errors, err)
-	fmt.Print(".")
+	fmt.Print(red("."))
 }
 
 func (w *blobstoreMigrationWatcher) MigrateBlobDidFinish() {
 	w.stats.AddSuccess()
-	fmt.Print(".")
+	fmt.Print(green("."))
 }
 
 func (w *blobstoreMigrationWatcher) MigrateBlobAlreadyFinished() {
 	w.stats.AddSkipped()
-	fmt.Print(".")
+	fmt.Print(yellow("."))
 }
 
 type migrateStats struct {

@@ -15,6 +15,7 @@ import:
   - context
 - package: code.cloudfoundry.org/workpool
 - package: github.com/jessevdk/go-flags
+- package: github.com/mgutz/ansi
 testImport:
 - package: github.com/onsi/ginkgo
   version: master
