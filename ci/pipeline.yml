@@ -28,13 +28,6 @@ resources:
     access_key_id: {{pivnet-aws-access-key}}
     secret_access_key: {{pivnet-aws-secret-key}}
 
-- name: goblob-gcs-release
-  type: gcs-resource
-  source:
-    bucket: goblob-releases
-    json_key: {{gcs-private-key}}
-    regexp: final/goblob-(.*).tgz
-
 - name: goblob-github-rc
   type: github-release
   source:
@@ -115,9 +108,6 @@ jobs:
       tag: version/version
       tag_prefix: v
   - aggregate:
-    - put: goblob-gcs-release
-      params:
-        file: goblob-final-release/goblob*.tgz
     - do:
       - task: create-pivnet-metadata
         file: goblob/ci/create-pivnet-metadata.yml
