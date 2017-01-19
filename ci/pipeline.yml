@@ -103,13 +103,13 @@ jobs:
       params: {bump: final}
     - get: goblob
       passed: [create-rc]
-  - put: goblob
-    params:
-      repository: goblob
-      only_tag: true
-      tag: version/version
-      tag_prefix: v
   - aggregate:
+    - put: goblob
+      params:
+        repository: goblob
+        only_tag: true
+        tag: version/version
+        tag_prefix: v
     - do:
       - task: create-pivnet-metadata
         file: goblob/ci/create-pivnet-metadata.yml
