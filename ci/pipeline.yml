@@ -6,6 +6,12 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+
 resources:
 - name: goblob
   type: git
@@ -13,6 +19,14 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotalservices/goblob.git
+
+- name: pivnet-release
+  type: pivnet
+  source:
+    api_token: {{pivnet-api-token}}
+    product_slug: goblob
+    access_key_id: {{pivnet-aws-access-key}}
+    secret_access_key: {{pivnet-aws-secret-key}}
 
 - name: goblob-gcs-release
   type: gcs-resource
@@ -104,6 +118,14 @@ jobs:
     - put: goblob-gcs-release
       params:
         file: goblob-final-release/goblob*.tgz
+    - do:
+      - task: create-pivnet-metadata
+        file: goblob/ci/create-pivnet-metadata
+      - put: pivnet-release
+        params:
+          metadata_file: pivnet-metadata/metadata.yml
+          file_glob: goblob-github-rc/*
+          s3_filepath_prefix: {{pivnet-filepath-prefix}}
     - do:
       - task: create-release-notes
         file: goblob/ci/create-release-notes.yml
