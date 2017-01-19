@@ -60,7 +60,6 @@ var _ = Describe("BlobstoreMigrator", func() {
 				Path:     "yet-another-path/yet-another-file",
 			}
 
-			iterator.CountReturns(3)
 			iterator.NextStub = func() (*blobstore.Blob, error) {
 				switch iterator.NextCallCount() {
 				case 1:

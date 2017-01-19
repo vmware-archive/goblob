@@ -18,12 +18,6 @@ type FakeBucketIterator struct {
 	DoneStub         func()
 	doneMutex        sync.RWMutex
 	doneArgsForCall  []struct{}
-	CountStub        func() uint
-	countMutex       sync.RWMutex
-	countArgsForCall []struct{}
-	countReturns     struct {
-		result1 uint
-	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -70,31 +64,6 @@ func (fake *FakeBucketIterator) DoneCallCount() int {
 	return len(fake.doneArgsForCall)
 }
 
-func (fake *FakeBucketIterator) Count() uint {
-	fake.countMutex.Lock()
-	fake.countArgsForCall = append(fake.countArgsForCall, struct{}{})
-	fake.recordInvocation("Count", []interface{}{})
-	fake.countMutex.Unlock()
-	if fake.CountStub != nil {
-		return fake.CountStub()
-	} else {
-		return fake.countReturns.result1
-	}
-}
-
-func (fake *FakeBucketIterator) CountCallCount() int {
-	fake.countMutex.RLock()
-	defer fake.countMutex.RUnlock()
-	return len(fake.countArgsForCall)
-}
-
-func (fake *FakeBucketIterator) CountReturns(result1 uint) {
-	fake.CountStub = nil
-	fake.countReturns = struct {
-		result1 uint
-	}{result1}
-}
-
 func (fake *FakeBucketIterator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -102,8 +71,6 @@ func (fake *FakeBucketIterator) Invocations() map[string][][]interface{} {
 	defer fake.nextMutex.RUnlock()
 	fake.doneMutex.RLock()
 	defer fake.doneMutex.RUnlock()
-	fake.countMutex.RLock()
-	defer fake.countMutex.RUnlock()
 	return fake.invocations
 }
 
