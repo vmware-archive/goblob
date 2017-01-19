@@ -86,18 +86,20 @@ func (m *blobstoreMigrator) Migrate(dst blobstore.Blobstore, src blobstore.Blobs
 				return err
 			}
 
-			checksum, err := src.Checksum(blob)
-			if err != nil {
-				return fmt.Errorf("could not checksum blob: %s", err)
-			}
-
-			blob.Checksum = checksum
-
 			migrateWG.Add(1)
 			bucketWG.Add(1)
 			m.pool.Submit(func() {
 				defer bucketWG.Done()
 				defer migrateWG.Done()
+
+				checksum, err := src.Checksum(blob)
+				if err != nil {
+					checksumErr := fmt.Errorf("could not checksum blob: %s", err)
+					migrateErrors = append(migrateErrors, checksumErr)
+					return
+				}
+
+				blob.Checksum = checksum
 
 				if !dst.Exists(blob) {
 					err := m.blobMigrator.Migrate(blob)
