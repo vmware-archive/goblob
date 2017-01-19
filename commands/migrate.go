@@ -46,7 +46,9 @@ func (c *MigrateCommand) Execute([]string) error {
 		return fmt.Errorf("error creating workpool: %s", err)
 	}
 
-	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator, c.Exclusions)
+	watcher := goblob.NewBlobstoreMigrationWatcher()
+
+	blobStoreMigrator := goblob.NewBlobstoreMigrator(pool, blobMigrator, c.Exclusions, watcher)
 
 	return blobStoreMigrator.Migrate(s3Store, nfsStore)
 }

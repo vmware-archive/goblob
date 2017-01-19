@@ -22,6 +22,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 		srcStore     *blobstorefakes.FakeBlobstore
 		iterator     *blobstorefakes.FakeBucketIterator
 		pool         *workpool.WorkPool
+		watcher      *goblobfakes.FakeBlobstoreMigrationWatcher
 	)
 
 	BeforeEach(func() {
@@ -35,7 +36,9 @@ var _ = Describe("BlobstoreMigrator", func() {
 
 		exclusions := []string{}
 
-		migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions)
+		watcher = &goblobfakes.FakeBlobstoreMigrationWatcher{}
+
+		migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions, watcher)
 
 		iterator = &blobstorefakes.FakeBucketIterator{}
 		srcStore.NewBucketIteratorReturns(iterator, nil)
@@ -86,7 +89,7 @@ var _ = Describe("BlobstoreMigrator", func() {
 		Context("when an exclusion list is given", func() {
 			BeforeEach(func() {
 				exclusions := []string{"cc-resources", "cc-buildpacks"}
-				migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions)
+				migrator = goblob.NewBlobstoreMigrator(pool, blobMigrator, exclusions, watcher)
 			})
 
 			It("does not migrate those paths", func() {
