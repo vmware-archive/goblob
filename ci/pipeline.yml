@@ -116,7 +116,7 @@ jobs:
       - put: pivnet-release
         params:
           metadata_file: pivnet-metadata/metadata.yml
-          file_glob: goblob-github-rc/*
+          file_glob: goblob-github-rc/goblob*
           s3_filepath_prefix: {{pivnet-filepath-prefix}}
     - do:
       - task: create-release-notes
