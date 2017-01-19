@@ -19,6 +19,8 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotalservices/goblob.git
+    ignore_paths:
+    - ci
 
 - name: pivnet-release
   type: pivnet
