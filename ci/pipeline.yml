@@ -100,6 +100,7 @@ jobs:
     - get: github-rc
       passed: [create-rc]
     - get: version
+      passed: [create-rc]
       params: {bump: final}
     - get: goblob
       passed: [create-rc]
