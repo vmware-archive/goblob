@@ -79,7 +79,6 @@ jobs:
         params:
           name: release-notes/name
           tag: release-notes/tag
-          tag_prefix: v
           globs:
           - linux-binary/*
           - darwin-binary/*
@@ -112,7 +111,6 @@ jobs:
         params:
           name: release-notes/name
           tag: release-notes/tag
-          tag_prefix: v
           globs:
           - goblob-github-rc/*
     - put: version
