@@ -120,7 +120,7 @@ jobs:
         file: goblob-final-release/goblob*.tgz
     - do:
       - task: create-pivnet-metadata
-        file: goblob/ci/create-pivnet-metadata
+        file: goblob/ci/create-pivnet-metadata.yml
       - put: pivnet-release
         params:
           metadata_file: pivnet-metadata/metadata.yml
