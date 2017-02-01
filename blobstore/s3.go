@@ -1,9 +1,11 @@
 package blobstore
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"path/filepath"
 	"strings"
 
@@ -47,8 +49,18 @@ func NewS3(
 		"cc-droplets":   dropletsBucketName,
 		"cc-packages":   packagesBucketName,
 	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+
 	return &s3Store{
 		session: session.New(&aws.Config{
+			HTTPClient:       httpClient,
 			Region:           aws.String(region),
 			Credentials:      credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, ""),
 			Endpoint:         aws.String(endpoint),
