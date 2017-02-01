@@ -66,7 +66,7 @@ func (s *s3Store) Name() string {
 }
 
 func (s *s3Store) destBucketName(bucket string) string {
-	if name, ok := s.bucketMapping[bucket]; ok {
+	if name, ok := s.bucketMapping[bucket]; ok && name != "" {
 		return name
 	}
 	return bucket + s.identifier
