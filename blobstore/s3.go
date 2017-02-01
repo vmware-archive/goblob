@@ -25,6 +25,7 @@ type s3Store struct {
 	session             *session.Session
 	identifier          string
 	useMultipartUploads bool
+	bucketMapping       map[string]string
 }
 
 func NewS3(
@@ -35,7 +36,17 @@ func NewS3(
 	endpoint string,
 	useMultipartUploads bool,
 	disableSSL bool,
+	buildpacksBucketName string,
+	dropletsBucketName string,
+	packagesBucketName string,
+	resourcesBucketName string,
 ) Blobstore {
+	bucketMapping := map[string]string{
+		"cc-buildpacks": buildpacksBucketName,
+		"cc-resources":  resourcesBucketName,
+		"cc-droplets":   dropletsBucketName,
+		"cc-packages":   packagesBucketName,
+	}
 	return &s3Store{
 		session: session.New(&aws.Config{
 			Region:           aws.String(region),
@@ -46,6 +57,7 @@ func NewS3(
 		}),
 		identifier:          identifier,
 		useMultipartUploads: useMultipartUploads,
+		bucketMapping:       bucketMapping,
 	}
 }
 
@@ -53,11 +65,18 @@ func (s *s3Store) Name() string {
 	return "S3"
 }
 
+func (s *s3Store) destBucketName(bucket string) string {
+	if name, ok := s.bucketMapping[bucket]; ok {
+		return name
+	}
+	return bucket + s.identifier
+}
+
 func (s *s3Store) List() ([]*Blob, error) {
 	var blobs []*Blob
 	s3Service := awss3.New(s.session)
 	for _, bucket := range buckets {
-		bucketName := bucket + "-" + s.identifier
+		bucketName := s.destBucketName(bucket)
 		bucketExists, err := s.doesBucketExist(bucketName)
 		if err != nil {
 			return nil, err
@@ -92,7 +111,7 @@ func (s *s3Store) List() ([]*Blob, error) {
 }
 
 func (s *s3Store) bucketName(blob *Blob) string {
-	return blob.Path[:strings.Index(blob.Path, "/")] + "-" + s.identifier
+	return s.destBucketName(blob.Path[:strings.Index(blob.Path, "/")])
 }
 
 func (s *s3Store) path(blob *Blob) string {

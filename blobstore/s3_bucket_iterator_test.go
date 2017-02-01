@@ -80,6 +80,10 @@ var _ = Describe("S3BucketIterator", func() {
 			s3Endpoint,
 			true,
 			true,
+			"some-buildpacks",
+			"some-droplets",
+			"some-packages",
+			"some-resources",
 		)
 
 		iterator, err = store.NewBucketIterator(bucketName)
