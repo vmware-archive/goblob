@@ -42,7 +42,10 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 * `s3-accesskey`: The access key to use with the S3-compatible blobstore
 * `s3-secretkey`: The secret key to use with the S3-compatible blobstore
 * `s3-region`: The region to use with the S3-compatible blobstore
-* `cf-identifier`: The suffix appended to the blobstore directories.
+* `buildpacks-bucket-name`: The bucket containing buildpacks
+* `droplets-bucket-name`: The bucket containing droplets
+* `packages-bucket-name`: The bucket containing packages
+* `resources-bucket-name`: The bucket containing resources
 * `use-multipart-uploads`: Whether to use multi-part uploads
 * `disable-ssl`: Whether to disable SSL when uploading blobs
 

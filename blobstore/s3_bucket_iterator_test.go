@@ -16,13 +16,12 @@ import (
 
 var _ = Describe("S3BucketIterator", func() {
 	var (
-		iterator                 blobstore.BucketIterator
-		store                    blobstore.Blobstore
-		bucketName               string
-		bucketNameWithIdentifier string
-		s3Client                 *awss3.S3
-		minioAccessKey           string
-		minioSecretKey           string
+		iterator       blobstore.BucketIterator
+		store          blobstore.Blobstore
+		bucketName     string
+		s3Client       *awss3.S3
+		minioAccessKey string
+		minioSecretKey string
 	)
 
 	const (
@@ -65,15 +64,13 @@ var _ = Describe("S3BucketIterator", func() {
 		s3Client = awss3.New(session)
 
 		bucketName = fmt.Sprintf("some-bucket-%d", GinkgoParallelNode())
-		bucketNameWithIdentifier = fmt.Sprintf("%s-%s", bucketName, "identifier")
 
 		_, err := s3Client.CreateBucket(&awss3.CreateBucketInput{
-			Bucket: aws.String(bucketNameWithIdentifier),
+			Bucket: aws.String(bucketName),
 		})
 		Expect(err).NotTo(HaveOccurred())
 
 		store = blobstore.NewS3(
-			"identifier",
 			minioAccessKey,
 			minioSecretKey,
 			s3Region,
@@ -92,20 +89,20 @@ var _ = Describe("S3BucketIterator", func() {
 
 	AfterEach(func() {
 		listObjectsOutput, err := s3Client.ListObjects(&awss3.ListObjectsInput{
-			Bucket: aws.String(bucketNameWithIdentifier),
+			Bucket: aws.String(bucketName),
 		})
 		Expect(err).NotTo(HaveOccurred())
 
 		for _, item := range listObjectsOutput.Contents {
 			_, err := s3Client.DeleteObject(&awss3.DeleteObjectInput{
-				Bucket: aws.String(bucketNameWithIdentifier),
+				Bucket: aws.String(bucketName),
 				Key:    item.Key,
 			})
 			Expect(err).NotTo(HaveOccurred())
 		}
 
 		_, err = s3Client.DeleteBucket(&awss3.DeleteBucketInput{
-			Bucket: aws.String(bucketNameWithIdentifier),
+			Bucket: aws.String(bucketName),
 		})
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -127,7 +124,7 @@ var _ = Describe("S3BucketIterator", func() {
 
 				_, err := s3Client.PutObject(&awss3.PutObjectInput{
 					Body:   strings.NewReader("content"),
-					Bucket: aws.String(bucketNameWithIdentifier),
+					Bucket: aws.String(bucketName),
 					Key:    aws.String("some-path/some-file"),
 					Metadata: map[string]*string{
 						"Checksum": aws.String("some-checksum"),
@@ -161,7 +158,7 @@ var _ = Describe("S3BucketIterator", func() {
 			BeforeEach(func() {
 				_, err := s3Client.PutObject(&awss3.PutObjectInput{
 					Body:   strings.NewReader("content"),
-					Bucket: aws.String(bucketNameWithIdentifier),
+					Bucket: aws.String(bucketName),
 					Key:    aws.String("some-path/some-file"),
 					Metadata: map[string]*string{
 						"Checksum": aws.String("some-checksum"),
@@ -171,7 +168,7 @@ var _ = Describe("S3BucketIterator", func() {
 
 				_, err = s3Client.PutObject(&awss3.PutObjectInput{
 					Body:   strings.NewReader("content"),
-					Bucket: aws.String(bucketNameWithIdentifier),
+					Bucket: aws.String(bucketName),
 					Key:    aws.String("some-path/some-other-file"),
 					Metadata: map[string]*string{
 						"Checksum": aws.String("some-checksum"),

@@ -25,13 +25,11 @@ var (
 
 type s3Store struct {
 	session             *session.Session
-	identifier          string
 	useMultipartUploads bool
 	bucketMapping       map[string]string
 }
 
 func NewS3(
-	identifier string,
 	awsAccessKey string,
 	awsSecretKey string,
 	region string,
@@ -43,13 +41,6 @@ func NewS3(
 	packagesBucketName string,
 	resourcesBucketName string,
 ) Blobstore {
-	bucketMapping := map[string]string{
-		"cc-buildpacks": buildpacksBucketName,
-		"cc-resources":  resourcesBucketName,
-		"cc-droplets":   dropletsBucketName,
-		"cc-packages":   packagesBucketName,
-	}
-
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -67,9 +58,13 @@ func NewS3(
 			DisableSSL:       aws.Bool(disableSSL),
 			S3ForcePathStyle: aws.Bool(true),
 		}),
-		identifier:          identifier,
 		useMultipartUploads: useMultipartUploads,
-		bucketMapping:       bucketMapping,
+		bucketMapping: map[string]string{
+			"cc-buildpacks": buildpacksBucketName,
+			"cc-resources":  resourcesBucketName,
+			"cc-droplets":   dropletsBucketName,
+			"cc-packages":   packagesBucketName,
+		},
 	}
 }
 
@@ -78,10 +73,7 @@ func (s *s3Store) Name() string {
 }
 
 func (s *s3Store) destBucketName(bucket string) string {
-	if name, ok := s.bucketMapping[bucket]; ok && name != "" {
-		return name
-	}
-	return bucket + s.identifier
+	return s.bucketMapping[bucket]
 }
 
 func (s *s3Store) List() ([]*Blob, error) {
@@ -272,9 +264,7 @@ func (s *s3Store) Exists(blob *Blob) bool {
 func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
 	s3Client := awss3.New(s.session)
 
-	realBucketName := bucketName + "-" + s.identifier
-
-	bucketExists, err := s.doesBucketExist(realBucketName)
+	bucketExists, err := s.doesBucketExist(bucketName)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +275,7 @@ func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
 
 	listObjectsOutput, err := s3Client.ListObjects(
 		&awss3.ListObjectsInput{
-			Bucket: aws.String(realBucketName),
+			Bucket: aws.String(bucketName),
 		},
 	)
 	if err != nil {
@@ -314,7 +304,7 @@ func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
 				blobCh <- &Blob{
 					Path: filepath.Join(
 						bucketName,
-						strings.TrimPrefix(*item.Key, realBucketName),
+						strings.TrimPrefix(*item.Key, bucketName),
 					),
 				}
 			}

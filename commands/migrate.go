@@ -17,25 +17,22 @@ type MigrateCommand struct {
 	} `group:"NFS"`
 
 	S3 struct {
-		Identifier string `long:"cf-identifier" env:"CF_IDENTIFIER" description:"unique identifier for Cloud Foundry deployment" required:"true"`
-
 		AccessKey            string `long:"s3-accesskey" env:"S3_ACCESSKEY" description:"S3 access key"`
 		SecretKey            string `long:"s3-secretkey" env:"S3_SECRETKEY" description:"S3 secret access key"`
 		Region               string `long:"region" default:"us-east-1" env:"S3_REGION" description:"S3 region"`
 		Endpoint             string `long:"s3-endpoint" default:"https://s3.amazonaws.com" env:"S3_ENDPOINT"`
 		UseMultipartUploads  bool   `long:"use-multipart-uploads" env:"USE_MULTIPART_UPLOADS"`
 		DisableSSL           bool   `long:"disable-ssl" description:"disable SSL connections to S3 endpoint"`
-		BuildpacksBucketName string `long:"buildpacks-bucket-name" description:"name of bucket to store buildpacks in"`
-		DropletsBucketName   string `long:"droplets-bucket-name" description:"name of bucket to store droplets in"`
-		PackagesBucketName   string `long:"packages-bucket-name" description:"name of bucket to store packages in"`
-		ResourcesBucketName  string `long:"resources-bucket-name" description:"name of bucket to store resources in"`
+		BuildpacksBucketName string `long:"buildpacks-bucket-name" default:"cc-buildpacks" description:"name of bucket to store buildpacks in"`
+		DropletsBucketName   string `long:"droplets-bucket-name" default:"cc-droplets" description:"name of bucket to store droplets in"`
+		PackagesBucketName   string `long:"packages-bucket-name" default:"cc-packages" description:"name of bucket to store packages in"`
+		ResourcesBucketName  string `long:"resources-bucket-name" default:"cc-resources" description:"name of bucket to store resources in"`
 	} `group:"S3"`
 }
 
 func (c *MigrateCommand) Execute([]string) error {
 	nfsStore := blobstore.NewNFS(c.NFS.Path)
 	s3Store := blobstore.NewS3(
-		c.S3.Identifier,
 		c.S3.AccessKey,
 		c.S3.SecretKey,
 		c.S3.Region,
