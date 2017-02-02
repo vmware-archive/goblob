@@ -36,6 +36,7 @@ func NewS3(
 	endpoint string,
 	useMultipartUploads bool,
 	disableSSL bool,
+	insecureSkipVerify bool,
 	buildpacksBucketName string,
 	dropletsBucketName string,
 	packagesBucketName string,
@@ -44,7 +45,7 @@ func NewS3(
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: insecureSkipVerify,
 			},
 		},
 	}

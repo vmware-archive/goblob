@@ -23,6 +23,7 @@ type MigrateCommand struct {
 		Endpoint             string `long:"s3-endpoint" default:"https://s3.amazonaws.com" env:"S3_ENDPOINT"`
 		UseMultipartUploads  bool   `long:"use-multipart-uploads" env:"USE_MULTIPART_UPLOADS"`
 		DisableSSL           bool   `long:"disable-ssl" description:"disable SSL connections to S3 endpoint"`
+		InsecureSkipVerify   bool   `long:"insecure-skip-verify" description:"disable verification of server certificate chain"`
 		BuildpacksBucketName string `long:"buildpacks-bucket-name" default:"cc-buildpacks" description:"name of bucket to store buildpacks in"`
 		DropletsBucketName   string `long:"droplets-bucket-name" default:"cc-droplets" description:"name of bucket to store droplets in"`
 		PackagesBucketName   string `long:"packages-bucket-name" default:"cc-packages" description:"name of bucket to store packages in"`
@@ -39,6 +40,7 @@ func (c *MigrateCommand) Execute([]string) error {
 		c.S3.Endpoint,
 		c.S3.UseMultipartUploads,
 		c.S3.DisableSSL,
+		c.S3.InsecureSkipVerify,
 		c.S3.BuildpacksBucketName,
 		c.S3.DropletsBucketName,
 		c.S3.PackagesBucketName,

@@ -77,6 +77,7 @@ var _ = Describe("S3BucketIterator", func() {
 			s3Endpoint,
 			true,
 			true,
+			true,
 			"some-buildpacks",
 			"some-droplets",
 			"some-packages",

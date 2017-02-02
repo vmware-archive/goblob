@@ -48,6 +48,7 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 * `resources-bucket-name`: The bucket containing resources
 * `use-multipart-uploads`: Whether to use multi-part uploads
 * `disable-ssl`: Whether to disable SSL when uploading blobs
+* `insecure-skip-verify`: Skip server SSL certificate verification
 
 ## Post-migration Tasks
 
