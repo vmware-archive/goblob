@@ -25,6 +25,8 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 
 ## Usage
 
+The tool is a Golang binary, which must be executed on the NFS VM that you intend to migrate. The only command of the tool is this:
+
 `goblob migrate [OPTIONS]`
 
 ### Options
