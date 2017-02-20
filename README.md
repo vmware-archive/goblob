@@ -52,12 +52,15 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
 
 ## Post-migration Tasks
 
+- If your S3 service uses an SSL certificate signed by your own CA: Before applying changes in Ops Manager to switch to S3, make sure the root CA cert that signed the endpoint cert is a BOSH-trusted-certificate. You will need to update Ops Manager ca-certs (place the CA cert in /usr/local/share/ca-certificates and run update-ca-certificates, and restart tempest-web). You will need to add this certificate back in each time you do an upgrade of Ops Manager. In PCF 1.9+, Ops Manager will let you replace its own SSL cert and have that persist across upgrades.
 - Update OpsManager File Storage Config to point at S3 blobstore using buckets (cc-buildpacks-<uniqueid>, cc-droplets-<uniqueid>, cc-packages-<uniqueid>, cc-resources-<uniqueid>)
-- Click `Apply Changes` in OpsManager
+- Click `Apply Changes` in Ops Manager
 - Once changes are applied, re-run `goblob` to migrate any files which were created after the initial migration
 - Validate apps can be restaged and pushed
-- Update NFS resource config to 0 in OpsManager to remove NFS server
-- Click `Apply Changes` in OpsManager
+- Update NFS Resource Config to 0 instances in Ops Manager to remove the NFS server. Also, you must set Cloud Controllers, Clock Global, and Cloud Controller Workers to 0 instances. This must be done to wipe the NFS mount from these Cloud Controller jobs. You can add these jobs back in later, after the NFS job is removed, but do note that this will incur downtime of Cloud Controller services (any `cf` commands) during this update.
+- Click `Apply Changes` in Ops Manager.
+- After the update is finished, you can add back the Cloud Controller, Clock Global, and Cloud Controller Worker instances in Ops Manager.
+- Click `Apply Changes` in Ops Manager. After this is finished, availability of Cloud Controller services will resume.
 
 ## Developing
 
