@@ -2,7 +2,6 @@ package blobstore
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -82,35 +81,30 @@ func (s *s3Store) List() ([]*Blob, error) {
 	s3Service := awss3.New(s.session)
 	for _, bucket := range buckets {
 		bucketName := s.destBucketName(bucket)
-		bucketExists, err := s.doesBucketExist(bucketName)
+
+		listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
+			Bucket: aws.String(bucketName),
+		})
 		if err != nil {
 			return nil, err
 		}
-		if bucketExists {
-			listObjectsOutput, err := s3Service.ListObjects(&awss3.ListObjectsInput{
-				Bucket: aws.String(bucketName),
-			})
+		fmt.Println("Getting list of files from S3", bucketName)
+		bar := pb.StartNew(len(listObjectsOutput.Contents))
+		bar.Format("<.- >")
+		for _, item := range listObjectsOutput.Contents {
+			blob := &Blob{
+				Path: filepath.Join(bucket, *item.Key),
+			}
+
+			checksum, err := s.checksumFromMetadata(blob)
 			if err != nil {
 				return nil, err
 			}
-			fmt.Println("Getting list of files from S3", bucketName)
-			bar := pb.StartNew(len(listObjectsOutput.Contents))
-			bar.Format("<.- >")
-			for _, item := range listObjectsOutput.Contents {
-				blob := &Blob{
-					Path: filepath.Join(bucket, *item.Key),
-				}
-
-				checksum, err := s.checksumFromMetadata(blob)
-				if err != nil {
-					return nil, err
-				}
-				blob.Checksum = checksum
-				blobs = append(blobs, blob)
-				bar.Increment()
-			}
-			bar.FinishPrint(fmt.Sprintf("Done Getting list of files from S3 %s", bucketName))
+			blob.Checksum = checksum
+			blobs = append(blobs, blob)
+			bar.Increment()
 		}
+		bar.FinishPrint(fmt.Sprintf("Done Getting list of files from S3 %s", bucketName))
 	}
 	return blobs, nil
 }
@@ -185,12 +179,10 @@ func (s *s3Store) Read(src *Blob) (io.ReadCloser, error) {
 func (s *s3Store) Write(dst *Blob, src io.Reader) error {
 	bucketName := s.bucketName(dst)
 	path := s.path(dst)
-	if err := s.createBucket(bucketName); err != nil {
-		return err
-	}
 	metadataMap := map[string]*string{
 		"Checksum": &dst.Checksum,
 	}
+
 	if s.useMultipartUploads {
 		uploader := s3manager.NewUploader(s.session)
 		_, err := uploader.Upload(&s3manager.UploadInput{
@@ -220,39 +212,6 @@ func (s *s3Store) Write(dst *Blob, src io.Reader) error {
 	return nil
 }
 
-func (s *s3Store) doesBucketExist(bucketName string) (bool, error) {
-	var listBucketOutput *awss3.ListBucketsOutput
-	var err error
-	s3Service := awss3.New(s.session)
-	if listBucketOutput, err = s3Service.ListBuckets(&awss3.ListBucketsInput{}); err != nil {
-		return false, err
-	}
-	for _, bucket := range listBucketOutput.Buckets {
-		if *bucket.Name == bucketName {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func (s *s3Store) createBucket(bucketName string) error {
-
-	s3Service := awss3.New(s.session)
-	bucketExists, err := s.doesBucketExist(bucketName)
-	if err != nil {
-		return err
-	}
-	if bucketExists {
-		return nil
-	}
-	_, err = s3Service.CreateBucket(&awss3.CreateBucketInput{
-		Bucket: aws.String(bucketName),
-	})
-
-	return err
-
-}
-
 func (s *s3Store) Exists(blob *Blob) bool {
 	checksum, err := s.Checksum(blob)
 	if err != nil {
@@ -264,15 +223,6 @@ func (s *s3Store) Exists(blob *Blob) bool {
 
 func (s *s3Store) NewBucketIterator(bucketName string) (BucketIterator, error) {
 	s3Client := awss3.New(s.session)
-
-	bucketExists, err := s.doesBucketExist(bucketName)
-	if err != nil {
-		return nil, err
-	}
-
-	if !bucketExists {
-		return nil, errors.New("bucket does not exist")
-	}
 
 	listObjectsOutput, err := s3Client.ListObjects(
 		&awss3.ListObjectsInput{
