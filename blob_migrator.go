@@ -27,18 +27,18 @@ func NewBlobMigrator(dst blobstore.Blobstore, src blobstore.Blobstore) BlobMigra
 func (m *blobMigrator) Migrate(blob *blobstore.Blob) error {
 	reader, err := m.src.Read(blob)
 	if err != nil {
-		return fmt.Errorf("error at %s: %s", blob.Path, err)
+		return fmt.Errorf("error reading blob at %s: %s", blob.Path, err)
 	}
 	defer reader.Close()
 
 	err = m.dst.Write(blob, reader)
 	if err != nil {
-		return fmt.Errorf("error at %s: %s", blob.Path, err)
+		return fmt.Errorf("error writing blob at %s: %s", blob.Path, err)
 	}
 
 	checksum, err := m.dst.Checksum(blob)
 	if err != nil {
-		return fmt.Errorf("error at %s: %s", blob.Path, err)
+		return fmt.Errorf("error checksumming blob at %s: %s", blob.Path, err)
 	}
 
 	if checksum != blob.Checksum {

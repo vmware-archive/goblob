@@ -82,7 +82,7 @@ var _ = Describe("BlobMigrator", func() {
 			It("returns an error", func() {
 				err := blobMigrator.Migrate(controlBlob)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error at some-path/some-filename: read-error"))
+				Expect(err.Error()).To(Equal("error reading blob at some-path/some-filename: read-error"))
 			})
 		})
 
@@ -94,7 +94,7 @@ var _ = Describe("BlobMigrator", func() {
 			It("returns an error", func() {
 				err := blobMigrator.Migrate(controlBlob)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error at some-path/some-filename: write-error"))
+				Expect(err.Error()).To(Equal("error writing blob at some-path/some-filename: write-error"))
 			})
 		})
 
@@ -106,7 +106,7 @@ var _ = Describe("BlobMigrator", func() {
 			It("returns an error", func() {
 				err := blobMigrator.Migrate(controlBlob)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error at some-path/some-filename: checksum-error"))
+				Expect(err.Error()).To(Equal("error checksumming blob at some-path/some-filename: checksum-error"))
 			})
 		})
 
