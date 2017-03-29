@@ -59,10 +59,15 @@ The tool is a Golang binary, which must be executed on the NFS VM that you inten
 - Click `Apply Changes` in Ops Manager
 - Once changes are applied, re-run `goblob` to migrate any files which were created after the initial migration
 - Validate apps can be restaged and pushed
-- Update NFS Resource Config to 0 instances in Ops Manager to remove the NFS server. Also, you must set Cloud Controllers, Clock Global, and Cloud Controller Workers to 0 instances. This must be done to wipe the NFS mount from these Cloud Controller jobs. You can add these jobs back in later, after the NFS job is removed, but do note that this will incur downtime of Cloud Controller services (any `cf` commands) during this update.
-- Click `Apply Changes` in Ops Manager.
-- After the update is finished, you can add back the Cloud Controller, Clock Global, and Cloud Controller Worker instances in Ops Manager.
-- Click `Apply Changes` in Ops Manager. After this is finished, availability of Cloud Controller services will resume.
+
+## Removing NFS post-migration
+
+- Turn off bosh resurrector (`bosh vm resurrection off`)
+- In the IaaS console (e.g. AWS EC2, vCenter console, etc.), terminate all the CC VM jobs (Cloud Controller, Cloud Controller Worker, and Clock Global) + NFS (ensure the attached disks are removed as well). Note that your CF API services will stop being available at this point (running apps should continue to be available though). This step is required to ensure the removal of the NFS mount from these jobs. 
+- `bosh cck` the cf deployment to check for any errors with the bosh state. It should ask you if you want to delete references to the missing CC/NFS jobs, which you want to do.
+- Go back to Ops Mgr and update your ERT configurations to zero NFS instances and re-add your desired instance counts for the CC jobs.
+- Click `Apply Changes` in Ops Manager. After this deploy is finished, your CF API service availibility will resume.
+- Turn back on the bosh vm resurrector, if it isn’t turned back on after your re-deploy (`bosh vm resurrection on`).
 
 ## Developing
 
