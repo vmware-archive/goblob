@@ -29,6 +29,8 @@ The tool is a Golang binary, which must be executed on the NFS VM that you inten
 
 `goblob migrate [OPTIONS]`
 
+For each option you use, add `--` before the option name in the command you want to execute.
+
 ### Options
 
 * `concurrent-uploads`: Number of concurrent uploads (default: 20)
@@ -43,7 +45,7 @@ The tool is a Golang binary, which must be executed on the NFS VM that you inten
 * `s3-endpoint`: The endpoint of the S3-compatible blobstore
 * `s3-accesskey`: The access key to use with the S3-compatible blobstore
 * `s3-secretkey`: The secret key to use with the S3-compatible blobstore
-* `s3-region`: The region to use with the S3-compatible blobstore
+* `region`: The region to use with the S3-compatible blobstore
 * `buildpacks-bucket-name`: The bucket containing buildpacks
 * `droplets-bucket-name`: The bucket containing droplets
 * `packages-bucket-name`: The bucket containing packages
@@ -68,6 +70,9 @@ The tool is a Golang binary, which must be executed on the NFS VM that you inten
 - Go back to Ops Mgr and update your ERT configurations to zero NFS instances and re-add your desired instance counts for the CC jobs.
 - Click `Apply Changes` in Ops Manager. After this deploy is finished, your CF API service availibility will resume.
 - Turn back on the bosh vm resurrector, if it isn’t turned back on after your re-deploy (`bosh vm resurrection on`).
+
+## Known Issues
+- Starting with PCF 1.12, Ops Manager no longer allows you to select the S3 blobstorage configuration for ERT/PAS, instead of the internal NFS option, without also deleting the NFS server VM. This means that you should shut down the Cloud Controller VMs before you switch your configuration, as you will not have a chance to run a post-configuration-switch migration once the NFS server is gone.
 
 ## Developing
 
