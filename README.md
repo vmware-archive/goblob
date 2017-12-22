@@ -54,6 +54,19 @@ For each option you use, add `--` before the option name in the command you want
 * `disable-ssl`: Whether to disable SSL when uploading blobs
 * `insecure-skip-verify`: Skip server SSL certificate verification
 
+## Example
+```
+goblob migrate --blobstore-path /var/vcap/store/shared \
+  --s3-endpoint https://s3.amazonaws.com \
+  --s3-accesskey MyKey \
+  --s3-secretkey MySecret \
+  --region us-east-1 \
+  --buildpacks-bucket-name pcf-buildpacks \
+  --droplets-bucket-name pcf-droplets \
+  --packages-bucket-name pcf-packages \
+  --resources-bucket-name pcf-resources
+```
+
 ## Post-migration Tasks
 
 - If your S3 service uses an SSL certificate signed by your own CA: Before applying changes in Ops Manager to switch to S3, make sure the root CA cert that signed the endpoint cert is a BOSH-trusted-certificate. You will need to update Ops Manager ca-certs (place the CA cert in /usr/local/share/ca-certificates and run update-ca-certificates, and restart tempest-web). You will need to add this certificate back in each time you do an upgrade of Ops Manager. In PCF 1.9+, Ops Manager will let you replace its own SSL cert and have that persist across upgrades.
