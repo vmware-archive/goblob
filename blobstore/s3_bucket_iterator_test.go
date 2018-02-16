@@ -25,7 +25,7 @@ import (
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 var _ = Describe("S3BucketIterator", func() {

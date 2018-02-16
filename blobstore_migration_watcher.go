@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/mgutz/ansi"
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 var red = ansi.ColorFunc("red+b")

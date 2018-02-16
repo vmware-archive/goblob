@@ -19,7 +19,7 @@ import (
 	"os"
 
 	flags "github.com/jessevdk/go-flags"
-	"github.com/pivotalservices/goblob/commands"
+	"github.com/pivotal-cf/goblob/commands"
 )
 
 func main() {

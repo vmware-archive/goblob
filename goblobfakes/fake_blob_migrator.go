@@ -18,8 +18,8 @@ package goblobfakes
 import (
 	"sync"
 
-	"github.com/pivotalservices/goblob"
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 type FakeBlobMigrator struct {

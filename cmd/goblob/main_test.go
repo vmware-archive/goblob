@@ -33,7 +33,7 @@ var _ = Describe("Main", func() {
 	})
 
 	It("builds", func() {
-		_, err := gexec.Build("github.com/pivotalservices/goblob/cmd/goblob")
+		_, err := gexec.Build("github.com/pivotal-cf/goblob/cmd/goblob")
 		Expect(err).NotTo(HaveOccurred())
 	})
 })

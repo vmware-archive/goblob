@@ -1,4 +1,4 @@
-package: github.com/pivotalservices/goblob
+package: github.com/pivotal-cf/goblob
 import:
 - package: github.com/aws/aws-sdk-go
   version: master

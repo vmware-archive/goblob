@@ -23,7 +23,7 @@ image_resource:
 
 inputs:
 - name: goblob
-  path: go/src/github.com/pivotalservices/goblob
+  path: go/src/github.com/pivotal-cf/goblob
 
 outputs:
 - name: goblob-with-dependencies
@@ -40,7 +40,7 @@ run:
 
     go get -u github.com/Masterminds/glide
 
-    cd go/src/github.com/pivotalservices/goblob
+    cd go/src/github.com/pivotal-cf/goblob
       glide install
       cp -R . "${ROOT}/goblob-with-dependencies"
     cd -

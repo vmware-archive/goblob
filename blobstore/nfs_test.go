@@ -17,7 +17,7 @@ package blobstore_test
 import (
 	"errors"
 
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

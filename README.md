@@ -6,7 +6,7 @@ S3-compatible one.
 
 ## Installing
 
-Download the [latest release](https://github.com/pivotalservices/goblob/releases/latest).
+Download the [latest release](https://github.com/pivotal-cf/goblob/releases/latest).
 
 ### Install from source
 
@@ -16,11 +16,11 @@ Requirements:
 * [go](https://golang.org)
 
 ```
-mkdir -p $GOPATH/src/github.com/pivotalservices/goblob
-git clone git@github.com:pivotalservices/goblob.git $GOPATH/src/github.com/pivotalservices/goblob
-cd $GOPATH/src/github.com/pivotalservices/goblob
+mkdir -p $GOPATH/src/github.com/pivotal-cf/goblob
+git clone git@github.com:pivotal-cf/goblob.git $GOPATH/src/github.com/pivotal-cf/goblob
+cd $GOPATH/src/github.com/pivotal-cf/goblob
 glide install
-GOARCH=amd64 GOOS=linux go install github.com/pivotalservices/goblob/cmd/goblob
+GOARCH=amd64 GOOS=linux go install github.com/pivotal-cf/goblob/cmd/goblob
 ```
 
 ## Usage

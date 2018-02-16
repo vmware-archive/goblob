@@ -23,7 +23,7 @@ image_resource:
 
 inputs:
 - name: goblob-with-dependencies
-  path: go/src/github.com/pivotalservices/goblob
+  path: go/src/github.com/pivotal-cf/goblob
 
 params:
   MINIO_ACCESS_KEY:
@@ -45,6 +45,6 @@ run:
 
     go get -u github.com/onsi/ginkgo/ginkgo
 
-    cd go/src/github.com/pivotalservices/goblob
+    cd go/src/github.com/pivotal-cf/goblob
       ginkgo -r -race -randomizeAllSpecs
     cd -

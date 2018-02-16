@@ -21,7 +21,7 @@ import (
 
 	"code.cloudfoundry.org/workpool"
 
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 var (

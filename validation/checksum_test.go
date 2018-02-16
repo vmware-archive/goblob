@@ -17,7 +17,7 @@ package validation_test
 import (
 	"path"
 
-	. "github.com/pivotalservices/goblob/validation"
+	. "github.com/pivotal-cf/goblob/validation"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

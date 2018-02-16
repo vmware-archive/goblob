@@ -18,7 +18,7 @@ package blobstorefakes
 import (
 	"sync"
 
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 type FakeBucketIterator struct {

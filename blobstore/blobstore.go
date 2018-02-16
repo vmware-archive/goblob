@@ -25,11 +25,18 @@ type Blob struct {
 //go:generate counterfeiter . Blobstore
 
 type Blobstore interface {
+	//Returns logical name of blobstore (S3, NFS)
 	Name() string
+	//Returns a list of all the "blobs" in blobstore
 	List() ([]*Blob, error)
+	//For a given blob will return io.ReadCloser with contents
 	Read(src *Blob) (io.ReadCloser, error)
+	//Returns md5 checksum for the given blob
 	Checksum(src *Blob) (string, error)
+	//Writes the blob to the blobstore
 	Write(dst *Blob, src io.Reader) error
+	//Determins if blob exists
 	Exists(*Blob) bool
+	//Returns an interator for all the blobs in the given bucket (or folder for NFS)
 	NewBucketIterator(string) (BucketIterator, error)
 }

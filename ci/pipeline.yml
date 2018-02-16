@@ -32,7 +32,7 @@ resources:
   source:
     branch: master
     private_key: {{git-private-key}}
-    uri: git@github.com:pivotalservices/goblob.git
+    uri: git@github.com:pivotal-cf/goblob.git
     ignore_paths:
     - ci
 
@@ -49,14 +49,14 @@ resources:
   source:
     release: false
     pre_release: true
-    user: pivotalservices
+    user: pivotal-cf
     repository: goblob
     access_token: {{github-access-token}}
 
 - name: github-release
   type: github-release
   source:
-    user: pivotalservices
+    user: pivotal-cf
     repository: goblob
     access_token: {{github-access-token}}
 
@@ -64,7 +64,7 @@ resources:
   type: semver
   source:
     driver: git
-    uri: git@github.com:pivotalservices/goblob.git
+    uri: git@github.com:pivotal-cf/goblob.git
     branch: version
     file: version
     private_key: {{git-private-key}}

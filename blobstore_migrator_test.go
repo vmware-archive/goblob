@@ -19,10 +19,10 @@ import (
 
 	"code.cloudfoundry.org/workpool"
 
-	"github.com/pivotalservices/goblob"
-	"github.com/pivotalservices/goblob/blobstore"
-	"github.com/pivotalservices/goblob/blobstore/blobstorefakes"
-	"github.com/pivotalservices/goblob/goblobfakes"
+	"github.com/pivotal-cf/goblob"
+	"github.com/pivotal-cf/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore/blobstorefakes"
+	"github.com/pivotal-cf/goblob/goblobfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

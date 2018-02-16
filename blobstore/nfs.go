@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/cheggaaa/pb"
-	"github.com/pivotalservices/goblob/validation"
+	"github.com/pivotal-cf/goblob/validation"
 	"golang.org/x/sync/errgroup"
 )
 

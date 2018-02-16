@@ -17,7 +17,7 @@ package goblob
 import (
 	"fmt"
 
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 //go:generate counterfeiter . BlobMigrator

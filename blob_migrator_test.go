@@ -20,11 +20,11 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/pivotalservices/goblob"
-	"github.com/pivotalservices/goblob/blobstore"
-	"github.com/pivotalservices/goblob/blobstore/blobstorefakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotal-cf/goblob"
+	"github.com/pivotal-cf/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore/blobstorefakes"
 )
 
 var _ = Describe("BlobMigrator", func() {

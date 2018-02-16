@@ -29,7 +29,7 @@ import (
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cheggaaa/pb"
-	"github.com/pivotalservices/goblob/validation"
+	"github.com/pivotal-cf/goblob/validation"
 	"github.com/xchapter7x/lo"
 )
 

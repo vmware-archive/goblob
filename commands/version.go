@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pivotalservices/goblob"
+	"github.com/pivotal-cf/goblob"
 )
 
 func init() {

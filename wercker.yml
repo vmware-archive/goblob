@@ -48,6 +48,8 @@ build:
     - script:
         name: go test
         code: |
+          export MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
+          export MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
           LOG_LEVEL=debug go test $(glide novendor) -v -cover -race
 
 crosscompile:

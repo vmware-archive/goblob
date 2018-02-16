@@ -19,7 +19,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/pivotalservices/goblob/blobstore"
+	"github.com/pivotal-cf/goblob/blobstore"
 )
 
 type FakeBlobstore struct {

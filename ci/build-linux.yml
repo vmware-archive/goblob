@@ -23,7 +23,7 @@ image_resource:
 
 inputs:
 - name: goblob-with-dependencies
-  path: go/src/github.com/pivotalservices/goblob
+  path: go/src/github.com/pivotal-cf/goblob
 - name: version
 
 outputs:
@@ -33,4 +33,4 @@ params:
   OUTPUT_PATH: linux-binary/goblob-linux
 
 run:
-  path: go/src/github.com/pivotalservices/goblob/ci/build.sh
+  path: go/src/github.com/pivotal-cf/goblob/ci/build.sh
