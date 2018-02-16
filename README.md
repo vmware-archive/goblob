@@ -65,7 +65,7 @@ For each option you use, add `--` before the option name in the command you want
 ## Removing NFS post-migration
 
 - Turn off bosh resurrector (`bosh vm resurrection off`)
-- In the IaaS console (e.g. AWS EC2, vCenter console, etc.), terminate all the CC VM jobs (Cloud Controller, Cloud Controller Worker, and Clock Global) + NFS (ensure the attached disks are removed as well). Note that your CF API services will stop being available at this point (running apps should continue to be available though). This step is required to ensure the removal of the NFS mount from these jobs. 
+- In the IaaS console (e.g. AWS EC2, vCenter console, etc.), terminate all the CC VM jobs (Cloud Controller, Cloud Controller Worker, and Clock Global) + NFS (ensure the attached disks are removed as well). Note that your CF API services will stop being available at this point (running apps should continue to be available though). This step is required to ensure the removal of the NFS mount from these jobs.
 - `bosh cck` the cf deployment to check for any errors with the bosh state. It should ask you if you want to delete references to the missing CC/NFS jobs, which you want to do.
 - Go back to Ops Mgr and update your ERT configurations to zero NFS instances and re-add your desired instance counts for the CC jobs.
 - Click `Apply Changes` in Ops Manager. After this deploy is finished, your CF API service availibility will resume.
@@ -86,4 +86,4 @@ To run all of the tests in a Docker container:
 To continually run the tests during development:
 
 * `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" minio/minio server /tmp`
-* (in a separate terminal) `ginkgo watch -r`
+* (in a separate terminal) `MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY ginkgo watch -r`
