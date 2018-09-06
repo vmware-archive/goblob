@@ -18,6 +18,7 @@ type GoblobCommand struct {
 	Version func() `command:"version" description:"Print version information and exit"`
 
 	Migrate MigrateCommand `command:"migrate" description:"Migrate blobs from one blobstore to another"`
+	MigrateToAzure MigrateToAzureBlobCommand `command:"migrate2azure" description:"Migrate blobs from NFS blobstore to Azure blobstore"`
 }
 
 var Goblob GoblobCommand
