@@ -4,6 +4,10 @@ import:
   version: master
   subpackages:
   - service/s3
+- package: github.com/Azure/azure-storage-blob-go
+  version: master
+  subpackages:
+  - 2018-03-28/azblob
 - package: github.com/xchapter7x/lo
 - package: github.com/op/go-logging
   version: master
