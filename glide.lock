@@ -1,10 +1,10 @@
-hash: 4ea66a069f90843e1bfe0c9c97d3730661d2fa481b15b563f6845c59ba60c68f
-updated: 2017-01-18T16:15:52.740864382-08:00
+hash: 1a1decfbf4b1ef74533aa3ee83cbd36011eaf37fbc032fb20bb0764970ce7129
+updated: 2018-09-12T04:06:03.398114585Z
 imports:
 - name: code.cloudfoundry.org/workpool
   version: 24756b8d25e8a6a601284a5900005c8bfdcaa766
 - name: github.com/aws/aws-sdk-go
-  version: 2669c2336f87952c54c236e2fecfab3331176c79
+  version: 08356ca48321d30b25ff97530d4a58fa3754322d
   subpackages:
   - aws
   - aws/awserr
@@ -16,23 +16,37 @@ imports:
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
   - aws/credentials/stscreds
+  - aws/csm
   - aws/defaults
   - aws/ec2metadata
   - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/sdkio
+  - internal/sdkrand
+  - internal/sdkuri
+  - internal/shareddefaults
   - private/protocol
+  - private/protocol/eventstream
+  - private/protocol/eventstream/eventstreamapi
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
-  - private/waiter
   - service/s3
   - service/s3/s3iface
   - service/s3/s3manager
   - service/sts
+- name: github.com/Azure/azure-pipeline-go
+  version: 7571e8eb0876932ab505918ff7ed5107773e5ee2
+  subpackages:
+  - pipeline
+- name: github.com/Azure/azure-storage-blob-go
+  version: bb46532f68b79e9e1baca8fb19a382ef5d40ed33
+  subpackages:
+  - 2018-03-28/azblob
 - name: github.com/cheggaaa/pb
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/go-ini/ini
@@ -42,7 +56,7 @@ imports:
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/mattn/go-runewidth
-  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
+  version: ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb
 - name: github.com/mgutz/ansi
   version: c286dcecd19ff979eeb73ea444e479b903f2cfcb
 - name: github.com/op/go-logging
@@ -53,13 +67,23 @@ imports:
   version: 07b51741c1d6423d4a6abab1c49940ec09cb1aaf
   subpackages:
   - context
+  - html
+  - html/atom
+  - html/charset
 - name: golang.org/x/sync
   version: 450f422ab23cf9881c94e2db30cac0eb1b7cf80c
   subpackages:
   - errgroup
 testImports:
+- name: github.com/hpcloud/tail
+  version: a1dbeea552b7c8df4b542c66073e393de198a800
+  subpackages:
+  - ratelimiter
+  - util
+  - watch
+  - winfile
 - name: github.com/onsi/ginkgo
-  version: a23f924ce96d61f963fb6219b8ff069d8d768cc2
+  version: 3774a09d95489ccaa16032e0770d08ea77ba6184
   subpackages:
   - config
   - internal/codelocation
@@ -68,17 +92,16 @@ testImports:
   - internal/leafnodes
   - internal/remote
   - internal/spec
+  - internal/spec_iterator
   - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
-  - reporters/stenographer/support/go-colorable
-  - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: e85f63af4302dc0e4277c6008ecf803f1d80e4f0
+  version: 7615b9433f86a8bdf29709bf288bc4fd0636a369
   subpackages:
   - format
   - gbytes
@@ -97,5 +120,29 @@ testImports:
   version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
   - unix
+- name: golang.org/x/text
+  version: 905a57155faa8230500121607930ebb9dd8e139c
+  subpackages:
+  - encoding
+  - encoding/charmap
+  - encoding/htmlindex
+  - encoding/internal
+  - encoding/internal/identifier
+  - encoding/japanese
+  - encoding/korean
+  - encoding/simplifiedchinese
+  - encoding/traditionalchinese
+  - encoding/unicode
+  - internal/language
+  - internal/language/compact
+  - internal/tag
+  - internal/utf8internal
+  - language
+  - runes
+  - transform
+- name: gopkg.in/fsnotify/fsnotify.v1
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+- name: gopkg.in/tomb.v1
+  version: c131134a1947e9afd9cecfe11f4c6dff0732ae58
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
