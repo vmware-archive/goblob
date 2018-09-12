@@ -56,7 +56,10 @@ func NewAzBlobStore(
 	packagesContainerName string,
 	resourcesContainerName string,
 ) Blobstore {
-	credential := azblob.NewSharedKeyCredential(accountName, accountKey)
+	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+	if err != nil {
+		panic(err)
+	}
 	pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 
 	primaryURL, _ := url.Parse(

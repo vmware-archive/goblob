@@ -16,6 +16,10 @@ import:
 - package: code.cloudfoundry.org/workpool
 - package: github.com/jessevdk/go-flags
 - package: github.com/mgutz/ansi
+- package: github.com/Azure/azure-storage-blob-go
+  version: 0.2.0
+  subpackages:
+  - 2018-03-28/azblob
 testImport:
 - package: github.com/onsi/ginkgo
   version: master

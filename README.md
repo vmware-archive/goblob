@@ -25,22 +25,31 @@ GOARCH=amd64 GOOS=linux go install github.com/pivotal-cf/goblob/cmd/goblob
 
 ## Usage
 
-The tool is a Golang binary, which must be executed on the NFS VM that you intend to migrate. The only command of the tool is this:
+The tool is a Golang binary, which must be executed on the NFS VM that you intend to migrate. The commands of the tool are:
 
-`goblob migrate [OPTIONS]`
+
+
+|              Command              |                    Description                    |
+|-----------------------------------|---------------------------------------------------|
+| `goblob migrate [OPTIONS]`        | Migrate NFS blobstore to S3-compatible blobstore  |
+| `goblob migrate2azure [OPTIONS]`  | Migrate NFS blobstore to Azure blob storage |
 
 For each option you use, add `--` before the option name in the command you want to execute.
 
-### Options
+### Migrate NFS blobstore to S3-compatible blobstore
+
+`goblob migrate [OPTIONS]`
+
+#### Options
 
 * `concurrent-uploads`: Number of concurrent uploads (default: 20)
 * `exclude`: Directory to exclude (may be given more than once)
 
-#### NFS-specific Options
+##### NFS-specific Options
 
 * `blobstore-path`: The path to the root of the NFS blobstore, e.g. /var/vcap/store/shared
 
-#### S3-specific Options
+##### S3-specific Options
 
 * `s3-endpoint`: The endpoint of the S3-compatible blobstore
 * `s3-accesskey`: The access key to use with the S3-compatible blobstore
@@ -53,6 +62,42 @@ For each option you use, add `--` before the option name in the command you want
 * `use-multipart-uploads`: Whether to use multi-part uploads
 * `disable-ssl`: Whether to disable SSL when uploading blobs
 * `insecure-skip-verify`: Skip server SSL certificate verification
+
+### Migrate NFS blobstore to Azure blob storage
+
+`goblob migrate2azure [OPTIONS]`
+
+#### Example
+
+```
+goblob migrate2azure --blobstore-path /var/vcap/store/shared \
+  --azure-storage-account $storage_account_name \
+  --azure-storage-account-key $storage_account_key \
+  --cloud-name AzureCloud \
+  --buildpacks-bucket-name cf-buildpacks \
+  --droplets-bucket-name cf-droplets \
+  --packages-bucket-name cf-packages \
+  --resources-bucket-name cf-resources
+```
+
+#### Options
+
+* `concurrent-uploads`: Number of concurrent uploads (default: 20)
+* `exclude`: Directory to exclude (may be given more than once)
+
+##### NFS-specific Options
+
+* `blobstore-path`: The path to the root of the NFS blobstore, e.g. /var/vcap/store/shared
+
+##### Azure-specific Options
+
+* `azure-storage-account`: Azure storage account name
+* `azure-storage-account-key`: Azure storage account key
+* `cloud-name`:  cloud name, available names are: AzureCloud, AzureChinaCloud, AzureGermanCloud, AzureUSGovernment
+* `buildpacks-bucket-name`: The container for buildpacks
+* `droplets-bucket-name`: The container for droplets
+* `packages-bucket-name`: The container for packages
+* `resources-bucket-name`: The container for resources
 
 ## Post-migration Tasks
 
