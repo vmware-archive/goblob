@@ -99,25 +99,21 @@ goblob migrate2azure --blobstore-path /var/vcap/store/shared \
 * `packages-bucket-name`: The container for packages
 * `resources-bucket-name`: The container for resources
 
-## Post-migration Tasks
+## PCF 2.0 and Newer Usage Instructions
 
-- If your S3 service uses an SSL certificate signed by your own CA: Before applying changes in Ops Manager to switch to S3, make sure the root CA cert that signed the endpoint cert is a BOSH-trusted-certificate. You will need to update Ops Manager ca-certs (place the CA cert in /usr/local/share/ca-certificates and run update-ca-certificates, and restart tempest-web). You will need to add this certificate back in each time you do an upgrade of Ops Manager. In PCF 1.9+, Ops Manager will let you replace its own SSL cert and have that persist across upgrades.
-- Update OpsManager File Storage Config to point at S3 blobstore using buckets (cc-buildpacks-<uniqueid>, cc-droplets-<uniqueid>, cc-packages-<uniqueid>, cc-resources-<uniqueid>)
-- Click `Apply Changes` in Ops Manager
-- Once changes are applied, re-run `goblob` to migrate any files which were created after the initial migration
-- Validate apps can be restaged and pushed
-
-## Removing NFS post-migration
-
-- Turn off bosh resurrector (`bosh vm resurrection off`)
-- In the IaaS console (e.g. AWS EC2, vCenter console, etc.), terminate all the CC VM jobs (Cloud Controller, Cloud Controller Worker, and Clock Global) + NFS (ensure the attached disks are removed as well). Note that your CF API services will stop being available at this point (running apps should continue to be available though). This step is required to ensure the removal of the NFS mount from these jobs.
-- `bosh cck` the cf deployment to check for any errors with the bosh state. It should ask you if you want to delete references to the missing CC/NFS jobs, which you want to do.
-- Go back to Ops Mgr and update your ERT configurations to zero NFS instances and re-add your desired instance counts for the CC jobs.
-- Click `Apply Changes` in Ops Manager. After this deploy is finished, your CF API service availibility will resume.
-- Turn back on the bosh vm resurrector, if it isn’t turned back on after your re-deploy (`bosh vm resurrection on`).
-
-## Known Issues
-- Starting with PCF 1.12, Ops Manager no longer allows you to select the S3 blobstorage configuration for ERT/PAS, instead of the internal NFS option, without also deleting the NFS server VM. This means that you should shut down the Cloud Controller VMs before you switch your configuration, as you will not have a chance to run a post-configuration-switch migration once the NFS server is gone.
+* If your S3 service uses an SSL certificate signed by your own CA: Before applying changes in Ops Manager to switch to S3, make sure the root CA cert that signed the endpoint cert is a BOSH-trusted-certificate. You will need to update Ops Manager ca-certs (place the CA cert in /usr/local/share/ca-certificates and run update-ca-certificates, and restart tempest-web). You will need to add this certificate back in each time you do an upgrade of Ops Manager. In PCF 1.9+, Ops Manager will let you replace its own SSL cert and have that persist across upgrades.
+* Run goblob to sync your data over to your s3 appliance/amazon s3/etc
+* Stop users from cf pushing using one of the two following means:
+  * Using the feature flag: `cf disable-feature-flag app_bits_upload`
+  * Disable Cloud Controller
+    * Turn off bosh resurrector (`bosh vm resurrection off`)
+    * In the IaaS console (e.g. AWS EC2, vCenter console, etc.), terminate all the CC VM jobs (Cloud Controller, Cloud Controller Worker, and Clock Global) + NFS (ensure the attached disks are removed as well). Note that your CF API services will stop being available at this point (running apps should continue to be available though). This step is required to ensure the removal of the NFS mount from these jobs.
+* Run goblob to sync any changes that have occured since your initial goblob run
+* Update OpsManager File Storage Config to point at S3 blobstore using buckets (cc-buildpacks-<uniqueid>, cc-droplets-<uniqueid>, cc-packages-<uniqueid>, cc-resources-<uniqueid>)
+* Click `Apply Changes` in Ops Manager
+  * After this deploy is finished, if you used the feature flag to stop pushes, re-enable pushing: `cf enable-feature-flag app_bits_upload`
+  * After this deploy is finished, your CF API service availibility will resume if you stopped cloud controller to prevent pushes
+* Validate apps can be restaged and pushed
 
 ## Developing
 
